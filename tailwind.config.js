@@ -3,11 +3,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'primary': '#2563eb', // Adjusted to match original blue
+        'primary': '#1e40af',  // Blue instead of green
         'secondary': '#10b981',
-        'background': '#0f172a', // Darker background for cyberpunk feel
-        'text-primary': '#f8fafc',
-        'text-secondary': '#94a3b8',
+        'background': '#121212',
+        'text-primary': '#ffffff',
+        'text-secondary': '#a3a3a3',
         'card-bg': '#1e293b',
         'card-hover': '#334155',
       },
