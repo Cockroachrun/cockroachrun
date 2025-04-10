@@ -1,0 +1,86 @@
+/* src/styles/main.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --neon-green: #00FF66;
+  --purple: #9333EA;
+  --dark-bg: #121212;
+  --text-color: #E0E0E0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Exo 2', sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-color);
+  overflow: hidden;
+}
+
+#game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#ui-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.button {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--text-color);
+  border: 1px solid var(--purple);
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  margin: 0.5rem;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.button:hover {
+  background-color: var(--purple);
+  transform: scale(1.05);
+}
+
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: var(--neon-green);
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+} 
