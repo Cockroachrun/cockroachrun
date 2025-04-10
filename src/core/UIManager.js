@@ -175,17 +175,28 @@ export class UIManager {
   }
   
   /**
-   * Show a specific screen and hide others
+   * Show a specific screen with transition
    */
   showScreen(screenName) {
-    // Hide all screens
+    // Hide all screens with fade-out
     this.hideAllScreens();
     
-    // Show the requested screen
+    // Show the requested screen with fade-in
     const screen = this.screens[screenName];
     if (screen) {
+      // Add fade-in class
       screen.classList.add('active');
+      screen.classList.add('fade-in');
+      
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        screen.classList.remove('fade-in');
+      }, (CONFIG?.UI?.SCREEN_TRANSITION_TIME || 0.3) * 1000);
+      
       this.currentScreen = screenName;
+      
+      // Play screen change sound if available
+      this.playSound('UI_SCREEN_CHANGE');
     }
   }
   
@@ -206,7 +217,15 @@ export class UIManager {
       this.elements.gameHud.classList.remove('hidden');
     }
   }
-  
+
+  /**
+   * Play a UI sound effect
+   */
+  playSound(soundId) {
+    // This will be implemented later with the audio system
+    console.log(`Playing sound: ${soundId}`);
+  }
+
   /**
    * Hide game HUD
    */

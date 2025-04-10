@@ -6,20 +6,20 @@
   <title>Cockroach Run</title>
   <link rel="stylesheet" href="./styles/index.css" />
 </head>
-<body>
+<body class="bg-background text-text-primary m-0 p-0 overflow-hidden font-sans">
   <!-- Game Canvas -->
   <canvas id="game-canvas" class="fixed top-0 left-0 w-full h-full"></canvas>
   
   <!-- Loading Screen -->
   <div id="loading-screen" class="screen active">
-    <h1 class="text-4xl font-bold mb-8">COCKROACH RUN</h1>
-    <p class="text-xl mb-4">A cyberpunk cockroach adventure</p>
-    <p class="text-sm mb-8">v0.1.0 Alpha</p>
-    <div class="w-64 h-4 bg-gray-800 rounded-full mb-4">
+    <h1 class="text-5xl font-bold mb-8 text-center">COCKROACH RUN</h1>
+    <p class="text-xl mb-4 text-blue-300">A cyberpunk cockroach adventure</p>
+    <p class="text-sm mb-8 text-gray-400">v0.1.0 Alpha</p>
+    <div class="w-64 h-4 bg-gray-800 rounded-full mb-4 overflow-hidden">
       <div class="progress-bar h-full bg-primary rounded-full" style="width: 0%"></div>
     </div>
-    <p class="progress-text">Loading... 0%</p>
-    <p class="flavor-text text-text-secondary mt-4">Preparing for infestation...</p>
+    <p class="progress-text mb-4">Loading... 0%</p>
+    <p class="flavor-text text-text-secondary mt-4 italic">Preparing for infestation...</p>
   </div>
   
   <!-- Start Screen -->
