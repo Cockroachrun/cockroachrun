@@ -1,28 +1,11 @@
+// src/core/UIManager.js
 import CONFIG from '../config';
 
 export class UIManager {
-  constructor() {
-    // Screen references
-    this.screens = {
-      loading: null,
-      start: null,
-      modeSelection: null,
-      characterSelection: null,
-      pause: null,
-      gameOver: null
-    };
-    
-    // UI elements
-    this.elements = {
-      gameHud: null,
-      progressBar: null,
-      progressText: null,
-      flavorText: null,
-      scoreValue: null,
-      finalScore: null
-    };
-    
-    // Current active screen
+  constructor(game) {
+    this.game = game;
+    this.screens = {};
+    this.elements = {};
     this.currentScreen = null;
     
     // Callbacks for UI events
@@ -40,55 +23,43 @@ export class UIManager {
     };
   }
   
-  /**
-   * Initialize UI elements and event listeners
-   */
   init() {
     this.initScreens();
     this.initElements();
     this.setupEventListeners();
     
     // Show loading screen by default
-    this.showScreen('loading');
+    this.showScreen('loading-screen');
     
     return this;
   }
   
-  /**
-   * Initialize screen references
-   */
   initScreens() {
     this.screens = {
-      loading: document.getElementById('loading-screen'),
-      start: document.getElementById('start-screen'),
-      modeSelection: document.getElementById('mode-selection-screen'),
-      characterSelection: document.getElementById('character-selection-screen'),
-      pause: document.getElementById('pause-screen'),
-      gameOver: document.getElementById('game-over-screen')
+      'loading-screen': document.getElementById('loading-screen'),
+      'start-screen': document.getElementById('start-screen'),
+      'mode-selection-screen': document.getElementById('mode-selection-screen'),
+      'character-selection-screen': document.getElementById('character-selection-screen'),
+      'pause-screen': document.getElementById('pause-screen'),
+      'game-over-screen': document.getElementById('game-over-screen')
     };
   }
   
-  /**
-   * Initialize UI element references
-   */
   initElements() {
     this.elements = {
-      gameHud: document.getElementById('game-hud'),
-      progressBar: document.querySelector('.progress-bar'),
-      progressText: document.querySelector('.progress-text'),
-      flavorText: document.querySelector('.flavor-text'),
-      scoreValue: document.getElementById('score-value'),
-      finalScore: document.getElementById('final-score')
+      'game-hud': document.getElementById('game-hud'),
+      'progress-bar': document.querySelector('.progress-bar'),
+      'progress-text': document.querySelector('.progress-text'),
+      'flavor-text': document.querySelector('.flavor-text'),
+      'score-value': document.getElementById('score-value'),
+      'final-score': document.getElementById('final-score')
     };
   }
   
-  /**
-   * Set up event listeners for UI elements
-   */
   setupEventListeners() {
     // Main menu buttons
     document.getElementById('play-button')?.addEventListener('click', () => {
-      this.showScreen('modeSelection');
+      this.showScreen('mode-selection-screen');
       if (this.callbacks.onPlay) this.callbacks.onPlay();
     });
     
@@ -96,7 +67,7 @@ export class UIManager {
     document.querySelectorAll('.mode-card').forEach(card => {
       card.addEventListener('click', () => {
         const mode = card.getAttribute('data-mode');
-        this.showScreen('characterSelection');
+        this.showScreen('character-selection-screen');
         if (this.callbacks.onModeSelect) this.callbacks.onModeSelect(mode);
       });
     });
@@ -133,155 +104,112 @@ export class UIManager {
     
     // Back buttons
     document.getElementById('back-from-mode')?.addEventListener('click', () => {
-      this.showScreen('start');
+      this.showScreen('start-screen');
     });
     
     document.getElementById('back-from-character')?.addEventListener('click', () => {
-      this.showScreen('modeSelection');
+      this.showScreen('mode-selection-screen');
     });
     
     // Game control buttons
     document.getElementById('pause-button')?.addEventListener('click', () => {
-      this.showScreen('pause');
+      this.showScreen('pause-screen');
       if (this.callbacks.onPause) this.callbacks.onPause();
     });
     
     document.getElementById('resume-button')?.addEventListener('click', () => {
       this.hideAllScreens();
+      this.showHUD();
       if (this.callbacks.onResume) this.callbacks.onResume();
     });
     
     document.getElementById('restart-button')?.addEventListener('click', () => {
       this.hideAllScreens();
+      this.showHUD();
       if (this.callbacks.onRestart) this.callbacks.onRestart();
     });
     
     document.getElementById('quit-button')?.addEventListener('click', () => {
-      this.showScreen('start');
+      this.showScreen('start-screen');
       this.hideHUD();
       if (this.callbacks.onQuit) this.callbacks.onQuit();
     });
     
     document.getElementById('try-again-button')?.addEventListener('click', () => {
       this.hideAllScreens();
+      this.showHUD();
       if (this.callbacks.onTryAgain) this.callbacks.onTryAgain();
     });
     
     document.getElementById('main-menu-button')?.addEventListener('click', () => {
-      this.showScreen('start');
+      this.showScreen('start-screen');
       this.hideHUD();
       if (this.callbacks.onMainMenu) this.callbacks.onMainMenu();
     });
   }
   
-  /**
-   * Show a specific screen with transition
-   */
-  showScreen(screenName) {
-    // Hide all screens with fade-out
+  showScreen(screenId) {
+    // Hide all screens
     this.hideAllScreens();
     
-    // Show the requested screen with fade-in
-    const screen = this.screens[screenName];
+    // Show the requested screen
+    const screen = this.screens[screenId];
     if (screen) {
-      // Add fade-in class
       screen.classList.add('active');
-      screen.classList.add('fade-in');
-      
-      // Remove animation class after transition completes
-      setTimeout(() => {
-        screen.classList.remove('fade-in');
-      }, (CONFIG?.UI?.SCREEN_TRANSITION_TIME || 0.3) * 1000);
-      
-      this.currentScreen = screenName;
-      
-      // Play screen change sound if available
-      this.playSound('UI_SCREEN_CHANGE');
+      this.currentScreen = screenId;
     }
   }
   
-  /**
-   * Hide all screens
-   */
   hideAllScreens() {
     Object.values(this.screens).forEach(screen => {
       if (screen) screen.classList.remove('active');
     });
   }
   
-  /**
-   * Show game HUD
-   */
   showHUD() {
-    if (this.elements.gameHud) {
-      this.elements.gameHud.classList.remove('hidden');
+    if (this.elements['game-hud']) {
+      this.elements['game-hud'].classList.remove('hidden');
     }
   }
-
-  /**
-   * Play a UI sound effect
-   */
-  playSound(soundId) {
-    // This will be implemented later with the audio system
-    console.log(`Playing sound: ${soundId}`);
-  }
-
-  /**
-   * Hide game HUD
-   */
+  
   hideHUD() {
-    if (this.elements.gameHud) {
-      this.elements.gameHud.classList.add('hidden');
+    if (this.elements['game-hud']) {
+      this.elements['game-hud'].classList.add('hidden');
     }
   }
   
-  /**
-   * Update loading progress
-   */
   updateLoadingProgress(progress) {
-    if (this.elements.progressBar) {
-      this.elements.progressBar.style.width = `${progress}%`;
+    if (this.elements['progress-bar']) {
+      this.elements['progress-bar'].style.width = `${progress}%`;
     }
     
-    if (this.elements.progressText) {
-      this.elements.progressText.textContent = `Loading... ${progress}%`;
+    if (this.elements['progress-text']) {
+      this.elements['progress-text'].textContent = `Loading... ${progress}%`;
     }
   }
   
-  /**
-   * Update loading message
-   */
   updateLoadingMessage(message) {
-    if (this.elements.flavorText) {
-      this.elements.flavorText.textContent = message;
+    if (this.elements['flavor-text']) {
+      this.elements['flavor-text'].textContent = message;
     }
   }
   
-  /**
-   * Update score display
-   */
   updateScore(score) {
-    if (this.elements.scoreValue) {
-      this.elements.scoreValue.textContent = score;
+    if (this.elements['score-value']) {
+      this.elements['score-value'].textContent = score;
     }
   }
   
-  /**
-   * Show game over screen with final score
-   */
   showGameOver(score) {
-    if (this.elements.finalScore) {
-      this.elements.finalScore.textContent = score;
+    if (this.elements['final-score']) {
+      this.elements['final-score'].textContent = score;
     }
     
-    this.showScreen('gameOver');
+    this.showScreen('game-over-screen');
   }
   
-  /**
-   * Register callback for UI events
-   */
   on(event, callback) {
-    if (this.callbacks[event]) {
+    if (this.callbacks[event] !== undefined) {
       this.callbacks[event] = callback;
     }
   }
