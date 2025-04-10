@@ -1,0 +1,126 @@
+/* ---------- Global Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background-color: var(--dark-bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---------- Typography ---------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-md);
+}
+
+h1 {
+  font-size: var(--text-xxl);
+  color: var(--neon-green);
+  text-shadow: var(--glow-green);
+}
+
+h2 {
+  font-size: var(--text-xl);
+  color: var(--neon-green);
+  text-shadow: var(--glow-green);
+}
+
+h3 {
+  font-size: var(--text-lg);
+  color: var(--neon-green);
+}
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+a {
+  color: var(--neon-green);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--light-green);
+}
+
+/* ---------- Layout ---------- */
+#game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#ui-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ---------- Common Elements ---------- */
+.screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-lg);
+  z-index: 100;
+  background-color: rgba(10, 10, 10, 0.9);
+  pointer-events: auto;
+}
+
+.screen.active {
+  display: flex;
+}
+
+.screen-content {
+  max-width: 800px;
+  width: 100%;
+}
+
+.subtitle {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-xl);
+  opacity: 0.8;
+}
+
+.version {
+  font-size: var(--text-xs);
+  opacity: 0.5;
+  margin-top: var(--space-xl);
+}
+
+.hidden {
+  display: none;
+}

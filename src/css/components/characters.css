@@ -1,0 +1,35 @@
+.characters-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-lg) 0;
+  flex-wrap: wrap;
+}
+
+.character-card {
+  background-color: var(--lighter-bg);
+  padding: var(--space-md);
+  border-radius: 8px;
+  border: 2px solid var(--neon-green);
+  width: 200px;
+  transition: all var(--transition-medium);
+  cursor: pointer;
+}
+
+.character-card:not(.locked):hover,
+.character-card.selected {
+  transform: translateY(-5px);
+  box-shadow: var(--glow-green);
+}
+
+.character-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(0, 255, 65, 0.3);
+}
+
+.lock-indicator {
+  font-size: var(--text-xs);
+  margin-top: var(--space-sm);
+  color: var(--neon-green);
+}

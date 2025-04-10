@@ -6,17 +6,17 @@
   <title>Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments</title>
 
   <!-- Theme CSS -->
-  <link rel="stylesheet" href="../css/themes/dark-realism.css" />
+  <link rel="stylesheet" href="css/themes/dark-theme.css" />
 
   <!-- Component Styles -->
-  <link rel="stylesheet" href="../css/components/buttons.css" />
-  <link rel="stylesheet" href="../css/components/loading.css" />
-  <link rel="stylesheet" href="../css/components/menus.css" />
-  <link rel="stylesheet" href="../css/components/characters.css" />
-  <link rel="stylesheet" href="../css/components/game-ui.css" />
+  <link rel="stylesheet" href="css/components/buttons.css" />
+  <link rel="stylesheet" href="css/components/loading.css" />
+  <link rel="stylesheet" href="css/components/menus.css" />
+  <link rel="stylesheet" href="css/components/characters.css" />
+  <link rel="stylesheet" href="css/components/game-ui.css" />
 
   <!-- Main CSS -->
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="css/main.css" />
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -30,15 +30,12 @@
   <div id="ui-container">
     <!-- Loading Screen -->
     <section id="loading-screen" class="screen" aria-label="Loading Screen">
-      <div class="screen-content">
+      <div class="loading-content">
         <h1>COCKROACH RUN</h1>
-        <p class="subtitle">A cyberpunk cockroach adventure</p>
-        <p class="version">v0.1.0 Alpha</p>
-
         <div class="progress-container">
           <div class="progress-bar"></div>
         </div>
-        <p class="progress-text">Loading... 0%</p>
+        <div class="progress-text">Loading... 0%</div>
         <p class="flavor-text">Preparing for infestation...</p>
       </div>
     </section>
@@ -56,7 +53,7 @@
           <button id="wallet-button" class="button">CONNECT WALLET</button>
         </div>
 
-        <p class="version">v0.1.0 Alpha</p>
+        <div class="version">v0.1.0 Alpha</div>
       </header>
     </section>
 
@@ -145,6 +142,6 @@
     </section>
   </div>
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

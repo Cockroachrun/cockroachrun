@@ -1,0 +1,22 @@
+.modes-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin: var(--space-lg) 0;
+  flex-wrap: wrap;
+}
+
+.mode-card {
+  background-color: var(--lighter-bg);
+  padding: var(--space-lg);
+  border-radius: 8px;
+  border: 2px solid var(--neon-green);
+  width: 300px;
+  transition: all var(--transition-medium);
+  cursor: pointer;
+}
+
+.mode-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--glow-green);
+}
