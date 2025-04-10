@@ -1,47 +1,33 @@
 # Cockroach Run
 
-An immersive 3D web-based game using Three.js that lets players experience the world from a cockroach's perspective.
+A dark, realistic Three.js game where you control a cockroach navigating through various environments.
 
-## Game Features
+## Game Modes
+- **Free World**: Explore kitchen, bathroom, sewer, and street environments
+- **Cockroach Runner**: Endless runner mode with obstacles and collectibles
 
-- **Two Game Modes**: Free Runner exploration mode and Roach Runner endless mode
-- **Multiple Characters**: Different cockroach types with unique abilities
-- **Rich Environments**: Explore kitchen, street, bathroom, and sewer environments
-- **Optional Wallet Integration**: Connect Bitcoin Ordinals wallets for special features
+## Features
+- Realistic 3D cockroach models with animations
+- Multiple characters with unique abilities
+- Bitcoin Ordinals integration for unlocking characters
+- Egg-laying checkpoint system in Free World mode
+- Dark, atmospheric environments with day/night cycles
+- Responsive design for various devices
+
+## Technology Stack
+- Three.js for 3D rendering
+- Vanilla JavaScript (ES6+)
+- Custom CSS for styling
+- GLTF models created with Meshy.ai and Blender
+
+## Installation
+1. Clone the repository
+2. No build process needed - open index.html in a browser
+3. For development, use VS Code with Live Server extension
 
 ## Development
+See the `/docs` folder for detailed development documentation
 
-This project is built with:
-- Three.js for 3D rendering
-- JavaScript (ES6+) for game logic
-- HTML5/CSS3 with Tailwind for UI
-- Howler.js for audio
-
-## Project Structure
-
-- `/assets` - Game assets (models, textures, audio)
-- `/src` - Source code
-- `/public` - Static files
-- `/docs` - Documentation
-- `/instructions` - Project requirements and guidelines
-
-## Getting Started
-
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Start development server: `npm run dev`
-4. Build for production: `npm run build`
-
-## Documentation
-
-See the `/instructions` directory for detailed documentation:
-- [Project Requirements](instructions/1-project-requirements.md)
-- [App Flow](instructions/2-app-flow.md)
-- [Tech Stack](instructions/3-tech-stack.md)
-- [Frontend Guidelines](instructions/4-frontend-guidelines.md)
-- [Backend Structure](instructions/5-backend-structure.md)
-- [Development Workflow](instructions/development-workflow.md)
-
-## License
-
-MIT 
+## Credits
+- 3D Models: Created using Meshy.ai and Blender
+- Game Design & Development: Cockroach Run Team 

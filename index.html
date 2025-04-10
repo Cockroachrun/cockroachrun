@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments">
+    <title>Cockroach Run</title>
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="css/themes/dark-realism.css">
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="css/components/buttons.css">
+    <link rel="stylesheet" href="css/components/loading.css">
+    <link rel="stylesheet" href="css/components/menus.css">
+    <link rel="stylesheet" href="css/components/characters.css">
+    <link rel="stylesheet" href="css/components/game-ui.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Canvas Container -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- UI Containers -->
+    <div id="ui-container">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="loading-content">
+                <h1>COCKROACH RUN</h1>
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <div class="progress-text">Loading... 0%</div>
+                <p class="flavor-text">Preparing for infestation...</p>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <div class="screen-content">
+                <h1>COCKROACH RUN</h1>
+                <p class="subtitle">A cyberpunk cockroach adventure</p>
+                <div class="button-container">
+                    <button id="play-button" class="button">PLAY</button>
+                    <button id="settings-button" class="button">SETTINGS</button>
+                    <button id="credits-button" class="button">CREDITS</button>
+                    <button id="wallet-button" class="button">CONNECT WALLET</button>
+                </div>
+                <div class="version">v0.1.0 Alpha</div>
+            </div>
+        </div>
+
+        <!-- Mode Selection Screen -->
+        <div id="mode-selection-screen" class="screen">
+            <div class="screen-content">
+                <h1>SELECT MODE</h1>
+                <div class="modes-container">
+                    <div class="mode-card" data-mode="free-world">
+                        <h2>FREE WORLD</h2>
+                        <p>Explore different environments at your own pace</p>
+                    </div>
+                    <div class="mode-card" data-mode="cockroach-runner">
+                        <h2>COCKROACH RUNNER</h2>
+                        <p>Race through endless obstacles, collect resources</p>
+                    </div>
+                </div>
+                <button id="back-from-mode" class="button">BACK</button>
+            </div>
+        </div>
+
+        <!-- Character Selection Screen -->
+        <div id="character-selection-screen" class="screen">
+            <div class="screen-content">
+                <h1>SELECT CHARACTER</h1>
+                <div class="characters-container">
+                    <div class="character-card" data-character="default">
+                        <h2>DEFAULT ROACH</h2>
+                        <p>Speed boost ability</p>
+                    </div>
+                    <div class="character-card locked" data-character="stealth">
+                        <h2>STEALTH ROACH</h2>
+                        <p>Temporary invisibility</p>
+                        <div class="lock-indicator">LOCKED</div>
+                    </div>
+                    <div class="character-card locked" data-character="glider">
+                        <h2>GLIDER ROACH</h2>
+                        <p>Enhanced jumping ability</p>
+                        <div class="lock-indicator">LOCKED</div>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button id="start-game-button" class="button">START GAME</button>
+                    <button id="back-from-character" class="button">BACK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game HUD (Hidden initially) -->
+        <div id="game-hud" class="hidden">
+            <div class="health-bar">
+                <div class="health-fill"></div>
+            </div>
+            <div class="score">SCORE: 0</div>
+            <div class="ability-indicator">
+                <div class="ability-icon"></div>
+                <div class="ability-cooldown"></div>
+            </div>
+            <button id="pause-button" class="icon-button">❚❚</button>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="screen">
+            <div class="screen-content">
+                <h1>PAUSED</h1>
+                <div class="button-container">
+                    <button id="resume-button" class="button">RESUME</button>
+                    <button id="restart-button" class="button">RESTART</button>
+                    <button id="quit-button" class="button">QUIT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+            <div class="screen-content">
+                <h1>GAME OVER</h1>
+                <div class="score-display">SCORE: 0</div>
+                <div class="button-container">
+                    <button id="try-again-button" class="button">TRY AGAIN</button>
+                    <button id="main-menu-button" class="button">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.1/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils/utils.js"></script>
+    <script src="js/components/loading.js"></script>
+    <script src="js/components/menu.js"></script>
+    <script src="js/components/characters.js"></script>
+    <script src="js/components/game-ui.js"></script>
+    <script src="js/core/game-loop.js"></script>
+    <script src="js/core/audio.js"></script>
+    <script src="js/core/animation.js"></script>
+    <script src="js/core/models.js"></script>
+    <script src="js/services/wallet.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
