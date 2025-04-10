@@ -40,6 +40,7 @@ See the `/instructions` directory for detailed documentation:
 - [Tech Stack](instructions/3-tech-stack.md)
 - [Frontend Guidelines](instructions/4-frontend-guidelines.md)
 - [Backend Structure](instructions/5-backend-structure.md)
+- [Development Workflow](instructions/development-workflow.md)
 
 ## License
 
