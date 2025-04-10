@@ -28,6 +28,7 @@ const Game = {
      * Initialize the game
      */
     init() {
+        console.log('Game.init() started');
         console.log(`Initializing Cockroach Run v${CONFIG.VERSION}`);
         
         // Initialize Three.js
@@ -469,5 +470,6 @@ const Game = {
 
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded event fired, calling Game.init()');
     Game.init();
-}); 
+});
