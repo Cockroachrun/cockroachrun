@@ -1,6 +1,5 @@
 import './styles/index.css';
-import CONFIG from './config';
-import Game from './core/Game.js';
+import { Game } from './core/Game.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Initializing Cockroach Run...');
