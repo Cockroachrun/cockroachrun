@@ -1,6 +1,5 @@
-import './styles/index.css';
-import { UIManager } from './core/UIManager';
 import CONFIG from './config';
+import { UIManager } from './core/UIManager';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Initializing Cockroach Run UI...');
@@ -17,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Simulate asset loading with progress bar
+ * Simulate asset loading process
  */
 function simulateLoading(ui) {
   let progress = 0;
@@ -35,13 +34,11 @@ function simulateLoading(ui) {
   
   // Cycle through loading messages
   let messageIndex = 0;
-  const messageInterval = setInterval(() => {
+  setInterval(() => {
+    if (progress >= 100) return;
+    
     messageIndex = (messageIndex + 1) % CONFIG.UI.LOADING_MESSAGES.length;
     ui.updateLoadingMessage(CONFIG.UI.LOADING_MESSAGES[messageIndex]);
-    
-    if (progress >= 100) {
-      clearInterval(messageInterval);
-    }
   }, 3000);
 }
 

@@ -1,53 +1,39 @@
-/* 
- * Cockroach Run - Dark Realism Theme
- * A dark, gritty theme inspired by realistic cockroach environments
- */
-
 :root {
-    /* Primary Colors */
-    --neon-green: #00FF66;      /* Neon moss green */
-    --rust-orange: #CC6633;     /* Rust orange */
-    --muted-brown: #663300;     /* Muted brown */
-    --eerie-blue: #3366CC;      /* Eerie blue */
-    --dark: #0A0A0A;            /* Dark background */
-    --light: #F5F5F5;           /* Light text color */
-    --danger: #FF3535;          /* Danger/warning color */
-    
-    /* Environment Colors */
-    --kitchen-tiles: #8D8D8D;   /* Kitchen floor tiles */
-    --bathroom-tiles: #A4C2C2;  /* Bathroom floor tiles */
-    --sewer-concrete: #3A3A3A;  /* Sewer concrete */
-    --street-asphalt: #333333;  /* Street asphalt */
-    
-    /* Derived Colors for UI Components */
-    --primary: var(--neon-green);
-    --secondary: var(--muted-brown);
-    --accent: var(--rust-orange);
-    --highlight: var(--eerie-blue);
-    
-    /* UI Effects */
-    --primary-glow: rgba(0, 255, 102, 0.6);
-    --primary-translucent: rgba(0, 255, 102, 0.2);
-    --dark-translucent: rgba(10, 10, 10, 0.8);
-    --dark-gradient: linear-gradient(135deg, var(--dark), var(--muted-brown));
-    
-    /* UI Component Colors */
-    --button-gradient: linear-gradient(to right, var(--muted-brown), var(--neon-green));
-    --button-text-color: var(--dark);
-    --panel-bg-color: rgba(10, 10, 10, 0.8);
-    --panel-border-color: rgba(0, 255, 102, 0.3);
-    --panel-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    --header-text-color: var(--neon-green);
-    
-    /* Game UI Elements */
-    --health-bar: linear-gradient(to right, #FF3535, var(--rust-orange));
-    --energy-bar: linear-gradient(to right, var(--eerie-blue), var(--neon-green));
-    --egg-indicator: var(--neon-green);
-    --status-effect: rgba(0, 255, 102, 0.4);
-    
-    /* Time of Day Colors */
-    --daytime-overlay: rgba(255, 255, 255, 0.1);
-    --nighttime-overlay: rgba(0, 0, 51, 0.3);
-    --dawn-overlay: rgba(255, 200, 150, 0.2);
-    --dusk-overlay: rgba(150, 100, 200, 0.2);
-} 
+  /* Colors */
+  --dark-bg: #121212;
+  --darker-bg: #0a0a0a;
+  --lighter-bg: #1a1a1a;
+  
+  /* Neon colors */
+  --neon-green: #00ff41;
+  --light-green: #92f29b;
+  --purple: #a742f5;
+  
+  /* Text colors */
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.7);
+  
+  /* Effects */
+  --glow-green: 0 0 10px rgba(0, 255, 65, 0.7);
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  
+  /* Typography */
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-xxl: 2.5rem;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+}

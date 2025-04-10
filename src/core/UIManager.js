@@ -93,21 +93,7 @@ export class UIManager {
       });
     });
     
-    // Start game button
-    document.getElementById('start-game-button')?.addEventListener('click', () => {
-      const selectedCard = document.querySelector('.character-card.selected');
-      if (!selectedCard) {
-        alert('Please select a character first');
-        return;
-      }
-      
-      this.hideAllScreens();
-      this.showHUD();
-      
-      if (this.callbacks.onStartGame) this.callbacks.onStartGame();
-    });
-    
-    // More event listeners...
+    // More event handlers...
   }
   
   showScreen(screenId) {
@@ -130,13 +116,13 @@ export class UIManager {
   
   showHUD() {
     if (this.elements['game-hud']) {
-      this.elements['game-hud'].style.display = 'flex';
+      this.elements['game-hud'].classList.remove('hidden');
     }
   }
   
   hideHUD() {
     if (this.elements['game-hud']) {
-      this.elements['game-hud'].style.display = 'none';
+      this.elements['game-hud'].classList.add('hidden');
     }
   }
   

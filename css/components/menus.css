@@ -1,68 +1,32 @@
-/*
- * Cockroach Run - Menu and Screen Styles
- * Styles for UI screens, menus, and mode selection
- */
-
-.screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--gradient-dark);
-    z-index: 10;
-    pointer-events: auto;
-}
-
-.screen.active {
-    display: flex;
-}
-
-.screen-content {
-    background-color: var(--overlay-heavy);
-    border: 1px solid var(--purple);
-    border-radius: var(--radius-md);
-    padding: var(--space-xl);
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
-    box-shadow: var(--shadow-medium);
-}
-
-.button-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
+.modes-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin: var(--space-lg) 0;
+  flex-wrap: wrap;
 }
 
 .mode-card {
-    background-color: var(--overlay-medium);
-    border: 1px solid var(--purple);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
-    cursor: pointer;
-    transition: all var(--transition-fast);
+  background-color: var(--lighter-bg);
+  padding: var(--space-lg);
+  border-radius: 8px;
+  border: 2px solid var(--neon-green);
+  width: 300px;
+  transition: all var(--transition-medium);
+  cursor: pointer;
 }
 
 .mode-card:hover {
-    border-color: var(--neon-green);
-    transform: scale(1.02);
-    background-color: var(--overlay-heavy);
+  transform: translateY(-5px);
+  box-shadow: var(--glow-green);
 }
 
-.mode-card h2 {
-    margin-bottom: var(--space-xs);
-}
-
-.mode-card p {
-    margin-bottom: 0;
-    font-size: var(--text-sm);
-    opacity: 0.8;
+@media (max-width: 480px) {
+  .modes-container {
+    flex-direction: column;
+  }
+  
+  .mode-card {
+    width: 100%;
+  }
 }

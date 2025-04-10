@@ -3,22 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cockroach Run</title>
+  <title>Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments</title>
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="../css/themes/dark-realism.css" />
+
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="../css/components/buttons.css" />
+  <link rel="stylesheet" href="../css/components/loading.css" />
+  <link rel="stylesheet" href="../css/components/menus.css" />
+  <link rel="stylesheet" href="../css/components/characters.css" />
+  <link rel="stylesheet" href="../css/components/game-ui.css" />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="../css/main.css" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <!-- Game Canvas -->
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
   </div>
-  
+
   <div id="ui-container">
     <!-- Loading Screen -->
-    <section id="loading-screen" class="screen active" aria-label="Loading Screen">
+    <section id="loading-screen" class="screen" aria-label="Loading Screen">
       <div class="screen-content">
         <h1>COCKROACH RUN</h1>
         <p class="subtitle">A cyberpunk cockroach adventure</p>
         <p class="version">v0.1.0 Alpha</p>
-        
+
         <div class="progress-container">
           <div class="progress-bar"></div>
         </div>
@@ -26,87 +42,87 @@
         <p class="flavor-text">Preparing for infestation...</p>
       </div>
     </section>
-    
+
     <!-- Start Screen -->
     <section id="start-screen" class="screen" aria-label="Start Screen">
       <header class="screen-content">
         <h1>COCKROACH RUN</h1>
         <p class="subtitle">A cyberpunk cockroach adventure</p>
-        
+
         <div class="button-container">
           <button id="play-button" class="button">PLAY</button>
           <button id="settings-button" class="button">SETTINGS</button>
           <button id="credits-button" class="button">CREDITS</button>
           <button id="wallet-button" class="button">CONNECT WALLET</button>
         </div>
-        
+
         <p class="version">v0.1.0 Alpha</p>
       </header>
     </section>
-    
+
     <!-- Mode Selection Screen -->
     <section id="mode-selection-screen" class="screen" aria-label="Mode Selection Screen">
       <div class="screen-content">
         <h2>SELECT MODE</h2>
-        
+
         <div class="modes-container">
           <div class="mode-card" data-mode="free-world">
             <h3>FREE WORLD</h3>
             <p>Explore different environments at your own pace</p>
           </div>
-          
+
           <div class="mode-card" data-mode="cockroach-runner">
             <h3>COCKROACH RUNNER</h3>
             <p>Race through endless obstacles, collect resources</p>
           </div>
         </div>
-        
+
         <button id="back-from-mode" class="button">BACK</button>
       </div>
     </section>
-    
+
     <!-- Character Selection Screen -->
     <section id="character-selection-screen" class="screen" aria-label="Character Selection Screen">
       <div class="screen-content">
         <h2>SELECT CHARACTER</h2>
-        
+
         <div class="characters-container">
           <div class="character-card" data-character="DEFAULT_ROACH">
             <h3>DEFAULT ROACH</h3>
             <p>Speed boost ability</p>
           </div>
-          
+
           <div class="character-card locked">
             <h3>STEALTH ROACH</h3>
             <p>Temporary invisibility</p>
-            <p class="lock-indicator">LOCKED</p>
+            <div class="lock-indicator">LOCKED</div>
           </div>
-          
+
           <div class="character-card locked">
             <h3>GLIDER ROACH</h3>
             <p>Enhanced jumping ability</p>
-            <p class="lock-indicator">LOCKED</p>
+            <div class="lock-indicator">LOCKED</div>
           </div>
         </div>
-        
+
         <div class="button-container">
           <button id="back-from-character" class="button">BACK</button>
           <button id="start-game-button" class="button">START GAME</button>
         </div>
       </div>
     </section>
-    
+
     <!-- Game HUD (hidden by default) -->
-    <div id="game-hud" style="display: none;">
+    <div id="game-hud" class="hidden">
       <button id="pause-button" class="button">PAUSE</button>
       <div class="score-display">SCORE: <span id="score-value">0</span></div>
     </div>
-    
+
     <!-- Pause Screen -->
     <section id="pause-screen" class="screen" aria-label="Pause Screen">
       <div class="screen-content">
         <h2>PAUSED</h2>
-        
+
         <div class="button-container">
           <button id="resume-button" class="button">RESUME</button>
           <button id="restart-button" class="button">RESTART</button>
@@ -114,13 +130,13 @@
         </div>
       </div>
     </section>
-    
+
     <!-- Game Over Screen -->
     <section id="game-over-screen" class="screen" aria-label="Game Over Screen">
       <div class="screen-content">
         <h2>GAME OVER</h2>
         <p class="score-display">SCORE: <span id="final-score">0</span></p>
-        
+
         <div class="button-container">
           <button id="try-again-button" class="button">TRY AGAIN</button>
           <button id="main-menu-button" class="button">MAIN MENU</button>
@@ -128,7 +144,7 @@
       </div>
     </section>
   </div>
-  
-  <script type="module" src="./main.js"></script>
+
+  <script type="module" src="../js/main.js"></script>
 </body>
 </html>
