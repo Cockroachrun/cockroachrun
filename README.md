@@ -25,8 +25,29 @@ A dark, realistic Three.js game where you control a cockroach navigating through
 2. No build process needed - open index.html in a browser
 3. For development, use VS Code with Live Server extension
 
-## Development
-See the `/docs` folder for detailed development documentation
+## Documentation
+The `/docs` folder contains comprehensive project documentation:
+
+### Technical Documentation
+- `architecture.md` - Overall system architecture
+- `component-guide.md` - Component implementation guidelines
+
+### Project Management
+- `team.md` - Team structure and workflow management
+- `risk-management.md` - Risk assessment and mitigation plans
+- `localization.md` - Language support and cultural adaptation
+
+### Creative Direction
+- `art-sound.md` - Art style guidelines and audio design
+
+### Business & Strategy
+- `monetization.md` - Token economics and revenue models
+- `marketing.md` - Community building and user acquisition
+- `competitive-analysis.md` - Market positioning and competitor analysis
+- `analytics.md` - Data collection and performance metrics
+- `legal.md` - Compliance and legal framework
+
+See the `/instructions` folder for additional setup and implementation guides.
 
 ## Credits
 - 3D Models: Created using Meshy.ai and Blender
