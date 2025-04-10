@@ -126,7 +126,36 @@ canvas {
   margin-top: var(--space-lg);
 }
 
-/* ---------- Start Screen ---------- */
+/* ---------- Buttons ---------- */
+.button {
+  font-family: var(--font-heading);
+  background-color: transparent;
+  color: var(--neon-green);
+  border: 2px solid var(--neon-green);
+  border-radius: 4px;
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--text-md);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  margin: var(--space-xs);
+  min-width: 200px;
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  pointer-events: auto;
+}
+
+.button:hover {
+  background-color: rgba(0, 255, 65, 0.1);
+  box-shadow: var(--glow-green);
+  transform: translateY(-2px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+/* ---------- Other Elements ---------- */
 .subtitle {
   font-size: var(--text-lg);
   margin-bottom: var(--space-xl);
@@ -139,7 +168,13 @@ canvas {
   margin-top: var(--space-xl);
 }
 
-/* ---------- Mode Selection ---------- */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
 .modes-container {
   display: flex;
   justify-content: center;
@@ -163,7 +198,6 @@ canvas {
   box-shadow: var(--glow-green);
 }
 
-/* ---------- Character Selection ---------- */
 .characters-container {
   display: flex;
   justify-content: center;
@@ -200,7 +234,6 @@ canvas {
   color: var(--neon-green);
 }
 
-/* ---------- Game HUD ---------- */
 #game-hud {
   position: fixed;
   top: 0;
@@ -220,40 +253,4 @@ canvas {
   font-size: var(--text-lg);
   color: var(--neon-green);
   text-shadow: var(--glow-green);
-}
-
-/* ---------- Buttons ---------- */
-.button {
-  font-family: var(--font-heading);
-  background-color: transparent;
-  color: var(--neon-green);
-  border: 2px solid var(--neon-green);
-  border-radius: 4px;
-  padding: var(--space-md) var(--space-lg);
-  font-size: var(--text-md);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all var(--transition-medium);
-  margin: var(--space-xs);
-  min-width: 200px;
-  box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
-  pointer-events: auto;
-}
-
-.button:hover {
-  background-color: rgba(0, 255, 65, 0.1);
-  box-shadow: var(--glow-green);
-  transform: translateY(-2px);
-}
-
-.button:active {
-  transform: translateY(0);
-}
-
-.button-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
 }
