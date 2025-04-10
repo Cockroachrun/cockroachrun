@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments" />
     <title>Cockroach Run</title>
+
     <!-- Theme CSS -->
-    <link rel="stylesheet" href="css/themes/dark-realism.css">
+    <link rel="stylesheet" href="css/themes/dark-realism.css" />
+
     <!-- Component Styles -->
-    <link rel="stylesheet" href="css/components/buttons.css">
-    <link rel="stylesheet" href="css/components/loading.css">
-    <link rel="stylesheet" href="css/components/menus.css">
-    <link rel="stylesheet" href="css/components/characters.css">
-    <link rel="stylesheet" href="css/components/game-ui.css">
+    <link rel="stylesheet" href="css/components/buttons.css" />
+    <link rel="stylesheet" href="css/components/loading.css" />
+    <link rel="stylesheet" href="css/components/menus.css" />
+    <link rel="stylesheet" href="css/components/characters.css" />
+    <link rel="stylesheet" href="css/components/game-ui.css" />
+
     <!-- Main CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css" />
+
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <!-- Canvas Container -->
-    <div id="game-container">
+    <!-- Game Canvas -->
+    <main id="game-container">
         <canvas id="game-canvas"></canvas>
-    </div>
+    </main>
 
-    <!-- UI Containers -->
+    <!-- UI Container -->
     <div id="ui-container">
         <!-- Loading Screen -->
-        <div id="loading-screen" class="screen">
+        <section id="loading-screen" class="screen" aria-label="Loading Screen">
             <div class="loading-content">
                 <h1>COCKROACH RUN</h1>
                 <div class="progress-container">
@@ -36,25 +40,25 @@
                 <div class="progress-text">Loading... 0%</div>
                 <p class="flavor-text">Preparing for infestation...</p>
             </div>
-        </div>
+        </section>
 
         <!-- Start Screen -->
-        <div id="start-screen" class="screen">
-            <div class="screen-content">
+        <section id="start-screen" class="screen" aria-label="Start Screen">
+            <header class="screen-content">
                 <h1>COCKROACH RUN</h1>
                 <p class="subtitle">A cyberpunk cockroach adventure</p>
-                <div class="button-container">
+                <nav class="button-container">
                     <button id="play-button" class="button">PLAY</button>
                     <button id="settings-button" class="button">SETTINGS</button>
                     <button id="credits-button" class="button">CREDITS</button>
                     <button id="wallet-button" class="button">CONNECT WALLET</button>
-                </div>
+                </nav>
                 <div class="version">v0.1.0 Alpha</div>
-            </div>
-        </div>
+            </header>
+        </section>
 
         <!-- Mode Selection Screen -->
-        <div id="mode-selection-screen" class="screen">
+        <section id="mode-selection-screen" class="screen" aria-label="Mode Selection Screen">
             <div class="screen-content">
                 <h1>SELECT MODE</h1>
                 <div class="modes-container">
@@ -69,10 +73,10 @@
                 </div>
                 <button id="back-from-mode" class="button">BACK</button>
             </div>
-        </div>
+        </section>
 
         <!-- Character Selection Screen -->
-        <div id="character-selection-screen" class="screen">
+        <section id="character-selection-screen" class="screen" aria-label="Character Selection Screen">
             <div class="screen-content">
                 <h1>SELECT CHARACTER</h1>
                 <div class="characters-container">
@@ -96,10 +100,10 @@
                     <button id="back-from-character" class="button">BACK</button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Game HUD (Hidden initially) -->
-        <div id="game-hud" class="hidden">
+        <!-- Game HUD -->
+        <section id="game-hud" class="hidden" aria-label="Game HUD">
             <div class="health-bar">
                 <div class="health-fill"></div>
             </div>
@@ -109,10 +113,10 @@
                 <div class="ability-cooldown"></div>
             </div>
             <button id="pause-button" class="icon-button">❚❚</button>
-        </div>
+        </section>
 
         <!-- Pause Screen -->
-        <div id="pause-screen" class="screen">
+        <section id="pause-screen" class="screen" aria-label="Pause Screen">
             <div class="screen-content">
                 <h1>PAUSED</h1>
                 <div class="button-container">
@@ -121,10 +125,10 @@
                     <button id="quit-button" class="button">QUIT</button>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Game Over Screen -->
-        <div id="game-over-screen" class="screen">
+        <section id="game-over-screen" class="screen" aria-label="Game Over Screen">
             <div class="screen-content">
                 <h1>GAME OVER</h1>
                 <div class="score-display">SCORE: 0</div>
@@ -133,7 +137,7 @@
                     <button id="main-menu-button" class="button">MAIN MENU</button>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 
     <!-- Scripts -->
@@ -153,4 +157,4 @@
     <script src="js/services/wallet.js"></script>
     <script src="js/main.js"></script>
 </body>
-</html> 
+</html>

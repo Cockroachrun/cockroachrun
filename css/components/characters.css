@@ -1,1 +1,63 @@
-/* Placeholder for characters.css */
+/*
+ * Cockroach Run - Character Selection Styles
+ * Styles for character selection screen and character cards
+ */
+
+.characters-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    width: 100%;
+}
+
+.character-card {
+    background-color: var(--overlay-medium);
+    border: 1px solid var(--purple);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.character-card:hover:not(.locked) {
+    border-color: var(--neon-green);
+    transform: scale(1.02);
+}
+
+.character-card.selected {
+    border-color: var(--neon-green);
+    border-width: 2px;
+    box-shadow: var(--glow-green);
+}
+
+.character-card.locked {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.lock-indicator {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background-color: var(--overlay-heavy);
+    color: var(--warning);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: bold;
+}
+
+/* Responsive layout for character cards */
+@media (min-width: 768px) {
+    .characters-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .character-card {
+        flex: 0 0 calc(50% - var(--space-md));
+    }
+}
