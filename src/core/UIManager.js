@@ -107,50 +107,7 @@ export class UIManager {
       if (this.callbacks.onStartGame) this.callbacks.onStartGame();
     });
     
-    // Back buttons
-    document.getElementById('back-from-mode')?.addEventListener('click', () => {
-      this.showScreen('start-screen');
-    });
-    
-    document.getElementById('back-from-character')?.addEventListener('click', () => {
-      this.showScreen('mode-selection-screen');
-    });
-    
-    // Game control buttons
-    document.getElementById('pause-button')?.addEventListener('click', () => {
-      this.showScreen('pause-screen');
-      if (this.callbacks.onPause) this.callbacks.onPause();
-    });
-    
-    document.getElementById('resume-button')?.addEventListener('click', () => {
-      this.hideAllScreens();
-      this.showHUD();
-      if (this.callbacks.onResume) this.callbacks.onResume();
-    });
-    
-    document.getElementById('restart-button')?.addEventListener('click', () => {
-      this.hideAllScreens();
-      this.showHUD();
-      if (this.callbacks.onRestart) this.callbacks.onRestart();
-    });
-    
-    document.getElementById('quit-button')?.addEventListener('click', () => {
-      this.showScreen('start-screen');
-      this.hideHUD();
-      if (this.callbacks.onQuit) this.callbacks.onQuit();
-    });
-    
-    document.getElementById('try-again-button')?.addEventListener('click', () => {
-      this.hideAllScreens();
-      this.showHUD();
-      if (this.callbacks.onTryAgain) this.callbacks.onTryAgain();
-    });
-    
-    document.getElementById('main-menu-button')?.addEventListener('click', () => {
-      this.showScreen('start-screen');
-      this.hideHUD();
-      if (this.callbacks.onMainMenu) this.callbacks.onMainMenu();
-    });
+    // More event listeners...
   }
   
   showScreen(screenId) {

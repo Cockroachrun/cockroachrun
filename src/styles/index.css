@@ -1,10 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap');
 @import './variables.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* ---------- Global Reset ---------- */
 * {
   margin: 0;
@@ -107,7 +103,7 @@ canvas {
 }
 
 /* ---------- Loading Screen ---------- */
-#loading-screen .progress-container {
+.progress-container {
   width: 300px;
   height: 10px;
   background-color: var(--darker-bg);
@@ -116,7 +112,7 @@ canvas {
   overflow: hidden;
 }
 
-#loading-screen .progress-bar {
+.progress-bar {
   height: 100%;
   background-color: var(--neon-green);
   box-shadow: var(--glow-green);
@@ -124,7 +120,7 @@ canvas {
   transition: width 0.2s ease;
 }
 
-#loading-screen .flavor-text {
+.flavor-text {
   font-style: italic;
   opacity: 0.7;
   margin-top: var(--space-lg);
@@ -198,7 +194,7 @@ canvas {
   border-color: rgba(0, 255, 65, 0.3);
 }
 
-.character-card .lock-indicator {
+.lock-indicator {
   font-size: var(--text-xs);
   margin-top: var(--space-sm);
   color: var(--neon-green);
@@ -260,23 +256,4 @@ canvas {
   flex-direction: column;
   gap: var(--space-md);
   margin-top: var(--space-lg);
-}
-
-/* ---------- Responsive Design ---------- */
-@media (max-width: 480px) {
-  h1 {
-    font-size: var(--text-xl);
-  }
-  
-  h2 {
-    font-size: var(--text-lg);
-  }
-  
-  .mode-card, .character-card {
-    width: 100%;
-  }
-  
-  .modes-container, .characters-container {
-    flex-direction: column;
-  }
 }

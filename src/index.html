@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cockroach Run</title>
+  <title>Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments</title>
+  <link rel="stylesheet" href="./styles/variables.css" />
+  <link rel="stylesheet" href="./styles/index.css" />
 </head>
 <body>
+  <!-- Game Canvas -->
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
   </div>
   
   <div id="ui-container">
     <!-- Loading Screen -->
-    <div id="loading-screen" class="screen active">
+    <section id="loading-screen" class="screen" aria-label="Loading Screen">
       <div class="screen-content">
         <h1>COCKROACH RUN</h1>
         <p class="subtitle">A cyberpunk cockroach adventure</p>
@@ -24,11 +27,11 @@
         <p class="progress-text">Loading... 0%</p>
         <p class="flavor-text">Preparing for infestation...</p>
       </div>
-    </div>
+    </section>
     
     <!-- Start Screen -->
-    <div id="start-screen" class="screen">
-      <div class="screen-content">
+    <section id="start-screen" class="screen" aria-label="Start Screen">
+      <header class="screen-content">
         <h1>COCKROACH RUN</h1>
         <p class="subtitle">A cyberpunk cockroach adventure</p>
         
@@ -40,11 +43,11 @@
         </div>
         
         <p class="version">v0.1.0 Alpha</p>
-      </div>
-    </div>
+      </header>
+    </section>
     
     <!-- Mode Selection Screen -->
-    <div id="mode-selection-screen" class="screen">
+    <section id="mode-selection-screen" class="screen" aria-label="Mode Selection Screen">
       <div class="screen-content">
         <h2>SELECT MODE</h2>
         
@@ -62,10 +65,10 @@
         
         <button id="back-from-mode" class="button">BACK</button>
       </div>
-    </div>
+    </section>
     
     <!-- Character Selection Screen -->
-    <div id="character-selection-screen" class="screen">
+    <section id="character-selection-screen" class="screen" aria-label="Character Selection Screen">
       <div class="screen-content">
         <h2>SELECT CHARACTER</h2>
         
@@ -93,7 +96,7 @@
           <button id="start-game-button" class="button">START GAME</button>
         </div>
       </div>
-    </div>
+    </section>
     
     <!-- Game HUD (hidden by default) -->
     <div id="game-hud" style="display: none;">
@@ -102,7 +105,7 @@
     </div>
     
     <!-- Pause Screen -->
-    <div id="pause-screen" class="screen">
+    <section id="pause-screen" class="screen" aria-label="Pause Screen">
       <div class="screen-content">
         <h2>PAUSED</h2>
         
@@ -112,10 +115,10 @@
           <button id="quit-button" class="button">QUIT</button>
         </div>
       </div>
-    </div>
+    </section>
     
     <!-- Game Over Screen -->
-    <div id="game-over-screen" class="screen">
+    <section id="game-over-screen" class="screen" aria-label="Game Over Screen">
       <div class="screen-content">
         <h2>GAME OVER</h2>
         <p class="score-display">SCORE: <span id="final-score">0</span></p>
@@ -125,7 +128,7 @@
           <button id="main-menu-button" class="button">MAIN MENU</button>
         </div>
       </div>
-    </div>
+    </section>
   </div>
   
   <script type="module" src="./main.js"></script>

@@ -7,8 +7,7 @@
   /* Neon colors */
   --neon-green: #00ff41;
   --light-green: #92f29b;
-  --neon-blue: #4169ff;
-  --neon-purple: #a742f5;
+  --purple: #a742f5;
   
   /* Text colors */
   --text: #ffffff;
@@ -16,7 +15,6 @@
   
   /* Effects */
   --glow-green: 0 0 10px rgba(0, 255, 65, 0.7);
-  --glow-blue: 0 0 10px rgba(65, 105, 255, 0.7);
   
   /* Spacing */
   --space-xs: 0.25rem;
