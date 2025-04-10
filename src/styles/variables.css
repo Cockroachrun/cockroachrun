@@ -1,0 +1,41 @@
+:root {
+  /* Colors */
+  --dark-bg: #121212;
+  --darker-bg: #0a0a0a;
+  --lighter-bg: #1a1a1a;
+  
+  /* Neon colors */
+  --neon-green: #00ff41;
+  --light-green: #92f29b;
+  --neon-blue: #4169ff;
+  --neon-purple: #a742f5;
+  
+  /* Text colors */
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.7);
+  
+  /* Effects */
+  --glow-green: 0 0 10px rgba(0, 255, 65, 0.7);
+  --glow-blue: 0 0 10px rgba(65, 105, 255, 0.7);
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  
+  /* Typography */
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-xxl: 2.5rem;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+}

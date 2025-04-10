@@ -2,102 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cockroach Run</title>
 </head>
-<body class="bg-background text-text-primary m-0 p-0 overflow-hidden">
-  <!-- Game Canvas -->
-  <canvas id="game-canvas" class="fixed top-0 left-0 w-full h-full"></canvas>
-  
-  <!-- Loading Screen -->
-  <div id="loading-screen" class="screen active">
-    <h1 class="text-4xl font-bold mb-8">COCKROACH RUN</h1>
-    <p class="text-xl mb-4">A cyberpunk cockroach adventure</p>
-    <p class="text-sm mb-8">v0.1.0 Alpha</p>
-    <div class="w-64 h-4 bg-gray-800 rounded-full mb-4">
-      <div class="progress-bar h-full bg-primary rounded-full" style="width: 0%"></div>
-    </div>
-    <p class="progress-text">Loading... 0%</p>
-    <p class="flavor-text text-text-secondary mt-4">Preparing for infestation...</p>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
   </div>
   
-  <!-- Start Screen -->
-  <div id="start-screen" class="screen">
-    <h1 class="text-4xl font-bold mb-8">COCKROACH RUN</h1>
-    <p class="text-xl mb-4">A cyberpunk cockroach adventure</p>
-    <p class="text-sm mb-8">v0.1.0 Alpha</p>
-    <div class="flex flex-col gap-4 w-64">
-      <button id="play-button" class="game-button">PLAY</button>
-      <button id="settings-button" class="game-button">SETTINGS</button>
-      <button id="credits-button" class="game-button">CREDITS</button>
-      <button id="wallet-button" class="game-button">CONNECT WALLET</button>
-    </div>
-  </div>
-  
-  <!-- Mode Selection Screen -->
-  <div id="mode-selection-screen" class="screen">
-    <h2 class="text-3xl font-bold mb-8">SELECT MODE</h2>
-    <div class="flex gap-8 mb-8">
-      <div class="mode-card p-6 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700" data-mode="free-world">
-        <h3 class="text-2xl font-bold mb-2">FREE WORLD</h3>
-        <p class="text-sm">Explore different environments at your own pace</p>
-      </div>
-      <div class="mode-card p-6 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700" data-mode="cockroach-runner">
-        <h3 class="text-2xl font-bold mb-2">COCKROACH RUNNER</h3>
-        <p class="text-sm">Race through endless obstacles, collect resources</p>
+  <div id="ui-container">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+      <div class="screen-content">
+        <h1>COCKROACH RUN</h1>
+        <p class="subtitle">A cyberpunk cockroach adventure</p>
+        <p class="version">v0.1.0 Alpha</p>
+        
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+        <p class="progress-text">Loading... 0%</p>
+        <p class="flavor-text">Preparing for infestation...</p>
       </div>
     </div>
-    <button id="back-from-mode" class="game-button">BACK</button>
-  </div>
-  
-  <!-- Character Selection Screen -->
-  <div id="character-selection-screen" class="screen">
-    <h2 class="text-3xl font-bold mb-8">SELECT CHARACTER</h2>
-    <div class="flex gap-4 mb-8">
-      <div class="character-card p-4 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700" data-character="DEFAULT_ROACH">
-        <h3 class="text-xl font-bold mb-2">DEFAULT ROACH</h3>
-        <p class="text-sm">Speed boost ability</p>
-      </div>
-      <div class="character-card locked p-4 bg-gray-800 rounded-lg opacity-50">
-        <h3 class="text-xl font-bold mb-2">STEALTH ROACH</h3>
-        <p class="text-sm">Temporary invisibility</p>
-        <p class="text-xs mt-2">LOCKED</p>
-      </div>
-      <div class="character-card locked p-4 bg-gray-800 rounded-lg opacity-50">
-        <h3 class="text-xl font-bold mb-2">GLIDER ROACH</h3>
-        <p class="text-sm">Enhanced jumping ability</p>
-        <p class="text-xs mt-2">LOCKED</p>
+    
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen">
+      <div class="screen-content">
+        <h1>COCKROACH RUN</h1>
+        <p class="subtitle">A cyberpunk cockroach adventure</p>
+        
+        <div class="button-container">
+          <button id="play-button" class="button">PLAY</button>
+          <button id="settings-button" class="button">SETTINGS</button>
+          <button id="credits-button" class="button">CREDITS</button>
+          <button id="wallet-button" class="button">CONNECT WALLET</button>
+        </div>
+        
+        <p class="version">v0.1.0 Alpha</p>
       </div>
     </div>
-    <div class="flex gap-4">
-      <button id="back-from-character" class="game-button">BACK</button>
-      <button id="start-game-button" class="game-button">START GAME</button>
+    
+    <!-- Mode Selection Screen -->
+    <div id="mode-selection-screen" class="screen">
+      <div class="screen-content">
+        <h2>SELECT MODE</h2>
+        
+        <div class="modes-container">
+          <div class="mode-card" data-mode="free-world">
+            <h3>FREE WORLD</h3>
+            <p>Explore different environments at your own pace</p>
+          </div>
+          
+          <div class="mode-card" data-mode="cockroach-runner">
+            <h3>COCKROACH RUNNER</h3>
+            <p>Race through endless obstacles, collect resources</p>
+          </div>
+        </div>
+        
+        <button id="back-from-mode" class="button">BACK</button>
+      </div>
     </div>
-  </div>
-  
-  <!-- Game HUD -->
-  <div id="game-hud" class="fixed top-0 left-0 w-full p-4 flex justify-between items-center hidden">
-    <button id="pause-button" class="game-button">PAUSE</button>
-    <div class="score-display">SCORE: <span id="score-value">0</span></div>
-  </div>
-  
-  <!-- Pause Screen -->
-  <div id="pause-screen" class="screen">
-    <h2 class="text-3xl font-bold mb-8">PAUSED</h2>
-    <div class="flex flex-col gap-4 w-64">
-      <button id="resume-button" class="game-button">RESUME</button>
-      <button id="restart-button" class="game-button">RESTART</button>
-      <button id="quit-button" class="game-button">QUIT</button>
+    
+    <!-- Character Selection Screen -->
+    <div id="character-selection-screen" class="screen">
+      <div class="screen-content">
+        <h2>SELECT CHARACTER</h2>
+        
+        <div class="characters-container">
+          <div class="character-card" data-character="DEFAULT_ROACH">
+            <h3>DEFAULT ROACH</h3>
+            <p>Speed boost ability</p>
+          </div>
+          
+          <div class="character-card locked">
+            <h3>STEALTH ROACH</h3>
+            <p>Temporary invisibility</p>
+            <p class="lock-indicator">LOCKED</p>
+          </div>
+          
+          <div class="character-card locked">
+            <h3>GLIDER ROACH</h3>
+            <p>Enhanced jumping ability</p>
+            <p class="lock-indicator">LOCKED</p>
+          </div>
+        </div>
+        
+        <div class="button-container">
+          <button id="back-from-character" class="button">BACK</button>
+          <button id="start-game-button" class="button">START GAME</button>
+        </div>
+      </div>
     </div>
-  </div>
-  
-  <!-- Game Over Screen -->
-  <div id="game-over-screen" class="screen">
-    <h2 class="text-3xl font-bold mb-4">GAME OVER</h2>
-    <p class="text-xl mb-8">SCORE: <span id="final-score">0</span></p>
-    <div class="flex flex-col gap-4 w-64">
-      <button id="try-again-button" class="game-button">TRY AGAIN</button>
-      <button id="main-menu-button" class="game-button">MAIN MENU</button>
+    
+    <!-- Game HUD (hidden by default) -->
+    <div id="game-hud" style="display: none;">
+      <button id="pause-button" class="button">PAUSE</button>
+      <div class="score-display">SCORE: <span id="score-value">0</span></div>
+    </div>
+    
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="screen">
+      <div class="screen-content">
+        <h2>PAUSED</h2>
+        
+        <div class="button-container">
+          <button id="resume-button" class="button">RESUME</button>
+          <button id="restart-button" class="button">RESTART</button>
+          <button id="quit-button" class="button">QUIT</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="screen">
+      <div class="screen-content">
+        <h2>GAME OVER</h2>
+        <p class="score-display">SCORE: <span id="final-score">0</span></p>
+        
+        <div class="button-container">
+          <button id="try-again-button" class="button">TRY AGAIN</button>
+          <button id="main-menu-button" class="button">MAIN MENU</button>
+        </div>
+      </div>
     </div>
   </div>
   

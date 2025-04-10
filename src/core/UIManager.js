@@ -1,14 +1,19 @@
-// src/core/UIManager.js
 import CONFIG from '../config';
 
 export class UIManager {
   constructor(game) {
     this.game = game;
+    
+    // Screen references
     this.screens = {};
+    
+    // UI elements
     this.elements = {};
+    
+    // Current screen
     this.currentScreen = null;
     
-    // Callbacks for UI events
+    // Event callbacks
     this.callbacks = {
       onPlay: null,
       onModeSelect: null,
@@ -168,13 +173,13 @@ export class UIManager {
   
   showHUD() {
     if (this.elements['game-hud']) {
-      this.elements['game-hud'].classList.remove('hidden');
+      this.elements['game-hud'].style.display = 'flex';
     }
   }
   
   hideHUD() {
     if (this.elements['game-hud']) {
-      this.elements['game-hud'].classList.add('hidden');
+      this.elements['game-hud'].style.display = 'none';
     }
   }
   

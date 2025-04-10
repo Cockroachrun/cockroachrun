@@ -1,4 +1,3 @@
-// src/main.js
 import './styles/index.css';
 import { UIManager } from './core/UIManager';
 import CONFIG from './config';
@@ -13,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Simulate asset loading with progress updates
   simulateLoading(ui);
   
-  // Register UI event handlers for testing
+  // Register UI event handlers
   registerUIHandlers(ui);
 });
 
