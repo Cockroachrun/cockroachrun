@@ -1,37 +1,49 @@
-// src/main.js
-import { initEngine } from './core/engine.js';
-import { initUI } from './components/ui/ui-manager.js';
-import { loadAssets } from './core/asset-loader.js';
-import { initTestScene } from './game-modes/test-scene.js';
+import './styles/index.css';
+import { UIManager } from './core/UIManager';
+import CONFIG from './config';
 
-// Game initialization
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   console.log('Initializing Cockroach Run...');
   
-  // Initialize the game engine
-  const engine = await initEngine();
+  // Initialize UI Manager
+  const ui = new UIManager();
+  ui.init();
   
-  // Initialize the UI
-  const ui = await initUI();
+  // Simulate asset loading with progress updates
+  simulateLoading(ui);
   
-  // Start with loading screen
-  ui.showScreen('loading-screen');
-  
-  // Load game assets
-  await loadAssets(progress => {
+  // Register UI events
+  ui.on('onPlay', () => console.log('Play clicked'));
+  ui.on('onModeSelect', (mode) => console.log(`Selected mode: ${mode}`));
+  ui.on('onCharacterSelect', (character) => console.log(`Selected character: ${character}`));
+  ui.on('onStartGame', () => console.log('Starting game...'));
+});
+
+/**
+ * Simulate asset loading process
+ */
+function simulateLoading(ui) {
+  let progress = 0;
+  const loadingInterval = setInterval(() => {
+    progress += 1;
     ui.updateLoadingProgress(progress);
-  });
+    
+    if (progress >= 100) {
+      clearInterval(loadingInterval);
+      setTimeout(() => {
+        ui.showScreen('start');
+      }, 500);
+    }
+  }, 50);
   
-  // Initialize test scene with cockroach
-  const { cockroach } = initTestScene();
-  
-  // Show start screen when ready
-  ui.showScreen('start-screen');
-  
-  // Add start game event listener
-  ui.on('startGame', () => {
-    engine.start();
-  });
-  
-  console.log('Cockroach Run initialized successfully');
-}); 
+  // Cycle through loading messages
+  let messageIndex = 0;
+  const messageInterval = setInterval(() => {
+    messageIndex = (messageIndex + 1) % CONFIG.UI.LOADING_MESSAGES.length;
+    ui.updateLoadingMessage(CONFIG.UI.LOADING_MESSAGES[messageIndex]);
+    
+    if (progress >= 100) {
+      clearInterval(messageInterval);
+    }
+  }, 3000);
+}

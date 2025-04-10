@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .screen {
+    @apply hidden fixed inset-0 bg-background bg-opacity-90 z-50 flex flex-col items-center justify-center;
+  }
+  
+  .screen.active {
+    @apply flex;
+  }
+  
+  .game-button {
+    @apply bg-primary text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition-colors;
+  }
+  
+  .character-card.selected {
+    @apply ring-2 ring-primary;
+  }
+}
+
+body {
+  @apply m-0 p-0 overflow-hidden bg-background text-text-primary;
+}
