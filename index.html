@@ -41,8 +41,7 @@
                 <div class="menu-buttons">
                     <button id="play-button" class="menu-button">PLAY</button>
                     <button id="settings-button" class="menu-button">SETTINGS</button>
-                    <button id="credits-button" class="menu-button">CREDITS</button>
-                    <button id="exit-button" class="menu-button">EXIT</button>
+                    <button id="connect-wallet-button" class="menu-button">CONNECT WALLET</button>
                 </div>
                 <div class="version-info">v0.1.0 Alpha</div>
             </div>
@@ -194,10 +193,13 @@
                         <h3>GRAPHICS</h3>
                         <div class="setting-item">
                             <span>Quality</span>
-                            <div class="option-buttons">
-                                <button class="option-button" data-quality="low">LOW</button>
-                                <button class="option-button active" data-quality="medium">MEDIUM</button>
-                                <button class="option-button" data-quality="high">HIGH</button>
+                            <div class="dropdown-container">
+                                <select id="quality-select" class="styled-dropdown">
+                                    <option value="low">LOW</option>
+                                    <option value="medium" selected>MEDIUM</option>
+                                    <option value="high">HIGH</option>
+                                </select>
+                                <div class="dropdown-arrow">▼</div>
                             </div>
                         </div>
                         <div class="setting-item">
@@ -208,6 +210,12 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>ABOUT</h3>
+                    <div class="setting-item">
+                        <button id="credits-button" class="menu-button">CREDITS</button>
                     </div>
                 </div>
                 <div class="button-row">

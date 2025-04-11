@@ -72,7 +72,7 @@ const AudioManager = {
         const songSelectionItem = document.createElement('div');
         songSelectionItem.className = 'setting-item';
         songSelectionItem.innerHTML = `
-            <span>Menu Music</span>
+            <span>Music Selection</span>
             <div class="dropdown-container">
                 <select id="music-track-select" class="styled-dropdown">
                     <option value="0">Random</option>

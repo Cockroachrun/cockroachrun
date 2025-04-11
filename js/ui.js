@@ -31,6 +31,23 @@ const UIManager = {
         this.loadSettings();
         this.simulateLoading();
         console.log('UI Manager initialized');
+
+        // Attempt to start current intended music on first user interaction
+        const tryPlayCurrentMusic = () => {
+            if (!AudioManager.menuMusic.paused || !AudioManager.gameMusic.paused) {
+                window.removeEventListener('click', tryPlayCurrentMusic);
+                return;
+            }
+            AudioManager.menuMusic.play().catch(() => {});
+            window.removeEventListener('click', tryPlayCurrentMusic);
+        };
+        window.addEventListener('click', tryPlayCurrentMusic);
+        // Attempt to start menu music on first user interaction
+        const tryPlayMenuMusic = () => {
+            AudioManager.menuMusic.play().catch(() => {});
+            window.removeEventListener('click', tryPlayMenuMusic);
+        };
+        window.addEventListener('click', tryPlayMenuMusic);
     },
     
     addEventListeners() {
@@ -46,8 +63,10 @@ const UIManager = {
             AudioManager.playButtonClick();
             this.showScreen('credits');
         });
-        document.getElementById('exit-button').addEventListener('click', () => {
+
+        document.getElementById('connect-wallet-button').addEventListener('click', () => {
             AudioManager.playButtonClick();
+            console.log('Connect Wallet button clicked');
             alert('Game exit functionality would be implemented here.');
         });
         document.querySelectorAll('.mode-card').forEach(card => {
@@ -91,13 +110,9 @@ const UIManager = {
             this.settings.showFps = !this.settings.showFps;
             document.getElementById('fps-toggle').classList.toggle('active', this.settings.showFps);
         });
-        document.querySelectorAll('.option-button').forEach(button => {
-            button.addEventListener('click', () => {
-                AudioManager.playButtonClick();
-                document.querySelectorAll('.option-button').forEach(b => b.classList.remove('active'));
-                button.classList.add('active');
-                this.settings.quality = button.getAttribute('data-quality');
-            });
+        document.getElementById('quality-select').addEventListener('change', (e) => {
+            AudioManager.playButtonClick();
+            this.settings.quality = e.target.value;
         });
         document.getElementById('back-from-credits').addEventListener('click', () => {
             AudioManager.playButtonClick();
@@ -163,7 +178,10 @@ const UIManager = {
                 clearInterval(interval);
                 setTimeout(() => {
                     this.showScreen('start');
-                    AudioManager.playMenuMusic();
+                    AudioManager.menuMusic.muted = false;
+                    AudioManager.menuMusic.play().catch((e) => {
+                        console.warn('Autoplay blocked:', e);
+                    });
                 }, 500);
             }
         }, 50);
@@ -176,6 +194,28 @@ const UIManager = {
         this.screens[screenName].classList.add('active');
         this.currentScreen = screenName;
         console.log(`Showing screen: ${screenName}`);
+
+        const gameContainer = document.getElementById('game-container');
+        if (gameContainer) {
+            let bgUrl = '';
+            if (screenName === 'start') {
+                bgUrl = "assets/images/backgrounds/kitchen_bg.png";
+            } else if (screenName === 'characterSelection') {
+                bgUrl = "assets/images/backgrounds/sewer_bg.png";
+            } else if (screenName === 'modeSelection') {
+                bgUrl = "assets/images/backgrounds/bathroom_bg.png";
+            } else {
+                bgUrl = "assets/images/backgrounds/sewer_bg.png";
+            }
+
+            gameContainer.style.background = `url('${bgUrl}') no-repeat center center`;
+            gameContainer.style.backgroundSize = 'cover';
+
+            console.log('DEBUG: Set background to:', bgUrl);
+            console.log('DEBUG: Computed style background:', getComputedStyle(gameContainer).background);
+        } else {
+            console.warn('DEBUG: #game-container not found');
+        }
     },
     
     startGame() {
