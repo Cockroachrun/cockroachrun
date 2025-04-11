@@ -1,0 +1,87 @@
+/* loading.css - Standalone loading screen styles */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #121212;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-container {
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.loading-logo {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+.loading-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: rgba(80, 80, 80, 0.3);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.loading-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #FF9000;
+    transition: width 0.3s ease;
+}
+
+.loading-text-container {
+    margin: 15px 0 25px;
+}
+
+.loading-percentage {
+    font-family: 'Orbitron', sans-serif;
+    color: #E0E0E0;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.loading-message {
+    color: #FFAA33;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.token-message {
+    margin-top: 30px;
+    padding: 10px 20px;
+    background-color: rgba(255, 144, 0, 0.2);
+    border: 1px solid #FF9000;
+    border-radius: 5px;
+    animation: pulse 2s infinite;
+}
+
+.token-message p {
+    margin: 0;
+    color: #FF9000;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 144, 0, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 144, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 144, 0, 0); }
+}
+
+/* Hide loading screen when inactive - important to override other classes */
+#loading-screen.inactive {
+    display: none !important;
+}
