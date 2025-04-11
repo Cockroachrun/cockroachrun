@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/sprite.css" />
 </head>
 <body>
     <!-- Game Canvas Container -->
@@ -37,6 +38,9 @@
             <div class="menu-container">
                 <div class="logo-container">
                     <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
+                </div>
+                <div class="sprite-container">
+                    <div id="cockroach-sprite" class="cockroach-sprite"></div>
                 </div>
                 <div class="menu-buttons">
                     <button id="play-button" class="menu-button">PLAY</button>
@@ -211,6 +215,50 @@
                             </div>
                         </div>
                     </div>
+                    <div class="settings-section">
+                        <h3>UI CUSTOMIZATION</h3>
+                        <div class="setting-item">
+                            <span>Device Optimization</span>
+                            <div class="dropdown-container">
+                                <select id="device-select" class="styled-dropdown">
+                                    <option value="auto">AUTO-DETECT</option>
+                                    <option value="mobile">MOBILE</option>
+                                    <option value="tablet">TABLET</option>
+                                    <option value="desktop" selected>DESKTOP</option>
+                                    <option value="custom">CUSTOM</option>
+                                </select>
+                                <div class="dropdown-arrow">▼</div>
+                            </div>
+                        </div>
+                        <div class="setting-item custom-ui-setting">
+                            <span>Menu Button Spacing</span>
+                            <div class="slider-container">
+                                <input type="range" id="menu-button-spacing" min="0" max="100" value="50" class="slider" />
+                                <span class="slider-value">50%</span>
+                            </div>
+                        </div>
+                        <div class="setting-item custom-ui-setting">
+                            <span>Sprite Position</span>
+                            <div class="slider-container">
+                                <input type="range" id="sprite-position" min="0" max="100" value="50" class="slider" />
+                                <span class="slider-value">50%</span>
+                            </div>
+                        </div>
+                        <div class="setting-item custom-ui-setting">
+                            <span>Menu Container Width</span>
+                            <div class="slider-container">
+                                <input type="range" id="menu-width" min="50" max="100" value="90" class="slider" />
+                                <span class="slider-value">90%</span>
+                            </div>
+                        </div>
+                        <div class="setting-item custom-ui-setting">
+                            <span>Menu Padding</span>
+                            <div class="slider-container">
+                                <input type="range" id="menu-padding" min="0" max="100" value="50" class="slider" />
+                                <span class="slider-value">50%</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="settings-section">
                     <h3>ABOUT</h3>
@@ -316,6 +364,7 @@
     <script src="js/config.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/sprite-animation.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

@@ -20,15 +20,22 @@ const UIManager = {
     selectedMode: null,
     selectedCharacter: 'default-roach',
     isGameRunning: false,
-    
     settings: {
         quality: 'medium',
-        showFps: false
+        showFps: false,
+        // UI Customization settings
+        deviceOptimization: 'desktop',
+        menuButtonSpacing: 50,
+        spritePosition: 50,
+        menuWidth: 90,
+        menuPadding: 50
     },
     
     init() {
         this.addEventListeners();
         this.loadSettings();
+        this.updateUICustomizationVisibility();
+        this.applyUICustomization();
         this.simulateLoading();
         console.log('UI Manager initialized');
 
@@ -114,6 +121,39 @@ const UIManager = {
             AudioManager.playButtonClick();
             this.settings.quality = e.target.value;
         });
+        
+        // UI Customization event listeners
+        document.getElementById('device-select').addEventListener('change', (e) => {
+            AudioManager.playButtonClick();
+            this.settings.deviceOptimization = e.target.value;
+            this.updateUICustomizationVisibility();
+            this.applyDeviceOptimization(e.target.value);
+        });
+        
+        document.getElementById('menu-button-spacing').addEventListener('input', (e) => {
+            this.settings.menuButtonSpacing = parseInt(e.target.value);
+            e.target.nextElementSibling.textContent = `${e.target.value}%`;
+            this.applyUICustomization();
+        });
+        
+        document.getElementById('sprite-position').addEventListener('input', (e) => {
+            this.settings.spritePosition = parseInt(e.target.value);
+            e.target.nextElementSibling.textContent = `${e.target.value}%`;
+            this.applyUICustomization();
+        });
+        
+        document.getElementById('menu-width').addEventListener('input', (e) => {
+            this.settings.menuWidth = parseInt(e.target.value);
+            e.target.nextElementSibling.textContent = `${e.target.value}%`;
+            this.applyUICustomization();
+        });
+        
+        document.getElementById('menu-padding').addEventListener('input', (e) => {
+            this.settings.menuPadding = parseInt(e.target.value);
+            e.target.nextElementSibling.textContent = `${e.target.value}%`;
+            this.applyUICustomization();
+        });
+        
         document.getElementById('back-from-credits').addEventListener('click', () => {
             AudioManager.playButtonClick();
             this.showScreen('start');
@@ -147,21 +187,68 @@ const UIManager = {
     loadSettings() {
         const savedQuality = localStorage.getItem('graphicsQuality');
         const savedShowFps = localStorage.getItem('showFps');
+        const savedDeviceOptimization = localStorage.getItem('deviceOptimization');
+        const savedMenuButtonSpacing = localStorage.getItem('menuButtonSpacing');
+        const savedSpritePosition = localStorage.getItem('spritePosition');
+        const savedMenuWidth = localStorage.getItem('menuWidth');
+        const savedMenuPadding = localStorage.getItem('menuPadding');
+        
         if (savedQuality) {
             this.settings.quality = savedQuality;
-            document.querySelectorAll('.option-button').forEach(button => {
-                button.classList.toggle('active', button.getAttribute('data-quality') === savedQuality);
-            });
+            document.getElementById('quality-select').value = savedQuality;
         }
+        
         if (savedShowFps) {
             this.settings.showFps = savedShowFps === 'true';
             document.getElementById('fps-toggle').classList.toggle('active', this.settings.showFps);
         }
+        
+        // Load UI customization settings
+        if (savedDeviceOptimization) {
+            this.settings.deviceOptimization = savedDeviceOptimization;
+            document.getElementById('device-select').value = savedDeviceOptimization;
+        }
+        
+        if (savedMenuButtonSpacing) {
+            this.settings.menuButtonSpacing = parseInt(savedMenuButtonSpacing);
+            document.getElementById('menu-button-spacing').value = savedMenuButtonSpacing;
+            document.getElementById('menu-button-spacing').nextElementSibling.textContent = `${savedMenuButtonSpacing}%`;
+        }
+        
+        if (savedSpritePosition) {
+            this.settings.spritePosition = parseInt(savedSpritePosition);
+            document.getElementById('sprite-position').value = savedSpritePosition;
+            document.getElementById('sprite-position').nextElementSibling.textContent = `${savedSpritePosition}%`;
+        }
+        
+        if (savedMenuWidth) {
+            this.settings.menuWidth = parseInt(savedMenuWidth);
+            document.getElementById('menu-width').value = savedMenuWidth;
+            document.getElementById('menu-width').nextElementSibling.textContent = `${savedMenuWidth}%`;
+        }
+        
+        if (savedMenuPadding) {
+            this.settings.menuPadding = parseInt(savedMenuPadding);
+            document.getElementById('menu-padding').value = savedMenuPadding;
+            document.getElementById('menu-padding').nextElementSibling.textContent = `${savedMenuPadding}%`;
+        }
+        
+        // Apply the loaded settings
+        this.updateUICustomizationVisibility();
+        this.applyUICustomization();
     },
     
     saveSettings() {
         localStorage.setItem('graphicsQuality', this.settings.quality);
         localStorage.setItem('showFps', this.settings.showFps);
+        
+        // Save UI customization settings
+        localStorage.setItem('deviceOptimization', this.settings.deviceOptimization);
+        localStorage.setItem('menuButtonSpacing', this.settings.menuButtonSpacing);
+        localStorage.setItem('spritePosition', this.settings.spritePosition);
+        localStorage.setItem('menuWidth', this.settings.menuWidth);
+        localStorage.setItem('menuPadding', this.settings.menuPadding);
+        
         AudioManager.saveSettings();
         console.log('Settings saved');
     },
@@ -294,5 +381,131 @@ const UIManager = {
         document.getElementById('high-score').textContent = Math.max(highScore, finalScore);
         this.showScreen('gameOver');
         this.isGameRunning = false;
+    },
+    
+    // UI Customization Functions
+    updateUICustomizationVisibility() {
+        const customUISettings = document.querySelectorAll('.custom-ui-setting');
+        const showCustomSettings = this.settings.deviceOptimization === 'custom';
+        
+        customUISettings.forEach(setting => {
+            setting.classList.toggle('active', showCustomSettings);
+        });
+    },
+    
+    applyDeviceOptimization(device) {
+        // Don't apply presets if custom is selected
+        if (device === 'custom') {
+            return;
+        }
+        
+        // Auto-detect device based on screen size and touch capability
+        if (device === 'auto') {
+            // Check if device has touch capability (likely mobile or tablet)
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            // More sophisticated device detection
+            if (window.innerWidth <= 480 || (hasTouch && window.innerWidth <= 600)) {
+                device = 'mobile';
+            } else if (window.innerWidth <= 768 || (hasTouch && window.innerWidth <= 1024)) {
+                device = 'tablet';
+            } else {
+                device = 'desktop';
+            }
+            
+            // Also consider orientation for better detection
+            if (device === 'tablet' && window.innerHeight > window.innerWidth) {
+                // Tablet in portrait mode might need mobile-like settings
+                device = 'mobile';
+            }
+            
+            console.log(`Auto-detected device: ${device}`);
+        }
+        
+        // Apply preset values based on device type
+        switch (device) {
+            case 'mobile':
+                this.settings.menuButtonSpacing = 45;  // Optimized spacing for mobile
+                this.settings.spritePosition = 29;     // Closer to title on mobile
+                this.settings.menuWidth = 95;          // Wider menu for mobile
+                this.settings.menuPadding = 35;        // Less padding on mobile
+                break;
+            case 'tablet':
+                this.settings.menuButtonSpacing = 48;  // Medium spacing for tablet
+                this.settings.spritePosition = 35;     // Medium distance from title
+                this.settings.menuWidth = 85;          // Slightly narrower for tablet
+                this.settings.menuPadding = 45;        // Medium padding for tablet
+                break;
+            case 'desktop':
+            default:
+                this.settings.menuButtonSpacing = 52;  // More spacing for desktop
+                this.settings.spritePosition = 40;     // Further from title on desktop
+                this.settings.menuWidth = 75;          // Narrower menu on desktop (looks better)
+                this.settings.menuPadding = 55;        // More padding on desktop
+                break;
+        }
+        
+        // Update slider values in the UI
+        document.getElementById('menu-button-spacing').value = this.settings.menuButtonSpacing;
+        document.getElementById('menu-button-spacing').nextElementSibling.textContent = `${this.settings.menuButtonSpacing}%`;
+        
+        document.getElementById('sprite-position').value = this.settings.spritePosition;
+        document.getElementById('sprite-position').nextElementSibling.textContent = `${this.settings.spritePosition}%`;
+        
+        document.getElementById('menu-width').value = this.settings.menuWidth;
+        document.getElementById('menu-width').nextElementSibling.textContent = `${this.settings.menuWidth}%`;
+        
+        document.getElementById('menu-padding').value = this.settings.menuPadding;
+        document.getElementById('menu-padding').nextElementSibling.textContent = `${this.settings.menuPadding}%`;
+        
+        // Apply the settings
+        this.applyUICustomization();
+    },
+    
+    applyUICustomization() {
+        // Get device type for responsive adjustments
+        const isMobile = window.innerWidth <= 480;
+        const isTablet = window.innerWidth > 480 && window.innerWidth <= 768;
+        
+        // Calculate actual values from percentages with device-specific ranges
+        let buttonSpacing, spritePosition, menuPadding;
+        
+        if (isMobile) {
+            // Mobile-specific ranges
+            buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.3, 1.2);
+            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -150, -70);
+            menuPadding = this.mapPercentToValue(this.settings.menuPadding, 0.5, 1.5);
+        } else if (isTablet) {
+            // Tablet-specific ranges
+            buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.4, 1.5);
+            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -180, -60);
+            menuPadding = this.mapPercentToValue(this.settings.menuPadding, 0.8, 2);
+        } else {
+            // Desktop-specific ranges
+            buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.5, 2);
+            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -200, -50);
+            menuPadding = this.mapPercentToValue(this.settings.menuPadding, 1, 3);
+        }
+        
+        // Calculate menu width with better constraints
+        const menuWidth = Math.max(60, Math.min(98, this.settings.menuWidth));
+        
+        // Apply to CSS variables with units
+        document.documentElement.style.setProperty('--menu-buttons-margin-top', `${buttonSpacing}rem`);
+        document.documentElement.style.setProperty('--sprite-container-margin-top', `${spritePosition}px`);
+        document.documentElement.style.setProperty('--menu-container-width', `${menuWidth}%`);
+        document.documentElement.style.setProperty('--menu-container-padding', `${menuPadding}rem`);
+        
+        // Additional refinements for better visual appearance
+        const buttonGap = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.2, 1);
+        document.documentElement.style.setProperty('--button-gap', `${buttonGap}rem`);
+        
+        // Apply changes immediately
+        console.log('UI customization applied');
+    },
+    
+    // Helper function to map percentage to a value range
+    mapPercentToValue(percent, min, max) {
+        return min + (percent / 100) * (max - min);
     }
 };
