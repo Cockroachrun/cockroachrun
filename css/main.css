@@ -80,11 +80,8 @@ canvas {
 .menu-container {
     width: 90%;
     max-width: 600px;
-    background-color: var(--overlay-bg);
     border-radius: var(--radius-md);
     padding: var(--space-xl);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(80, 80, 80, 0.5);
     pointer-events: all;
 }
 
@@ -101,9 +98,23 @@ canvas {
     filter: drop-shadow(0 0 10px rgba(255, 144, 0, 0.5));
 }
 
+.main-menu-logo {
+    filter: none;
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 /* Loading Screen */
 #loading-screen {
-    background-color: var(--dark-bg);
+    background-color: #000000;
 }
 
 .loading-content {
@@ -150,9 +161,9 @@ canvas {
 }
 
 .menu-button {
-    background-color: var(--button-bg);
-    color: var(--text-color);
-    border: 1px solid var(--button-border);
+    background-color: #000000;
+    color: #cc7200;
+    border: 1px solid #ff9000;
     border-radius: var(--radius-sm);
     padding: var(--space-md) var(--space-lg);
     font-size: var(--text-lg);
@@ -272,7 +283,7 @@ canvas {
 }
 
 .character-card {
-    background-color: rgba(50, 50, 50, 0.6);
+    background-color: black;
     border: 1px solid var(--button-border);
     border-radius: var(--radius-md);
     padding: var(--space-md);
@@ -301,22 +312,24 @@ canvas {
 .character-image {
     width: 80px;
     height: 80px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
+    object-fit: contain;
     margin-bottom: var(--space-sm);
-    border: 1px solid rgba(80, 80, 80, 0.8);
+    display: block;
 }
 
 .default-roach {
-    background-color: #88553C;
+    background: url('../assets/images/characters/American Cockroach with bg.png') no-repeat center center;
+    background-size: cover;
 }
 
 .stealth-roach {
-    background-color: #444444;
+    background: url('../assets/images/animations/frames/Cockroach_01.png') no-repeat center center;
+    background-size: cover;
 }
 
 .glider-roach {
-    background-color: #A86F4B;
+    background: url('../assets/images/animations/frames/Cockroach_01.png') no-repeat center center;
+    background-size: cover;
 }
 
 .character-card h3 {
