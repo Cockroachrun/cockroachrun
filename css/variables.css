@@ -1,212 +1,126 @@
 /* Base variables for all devices */
 :root {
-    /* Colors */
-    --orange: #FF9000;
-    --dark-orange: #CC7200;
-    --light-orange: #FFAA33;
-    --text-color: #E0E0E0;
-    --dark-text: #444444;
-    --dark-bg: #121212;
-    --button-bg: rgba(32, 32, 32, 0.85);
-    --button-border: rgba(80, 80, 80, 0.8);
-    --button-highlight: rgba(255, 144, 0, 0.8);
-    --overlay-bg: rgba(0, 0, 0, 0.7);
-    --red: #FF4444;
-    
-    /* Fonts */
-    --font-heading: 'Orbitron', sans-serif;
-    --font-body: 'Exo 2', sans-serif;
-    
-    /* Effects */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
-    --orange-glow: 0 0 10px rgba(255, 144, 0, 0.7);
-    
-    /* Transitions */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
-    
-    /* Border Radius */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+  /* Colors */
+  --orange: #FF9000;
+  --dark-orange: #CC7200;
+  --light-orange: #FFAA33;
+  --text-color: #E0E0E0;
+  --dark-text: #444444;
+  --dark-bg: #121212;
+  --button-bg: rgba(32, 32, 32, 0.85);
+  --button-border: rgba(80, 80, 80, 0.8);
+  --button-highlight: rgba(255, 144, 0, 0.8);
+  --overlay-bg: rgba(0, 0, 0, 0.75);
+  --red: #FF4444;
+  
+  /* Fonts */
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
+  
+  /* Typography Sizes - Desktop default */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-md: 1rem;       /* 16px */
+  --text-lg: 1.25rem;    /* 20px */
+  --text-xl: 1.5rem;     /* 24px */
+  --text-2xl: 2rem;      /* 32px */
+  --text-3xl: 2.5rem;    /* 40px */
+  
+  /* Spacing - Desktop default */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 1rem;      /* 16px */
+  --space-md: 1.5rem;    /* 24px */
+  --space-lg: 2rem;      /* 32px */
+  --space-xl: 3rem;      /* 48px */
+  
+  /* Container Sizes - Desktop default */
+  --menu-width: 90%;
+  --menu-max-width: 600px;
+  --menu-padding: 2.5rem;
+  --card-spacing: 1.5rem;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* Effects */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --orange-glow: 0 0 10px rgba(255, 144, 0, 0.7);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Animation Canvas */
+  --canvas-width: 300px;
+  --canvas-height: 160px;
+  --canvas-margin: 1.5rem;
 }
 
-/* Mobile devices (small screens) */
+/* Tablet devices */
+@media (max-width: 768px) {
+  :root {
+    /* Typography Sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.375rem;
+    --text-2xl: 1.75rem;
+    --text-3xl: 2.25rem;
+    
+    /* Spacing */
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1.25rem;
+    --space-lg: 1.75rem;
+    --space-xl: 2.5rem;
+    
+    /* Container Sizes */
+    --menu-width: 90%;
+    --menu-max-width: 500px;
+    --menu-padding: 2rem;
+    --card-spacing: 1.25rem;
+    
+    /* Animation Canvas */
+    --canvas-width: 240px;
+    --canvas-height: 130px;
+    --canvas-margin: 1.25rem;
+  }
+}
+
+/* Mobile devices */
 @media (max-width: 480px) {
-    :root {
-        /* Sizes */
-        --text-xs: 0.7rem;
-        --text-sm: 0.8rem;
-        --text-md: 0.9rem;
-        --text-lg: 1rem;
-        --text-xl: 1.2rem;
-        --text-2xl: 1.5rem;
-        --text-3xl: 1.8rem;
-        
-        /* Spacing */
-        --space-xs: 0.75rem;
-        --space-sm: 1.25rem;
-        --space-md: 0.5rem;
-        --space-lg: 1rem;
-        --space-xl: 1.5rem;
-        
-        /* Sprite Animation Customization */
-        --sprite-container-margin-top: -80px;
-        --sprite-container-margin-bottom: 5px;
-        --sprite-container-height: 40px;
-        --sprite-width: 180px;
-        --sprite-height: 70px;
-        
-        /* Menu Container Customization */
-        --menu-container-width: 95%;
-        --menu-container-max-width: 320px;
-        --menu-container-padding: 1.25rem;
-        
-        /* Button Customization */
-        --menu-buttons-margin-top: 40px;
-        --menu-button-padding-vertical: 0.5rem;
-        --menu-button-padding-horizontal: 0.75rem;
-        --menu-button-font-size: 0.9rem;
-        --menu-button-letter-spacing: 0.5px;
-        
-        /* Back/Save Button Customization */
-        --back-button-padding-vertical: 0.3rem;
-        --back-button-padding-horizontal: 0.5rem;
-        --back-button-font-size: 0.8rem;
-        
-        /* Screen Title Customization */
-        --screen-title-font-size: 1.5rem;
-        --screen-title-margin-bottom: 1rem;
-        --screen-title-letter-spacing: 1px;
-        
-        /* Mode Card Customization */
-        --mode-card-padding: 1rem 1rem 1.5rem;
-        --mode-image-height: 80px;
-        
-        /* Character Card Customization */
-        --character-card-padding: 0.5rem;
-        --character-card-min-width: 120px;
-        --character-image-size: 60px;
-    }
-}
-
-/* Tablet devices (medium screens) */
-@media (min-width: 481px) and (max-width: 768px) {
-    :root {
-        /* Sizes */
-        --text-xs: 0.75rem;
-        --text-sm: 0.875rem;
-        --text-md: 1rem;
-        --text-lg: 1.1rem;
-        --text-xl: 1.3rem;
-        --text-2xl: 1.7rem;
-        --text-3xl: 2rem;
-        
-        /* Spacing */
-        --space-xs: 0.75rem;
-        --space-sm: 2rem;
-        --space-md: 0rem;
-        --space-lg: 1rem;
-        --space-xl: 1.5rem;
-        
-        /* Sprite Animation Customization */
-        --sprite-container-margin-top: -100px;
-        --sprite-container-margin-bottom: 8px;
-        --sprite-container-height: 50px;
-        --sprite-width: 240px;
-        --sprite-height: 90px;
-        
-        /* Menu Container Customization */
-        --menu-container-width: 90%;
-        --menu-container-max-width: 480px;
-        --menu-container-padding: 1.5rem;
-        
-        /* Button Customization */
-        --menu-buttons-margin-top: 60px;
-        --menu-button-padding-vertical: 0.6rem;
-        --menu-button-padding-horizontal: 1rem;
-        --menu-button-font-size: 1.1rem;
-        --menu-button-letter-spacing: 0.8px;
-        
-        /* Back/Save Button Customization */
-        --back-button-padding-vertical: 0.4rem;
-        --back-button-padding-horizontal: 0.7rem;
-        --back-button-font-size: 0.9rem;
-        
-        /* Screen Title Customization */
-        --screen-title-font-size: 1.7rem;
-        --screen-title-margin-bottom: 1.5rem;
-        --screen-title-letter-spacing: 1.5px;
-        
-        /* Mode Card Customization */
-        --mode-card-padding: 1.25rem 1.25rem 1.75rem;
-        --mode-image-height: 100px;
-        
-        /* Character Card Customization */
-        --character-card-padding: 0.75rem;
-        --character-card-min-width: 140px;
-        --character-image-size: 70px;
-    }
-}
-
-/* Desktop devices (large screens) */
-@media (min-width: 769px) {
-    :root {
-        /* Sizes */
-        --text-xs: 0.75rem;
-        --text-sm: 0.875rem;
-        --text-md: 1rem;
-        --text-lg: 1.25rem;
-        --text-xl: 1.5rem;
-        --text-2xl: 2rem;
-        --text-3xl: 2.5rem;
-        
-        /* Spacing */
-        --space-xs: 1.25rem;
-        --space-sm: 3.5rem;
-        --space-md: 0rem;
-        --space-lg: 1.5rem;
-        --space-xl: 2rem;
-        
-        /* Sprite Animation Customization */
-        --sprite-container-margin-top: -136px;
-        --sprite-container-margin-bottom: 12px;
-        --sprite-container-height: 56px;
-        --sprite-width: 326px;
-        --sprite-height: 111px;
-        
-        /* Menu Container Customization */
-        --menu-container-width: 90%;
-        --menu-container-max-width: 600px;
-        --menu-container-padding: 2rem;
-        
-        /* Button Customization */
-        --menu-buttons-margin-top: 77px;
-        --menu-button-padding-vertical: 0.8rem;
-        --menu-button-padding-horizontal: 1.5rem;
-        --menu-button-font-size: 1.25rem;
-        --menu-button-letter-spacing: 1px;
-        
-        /* Back/Save Button Customization */
-        --back-button-padding-vertical: 0.5rem;
-        --back-button-padding-horizontal: 1rem;
-        --back-button-font-size: 1rem;
-        
-        /* Screen Title Customization */
-        --screen-title-font-size: 2rem;
-        --screen-title-margin-bottom: 2rem;
-        --screen-title-letter-spacing: 2px;
-        
-        /* Mode Card Customization */
-        --mode-card-padding: 1.5rem 1.5rem 2rem;
-        --mode-image-height: 120px;
-        
-        /* Character Card Customization */
-        --character-card-padding: 1rem;
-        --character-card-min-width: 160px;
-        --character-image-size: 80px;
-    }
+  :root {
+    /* Typography Sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.8125rem;
+    --text-md: 0.9375rem;
+    --text-lg: 1.0625rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.75rem;
+    
+    /* Spacing */
+    --space-xs: 0.375rem;
+    --space-sm: 0.625rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    
+    /* Container Sizes */
+    --menu-width: 92%;
+    --menu-max-width: 360px; 
+    --menu-padding: 1.5rem 1.25rem;
+    --card-spacing: 1rem;
+    
+    /* Animation Canvas */
+    --canvas-width: 200px;
+    --canvas-height: 110px;
+    --canvas-margin: 1rem;
+  }
 }

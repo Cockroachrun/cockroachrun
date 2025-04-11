@@ -257,21 +257,33 @@ const UIManager = {
         let progress = 0;
         const progressBar = document.querySelector('.progress-bar');
         const progressText = document.getElementById('loading-percent');
+        
+        // Faster loading for better user experience
         const interval = setInterval(() => {
-            progress += 1;
+            progress += 2; // Increase by 2% each time for faster loading
             progressBar.style.width = `${progress}%`;
             progressText.textContent = progress;
+            
             if (progress >= 100) {
                 clearInterval(interval);
+                
+                // Transition to start screen after loading completes
                 setTimeout(() => {
                     this.showScreen('start');
-                    AudioManager.menuMusic.muted = false;
-                    AudioManager.menuMusic.play().catch((e) => {
-                        console.warn('Autoplay blocked:', e);
-                    });
-                }, 500);
+                    
+                    // Try to play menu music (handled by AudioManager.initBackgroundMusic)
+                    if (typeof AudioManager.initBackgroundMusic === 'function') {
+                        AudioManager.initBackgroundMusic();
+                    } else {
+                        // Fallback if the new method isn't available
+                        AudioManager.menuMusic.muted = false;
+                        AudioManager.menuMusic.play().catch((e) => {
+                            console.warn('Autoplay blocked:', e);
+                        });
+                    }
+                }, 300); // Reduced delay for better responsiveness
             }
-        }, 50);
+        }, 30); // Faster interval for smoother progress
     },
     
     showScreen(screenName) {
@@ -468,33 +480,28 @@ const UIManager = {
         const isTablet = window.innerWidth > 480 && window.innerWidth <= 768;
         
         // Calculate actual values from percentages with device-specific ranges
-        let buttonSpacing, spritePosition, menuPadding;
+        let buttonSpacing, menuPadding;
         
         if (isMobile) {
             // Mobile-specific ranges
             buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.3, 1.2);
-            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -150, -70);
             menuPadding = this.mapPercentToValue(this.settings.menuPadding, 0.5, 1.5);
         } else if (isTablet) {
             // Tablet-specific ranges
             buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.4, 1.5);
-            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -180, -60);
             menuPadding = this.mapPercentToValue(this.settings.menuPadding, 0.8, 2);
         } else {
             // Desktop-specific ranges
             buttonSpacing = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.5, 2);
-            spritePosition = this.mapPercentToValue(this.settings.spritePosition, -200, -50);
             menuPadding = this.mapPercentToValue(this.settings.menuPadding, 1, 3);
         }
         
         // Calculate menu width with better constraints
         const menuWidth = Math.max(60, Math.min(98, this.settings.menuWidth));
         
-        // Apply to CSS variables with units
-        document.documentElement.style.setProperty('--menu-buttons-margin-top', `${buttonSpacing}rem`);
-        document.documentElement.style.setProperty('--sprite-container-margin-top', `${spritePosition}px`);
-        document.documentElement.style.setProperty('--menu-container-width', `${menuWidth}%`);
-        document.documentElement.style.setProperty('--menu-container-padding', `${menuPadding}rem`);
+        // Apply to CSS variables with units - using the new CSS variable names
+        document.documentElement.style.setProperty('--menu-width', `${menuWidth}%`);
+        document.documentElement.style.setProperty('--menu-padding', `${menuPadding}rem`);
         
         // Additional refinements for better visual appearance
         const buttonGap = this.mapPercentToValue(this.settings.menuButtonSpacing, 0.2, 1);
@@ -502,6 +509,20 @@ const UIManager = {
         
         // Apply changes immediately
         console.log('UI customization applied');
+    },
+    
+    /**
+     * Maps a percentage value (0-100) to a value within a specified range
+     * @param {number} percent - The percentage value to map (0-100)
+     * @param {number} min - The minimum value in the target range
+     * @param {number} max - The maximum value in the target range
+     * @returns {number} - The mapped value within the target range
+     */
+    mapPercentToValue(percent, min, max) {
+        // Ensure percent is within 0-100 range
+        const clampedPercent = Math.max(0, Math.min(100, percent));
+        // Map the percentage to the target range
+        return min + (clampedPercent / 100) * (max - min);
     },
     
     // Helper function to map percentage to a value range
