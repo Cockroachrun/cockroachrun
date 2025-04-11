@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <script src="js/loading.js" defer></script>
 </head>
 <body>
     <!-- Game Canvas Container -->
@@ -20,16 +22,16 @@
     <div id="ui-container">
         <!-- Loading Screen -->
         <div id="loading-screen" class="screen active">
-            <div class="loading-content">
-                <div class="logo-container">
-                    <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo">
+            <div class="loading-container">
+                <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="loading-logo">
+                <div class="loading-bar-container">
+                    <div class="loading-bar" id="loading-bar"></div>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar"></div>
+                <div class="loading-text-container">
+                    <p class="loading-percentage">Loading... <span id="loading-percentage-value">0</span>%</p>
+                    <p class="loading-message" id="loading-message">Preparing for infestation...</p>
                 </div>
-                <p class="loading-text">Loading... <span id="loading-percent">0</span>%</p>
-                <p class="flavor-text">Preparing for infestation...</p>
-                <div class="token-info">
+                <div class="token-message">
                     <p>$ROACH coming soon on Odin</p>
                 </div>
             </div>
