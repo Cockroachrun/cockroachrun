@@ -63,13 +63,19 @@ Cockroach Run is an immersive 3D web-based game using Three.js that lets players
 - Touch input for mobile and mouse/keyboard for desktop
 
 ## Visual Style
-- Dark, immersive environments with neon highlights
+Dark, immersive environments with neon highlights
 - Cyberpunk aesthetic with glowing elements
 - Consistent color palette:
-  - Primary: Neon green (#00FF66)
-  - Secondary: Purple (#9333EA)
+  - Primary: Orange (#FF9000)
+  - Dark Orange: (#CC7200)
+  - Light Orange: (#FFAA33)
   - Background: Deep black (#121212)
   - Text: Light gray (#E0E0E0)
+  - Button Background: rgba(32, 32, 32, 0.85)
+  - Button Border: rgba(80, 80, 80, 0.8)
+  - Button Highlight: rgba(255, 144, 0, 0.8)
+  - Overlay Background: rgba(0, 0, 0, 0.7)
+  - Red: (#FF4444)
 - Fonts: Orbitron for headings, Exo 2 for body text
 
 ## Game Flow
