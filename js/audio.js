@@ -495,5 +495,105 @@ const AudioManager = {
         sound.play().catch(error => {
             console.warn('Failed to play scatter sound:', error);
         });
+    },
+    
+    /**
+     * Start menu music with autoplay fallback
+     * Ensures music starts right after loading
+     */
+    startMenuMusic() {
+        const menuMusic = document.getElementById('menu-music');
+        if (!menuMusic) return;
+        
+        // Set volume before playing
+        menuMusic.volume = this.musicVolume; // Use saved volume setting
+        
+        // Try to play the music
+        menuMusic.play().catch(error => {
+            console.warn('Failed to autoplay menu music:', error);
+            
+            // Set up a one-time click handler to start music
+            // (browsers require user interaction for autoplay)
+            const startAudioOnInteraction = () => {
+                menuMusic.play().catch(e => console.warn('Still unable to play music:', e));
+                document.removeEventListener('click', startAudioOnInteraction);
+            };
+            
+            document.addEventListener('click', startAudioOnInteraction, { once: true });
+        });
+    },
+    
+    /**
+     * Initialize background music to start automatically after loading
+     */
+    initBackgroundMusic() {
+        const menuMusic = document.getElementById('menu-music');
+        if (!menuMusic) return;
+        
+        // Initialize volume
+        menuMusic.volume = this.musicVolume || 0.8;
+        
+        // Try to play on page load (might be blocked by browser)
+        menuMusic.play().catch(err => {
+            console.log('Auto-play prevented by browser, will play on user interaction');
+            
+            // Add click listener to start music on first interaction
+            document.addEventListener('click', function startMusic() {
+                menuMusic.play().catch(e => console.warn('Music playback failed:', e));
+                document.removeEventListener('click', startMusic);
+            }, {once: true});
+        });
     }
 };
+
+/**
+ * Start music after loading is complete
+ */
+function startMusicAfterLoading() {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            if (mutation.type === 'attributes' &&
+                mutation.attributeName === 'class' &&
+                document.getElementById('start-screen').classList.contains('active')) {
+                AudioManager.initBackgroundMusic();
+                observer.disconnect();
+            }
+        });
+    });
+    
+    // Watch for class changes on start-screen
+    const startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        observer.observe(startScreen, { attributes: true });
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    AudioManager.init();
+    startMusicAfterLoading();
+});
+
+// Call startMenuMusic when loading completes
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup a listener for when loading is complete
+    const loadingScreen = document.getElementById('loading-screen');
+    const startScreen = document.getElementById('start-screen');
+    
+    if (loadingScreen && startScreen) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.id === 'start-screen' &&
+                    mutation.target.classList.contains('active')) {
+                    AudioManager.startMenuMusic();
+                    observer.disconnect();
+                }
+            });
+        });
+        
+        observer.observe(startScreen, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+});

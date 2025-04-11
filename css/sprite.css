@@ -1,0 +1,16 @@
+/* Sprite Animation Container */
+.sprite-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: var(--sprite-container-margin-top) 0 var(--sprite-container-margin-bottom) 0;
+    height: var(--sprite-container-height);
+}
+
+.cockroach-sprite {
+    width: var(--sprite-width);
+    height: var(--sprite-height);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
