@@ -161,11 +161,8 @@ canvas {
 }
 
 .menu-button {
-    background-color: #000000;
     color: #cc7200;
-    border: 1px solid #ff9000;
     border-radius: var(--radius-sm);
-    padding: var(--space-md) var(--space-lg);
     font-size: var(--text-lg);
     text-transform: uppercase;
     transition: all var(--transition-fast);
@@ -408,7 +405,7 @@ canvas {
 
 .back-button, .save-button {
     background-color: var(--button-bg);
-    color: var(--text-color);
+    color: #ff9000;
     border: 1px solid var(--button-border);
     border-radius: var(--radius-sm);
     padding: var(--space-sm) var(--space-md);
