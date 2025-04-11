@@ -1,0 +1,4 @@
+/* Safe Glow Removal Only */
+.no-glow .game-logo {
+    filter: none !important;
+}

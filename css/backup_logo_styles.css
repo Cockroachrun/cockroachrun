@@ -1,0 +1,19 @@
+/* Backup of original logo styles - created 2025-04-11 */
+
+/* Original game logo with orange glow */
+.game-logo {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 144, 0, 0.5));
+}
+
+/* Original main menu logo with pulse animation */
+.main-menu-logo {
+    filter: none;
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}

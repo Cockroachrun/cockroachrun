@@ -98,7 +98,8 @@ canvas {
 .game-logo {
     max-width: 100%;
     height: auto;
-    filter: drop-shadow(0 0 10px rgba(255, 144, 0, 0.5));
+    filter: none !important;
+    -webkit-filter: none !important;
 }
 
 .main-menu-logo {
