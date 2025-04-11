@@ -1,0 +1,50 @@
+:root {
+    /* Colors */
+    --orange: #FF9000;
+    --dark-orange: #CC7200;
+    --light-orange: #FFAA33;
+    --text-color: #E0E0E0;
+    --dark-text: #444444;
+    --dark-bg: #121212;
+    --button-bg: rgba(32, 32, 32, 0.85);
+    --button-border: rgba(80, 80, 80, 0.8);
+    --button-highlight: rgba(255, 144, 0, 0.8);
+    --overlay-bg: rgba(0, 0, 0, 0.7);
+    --red: #FF4444;
+    
+    /* Fonts */
+    --font-heading: 'Orbitron', sans-serif;
+    --font-body: 'Exo 2', sans-serif;
+    
+    /* Sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2rem;
+    --text-3xl: 2.5rem;
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    
+    /* Effects */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --orange-glow: 0 0 10px rgba(255, 144, 0, 0.7);
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+}

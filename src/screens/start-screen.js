@@ -152,6 +152,9 @@ export const createStartScreen = (uiManager) => {
   // Event handlers
   const onShow = () => {
     animateBackground();
+    if (window.AudioManager && typeof window.AudioManager.playMenuMusic === 'function') {
+      window.AudioManager.playMenuMusic();
+    }
   };
   
   const onHide = () => {
@@ -165,4 +168,4 @@ export const createStartScreen = (uiManager) => {
     onShow,
     onHide
   };
-}; 
+};

@@ -2,159 +2,312 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Cockroach Run - A dark, realistic Three.js game where you control a cockroach navigating through various environments" />
-    <title>Cockroach Run</title>
-
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="css/themes/dark-realism.css" />
-
-    <!-- Component Styles -->
-    <link rel="stylesheet" href="css/components/buttons.css" />
-    <link rel="stylesheet" href="css/components/loading.css" />
-    <link rel="stylesheet" href="css/components/menus.css" />
-    <link rel="stylesheet" href="css/components/characters.css" />
-    <link rel="stylesheet" href="css/components/game-ui.css" />
-
-    <!-- Main CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cockroach Run - A Cyberpunk Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/main.css" />
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <!-- Game Canvas -->
-    <main id="game-container">
+    <!-- Game Canvas Container -->
+    <div id="game-container">
         <canvas id="game-canvas"></canvas>
-    </main>
+    </div>
 
     <!-- UI Container -->
     <div id="ui-container">
         <!-- Loading Screen -->
-        <section id="loading-screen" class="screen" aria-label="Loading Screen">
+        <div id="loading-screen" class="screen active">
             <div class="loading-content">
-                <h1>COCKROACH RUN</h1>
+                <div class="logo-container">
+                    <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
+                </div>
                 <div class="progress-container">
                     <div class="progress-bar"></div>
                 </div>
-                <div class="progress-text">Loading... 0%</div>
+                <p class="loading-text">Loading... <span id="loading-percent">0</span>%</p>
                 <p class="flavor-text">Preparing for infestation...</p>
             </div>
-        </section>
+        </div>
 
         <!-- Start Screen -->
-        <section id="start-screen" class="screen" aria-label="Start Screen">
-            <header class="screen-content">
-                <h1>COCKROACH RUN</h1>
-                <p class="subtitle">A cyberpunk cockroach adventure</p>
-                <nav class="button-container">
-                    <button id="play-button" class="button">PLAY</button>
-                    <button id="settings-button" class="button">SETTINGS</button>
-                    <button id="credits-button" class="button">CREDITS</button>
-                    <button id="wallet-button" class="button">CONNECT WALLET</button>
-                </nav>
-                <div class="version">v0.1.0 Alpha</div>
-            </header>
-        </section>
+        <div id="start-screen" class="screen">
+            <div class="menu-container">
+                <div class="logo-container">
+                    <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
+                </div>
+                <div class="menu-buttons">
+                    <button id="play-button" class="menu-button">PLAY</button>
+                    <button id="settings-button" class="menu-button">SETTINGS</button>
+                    <button id="credits-button" class="menu-button">CREDITS</button>
+                    <button id="exit-button" class="menu-button">EXIT</button>
+                </div>
+                <div class="version-info">v0.1.0 Alpha</div>
+            </div>
+        </div>
 
         <!-- Mode Selection Screen -->
-        <section id="mode-selection-screen" class="screen" aria-label="Mode Selection Screen">
-            <div class="screen-content">
-                <h1>SELECT MODE</h1>
-                <div class="modes-container">
+        <div id="mode-selection-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">SELECT MODE</h2>
+                <div class="mode-selection">
                     <div class="mode-card" data-mode="free-world">
-                        <h2>FREE WORLD</h2>
+                        <div class="mode-image">
+                            <div class="kitchen-environment"></div>
+                        </div>
+                        <h3>FREE WORLD</h3>
                         <p>Explore different environments at your own pace</p>
                     </div>
                     <div class="mode-card" data-mode="cockroach-runner">
-                        <h2>COCKROACH RUNNER</h2>
+                        <div class="mode-image">
+                            <div class="runner-environment"></div>
+                        </div>
+                        <h3>COCKROACH RUNNER</h3>
                         <p>Race through endless obstacles, collect resources</p>
                     </div>
                 </div>
-                <button id="back-from-mode" class="button">BACK</button>
+                <button id="back-from-mode" class="back-button">BACK</button>
             </div>
-        </section>
+        </div>
 
         <!-- Character Selection Screen -->
-        <section id="character-selection-screen" class="screen" aria-label="Character Selection Screen">
-            <div class="screen-content">
-                <h1>SELECT CHARACTER</h1>
-                <div class="characters-container">
-                    <div class="character-card" data-character="default">
-                        <h2>DEFAULT ROACH</h2>
+        <div id="character-selection-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">SELECT CHARACTER</h2>
+                <div class="character-selection">
+                    <div class="character-card selected" data-character="default-roach">
+                        <div class="character-image default-roach"></div>
+                        <h3>DEFAULT ROACH</h3>
                         <p>Speed boost ability</p>
+                        <div class="stats">
+                            <div class="stat">
+                                <span>SPEED</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>JUMP</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>STEALTH</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 40%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="character-card locked" data-character="stealth">
-                        <h2>STEALTH ROACH</h2>
+                    <div class="character-card locked" data-character="stealth-roach">
+                        <div class="character-image stealth-roach"></div>
+                        <h3>STEALTH ROACH</h3>
                         <p>Temporary invisibility</p>
-                        <div class="lock-indicator">LOCKED</div>
+                        <div class="stats">
+                            <div class="stat">
+                                <span>SPEED</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>JUMP</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>STEALTH</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="locked-overlay">
+                            <span>LOCKED</span>
+                            <p>Connect wallet to unlock</p>
+                        </div>
                     </div>
-                    <div class="character-card locked" data-character="glider">
-                        <h2>GLIDER ROACH</h2>
+                    <div class="character-card locked" data-character="glider-roach">
+                        <div class="character-image glider-roach"></div>
+                        <h3>GLIDER ROACH</h3>
                         <p>Enhanced jumping ability</p>
-                        <div class="lock-indicator">LOCKED</div>
+                        <div class="stats">
+                            <div class="stat">
+                                <span>SPEED</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>JUMP</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 90%"></div>
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <span>STEALTH</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: 30%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="locked-overlay">
+                            <span>LOCKED</span>
+                            <p>Connect wallet to unlock</p>
+                        </div>
                     </div>
                 </div>
-                <div class="button-container">
-                    <button id="start-game-button" class="button">START GAME</button>
-                    <button id="back-from-character" class="button">BACK</button>
+                <div class="button-row">
+                    <button id="back-from-character" class="back-button">BACK</button>
+                    <button id="start-game-button" class="start-button">START GAME</button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Game HUD -->
-        <section id="game-hud" class="hidden" aria-label="Game HUD">
-            <div class="health-bar">
-                <div class="health-fill"></div>
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">SETTINGS</h2>
+                <div class="settings-content">
+                    <div class="settings-section">
+                        <h3>AUDIO</h3>
+                        <div class="setting-item">
+                            <span>Music Volume</span>
+                            <div class="slider-container">
+                                <input type="range" id="music-volume" min="0" max="100" value="80" class="slider" />
+                                <span class="slider-value">80%</span>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <span>Sound Effects</span>
+                            <div class="slider-container">
+                                <input type="range" id="sfx-volume" min="0" max="100" value="100" class="slider" />
+                                <span class="slider-value">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>GRAPHICS</h3>
+                        <div class="setting-item">
+                            <span>Quality</span>
+                            <div class="option-buttons">
+                                <button class="option-button" data-quality="low">LOW</button>
+                                <button class="option-button active" data-quality="medium">MEDIUM</button>
+                                <button class="option-button" data-quality="high">HIGH</button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <span>Show FPS</span>
+                            <div class="toggle-container">
+                                <div class="toggle" id="fps-toggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="back-from-settings" class="back-button">BACK</button>
+                    <button id="save-settings" class="save-button">SAVE</button>
+                </div>
             </div>
-            <div class="score">SCORE: 0</div>
-            <div class="ability-indicator">
-                <div class="ability-icon"></div>
-                <div class="ability-cooldown"></div>
+        </div>
+
+        <!-- Credits Screen -->
+        <div id="credits-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">CREDITS</h2>
+                <div class="credits-content">
+                    <div class="credits-section">
+                        <h3>GAME DESIGN</h3>
+                        <p>Cockroach Run Team</p>
+                    </div>
+                    <div class="credits-section">
+                        <h3>DEVELOPMENT</h3>
+                        <p>Cockroach Run Team</p>
+                    </div>
+                    <div class="credits-section">
+                        <h3>3D MODELS</h3>
+                        <p>Created using Meshy.ai and Blender</p>
+                    </div>
+                    <div class="credits-section">
+                        <h3>SPECIAL THANKS</h3>
+                        <p>The Three.js Community</p>
+                        <p>All Our Supporters</p>
+                    </div>
+                </div>
+                <button id="back-from-credits" class="back-button">BACK</button>
             </div>
-            <button id="pause-button" class="icon-button">❚❚</button>
-        </section>
+        </div>
 
         <!-- Pause Screen -->
-        <section id="pause-screen" class="screen" aria-label="Pause Screen">
-            <div class="screen-content">
-                <h1>PAUSED</h1>
-                <div class="button-container">
-                    <button id="resume-button" class="button">RESUME</button>
-                    <button id="restart-button" class="button">RESTART</button>
-                    <button id="quit-button" class="button">QUIT</button>
+        <div id="pause-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">PAUSED</h2>
+                <div class="menu-buttons">
+                    <button id="resume-button" class="menu-button">RESUME</button>
+                    <button id="restart-button" class="menu-button">RESTART</button>
+                    <button id="quit-button" class="menu-button">QUIT</button>
                 </div>
             </div>
-        </section>
+        </div>
 
         <!-- Game Over Screen -->
-        <section id="game-over-screen" class="screen" aria-label="Game Over Screen">
-            <div class="screen-content">
-                <h1>GAME OVER</h1>
-                <div class="score-display">SCORE: 0</div>
-                <div class="button-container">
-                    <button id="try-again-button" class="button">TRY AGAIN</button>
-                    <button id="main-menu-button" class="button">MAIN MENU</button>
+        <div id="game-over-screen" class="screen">
+            <div class="menu-container">
+                <h2 class="screen-title">GAME OVER</h2>
+                <div class="score-display">
+                    <div class="score-row">
+                        <span>SCORE:</span>
+                        <span id="final-score">0</span>
+                    </div>
+                    <div class="score-row">
+                        <span>HIGH SCORE:</span>
+                        <span id="high-score">0</span>
+                    </div>
+                </div>
+                <div class="menu-buttons">
+                    <button id="try-again-button" class="menu-button">TRY AGAIN</button>
+                    <button id="main-menu-button" class="menu-button">MAIN MENU</button>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <!-- Game HUD -->
+        <div id="game-hud" class="hidden">
+            <div id="score-display">
+                <span>SCORE:</span>
+                <span id="score-value">0</span>
+            </div>
+            <div id="health-container">
+                <div id="health-bar"></div>
+            </div>
+            <button id="pause-button" class="pause-button">II</button>
+        </div>
     </div>
 
+    <!-- Audio Elements -->
+    <audio id="menu-music" loop preload="auto">
+        <source src="assets/sounds/music/Menu_loop.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="game-music" loop preload="auto">
+        <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="button-click" preload="auto">
+        <source src="assets/sounds/sfx/button_click.wav" type="audio/wav" />
+    </audio>
+    <audio id="scatter-sound" preload="auto">
+        <source src="assets/sounds/sfx/scatter.wav" type="audio/wav" />
+    </audio>
+
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.1/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
     <script src="js/config.js"></script>
-    <script src="js/utils/utils.js"></script>
-    <script src="js/components/loading.js"></script>
-    <script src="js/components/menu.js"></script>
-    <script src="js/components/characters.js"></script>
-    <script src="js/components/game-ui.js"></script>
-    <script src="js/core/game-loop.js"></script>
-    <script src="js/core/audio.js"></script>
-    <script src="js/core/animation.js"></script>
-    <script src="js/core/models.js"></script>
-    <script src="js/services/wallet.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
