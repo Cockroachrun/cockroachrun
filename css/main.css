@@ -275,6 +275,9 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 5; /* Ensure clickability */
+    pointer-events: auto; /* Fix for mobile */
 }
 
 .mode-card:hover {

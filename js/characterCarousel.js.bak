@@ -1,0 +1,460 @@
+/**
+ * Character Carousel for Cockroach Run
+ * Implements carousel UI for character selection
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up carousel when DOM is loaded
+    setupCharacterCarousel();
+    
+    // Also trigger setup when clicking on mode cards
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // Small delay to allow screen transition
+            setTimeout(setupCharacterCarousel, 10);
+        });
+    });
+});
+
+function setupCharacterCarousel() {
+    try {
+        console.log('Setting up character carousel');
+        
+        // Get container element
+        const characterSelection = document.querySelector('.character-selection');
+        if (!characterSelection) {
+            console.warn('Character selection container not found');
+            return;
+        }
+        
+        // Get original character cards
+        const characterCards = document.querySelectorAll('.character-card');
+        if (!characterCards.length) {
+            console.warn('No character cards found');
+            return;
+        }
+        
+        // Get container element and original button row to preserve functionality
+        const characterSelection = document.querySelector('.character-selection');
+        const originalButtonRow = document.querySelector('#character-selection-screen .button-row');
+        const originalStartButton = document.getElementById('start-game-button');
+        const originalBackButton = document.getElementById('back-from-character');
+        
+        if (!characterSelection) {
+            console.warn('Character selection container not found');
+            return;
+        }
+        
+        // Store original HTML and button functionality to restore if needed
+        const originalHTML = characterSelection.innerHTML;
+        const originalStartFunction = originalStartButton ? originalStartButton.onclick : null;
+        const originalBackFunction = originalBackButton ? originalBackButton.onclick : null;
+        
+        // Remove the original button row to prevent duplicates
+        if (originalButtonRow) {
+            originalButtonRow.style.display = 'none';
+        }
+        
+        try {
+            // Create carousel container
+            const carouselHTML = `
+                <div class="character-carousel">
+                    <button class="carousel-nav prev-button">&lt;</button>
+                    
+                    <div class="character-card-container">
+                        ${Array.from(characterCards).map((card, index) => {
+                            return `<div class="character-card ${index === 0 ? 'active selected' : ''} ${card.classList.contains('locked') ? 'locked' : ''}" 
+                                      data-character="${card.getAttribute('data-character')}">
+                                ${card.innerHTML}
+                                ${card.querySelector('.locked-overlay') ? 
+                                    `<div class="locked-overlay">${card.querySelector('.locked-overlay').innerHTML}</div>` : 
+                                    ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    
+                    <button class="carousel-nav next-button">&gt;</button>
+                </div>
+                
+                <div class="carousel-footer">
+                    <button id="start-game-button" class="start-button">START GAME</button>
+                    <button id="back-from-character" class="back-button">BACK</button>
+                </div>
+            `;
+            
+            // Apply carousel HTML - safely
+            characterSelection.innerHTML = carouselHTML;
+            
+            // Add carousel styles
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'carousel-styles';
+            styleSheet.textContent = `
+                .character-carousel {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4%;
+                    margin: 5% 0;
+                    position: relative;
+                    padding: 2% 0;
+                    width: 100%;
+                    max-width: 600px;
+                }
+                
+                .carousel-nav {
+                    width: 12%;
+                    max-width: 50px;
+                    aspect-ratio: 1/1;
+                    border-radius: 50%;
+                    background-color: rgba(0,0,0,0.9);
+                    color: var(--orange);
+                    font-size: clamp(18px, 4vw, 24px);
+                    border: 2px solid var(--orange);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    z-index: 5;
+                    transition: all var(--transition-fast);
+                }
+                
+                .carousel-nav:hover {
+                    background-color: var(--orange);
+                    color: black;
+                    transform: scale(1.1);
+                }
+                
+                .character-card-container {
+                    position: relative;
+                    width: 60%;
+                    max-width: 300px;
+                    aspect-ratio: 3/4;
+                }
+                
+                .character-carousel .character-card {
+                    background-color: rgba(0, 0, 0, 0.85);
+                    border: 2px solid var(--orange);
+                    border-radius: var(--radius-md);
+                    padding: 5% 5%;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 100%; /* Ensure full height */
+                    transition: all var(--transition-normal);
+                    cursor: pointer;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start; /* Align to top */
+                    opacity: 0;
+                    visibility: hidden;
+                    box-shadow: 0 0 20px rgba(255, 144, 0, 0.3);
+                    overflow: hidden; /* Prevent overflow */
+                }
+                
+                .character-carousel .character-card.active {
+                    opacity: 1;
+                    visibility: visible;
+                    z-index: 2;
+                }
+                
+                .character-carousel .character-image {
+                    width: 45%;
+                    aspect-ratio: 1/1;
+                    max-width: 150px;
+                    filter: none;
+                    margin-bottom: 3%;
+                    margin-top: 5%;
+                    display: block;
+                }
+                
+                .character-carousel .character-card h3 {
+                    font-size: var(--text-2xl);
+                    letter-spacing: 2px;
+                    text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                    width: 100%;
+                    text-align: center;
+                }
+                
+                .character-carousel .character-card p {
+                    color: var(--orange);
+                    margin-bottom: 2%;
+                    text-align: center;
+                    font-size: var(--text-sm);
+                }
+                
+                .carousel-footer {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 1vh;
+                    margin-top: 0; /* Move buttons up */
+                    width: 100%;
+                    pointer-events: auto;
+                    position: relative;
+                    z-index: 50;
+                    margin-bottom: 5vh; /* Add space at bottom */
+                }
+                
+                .carousel-footer .start-button {
+                    font-size: var(--text-lg);
+                    padding: 0.5rem 1rem;
+                    background-color: rgba(0, 0, 0, 0.75);
+                    border: 1px solid var(--orange);
+                    width: auto;
+                    text-align: center;
+                    position: relative;
+                    z-index: 10;
+                    color: var(--orange);
+                    text-transform: uppercase;
+                    border-radius: var(--radius-sm);
+                    white-space: nowrap;
+                }
+                
+                .carousel-footer .back-button {
+                    font-size: var(--text-md);
+                    padding: 0.4rem 1rem;
+                    background-color: rgba(0, 0, 0, 0.75);
+                    border: 1px solid var(--orange);
+                    width: auto;
+                    text-align: center;
+                    position: relative;
+                    z-index: 10;
+                    color: var(--orange);
+                    text-transform: uppercase;
+                    margin-top: 0.5vh;
+                    border-radius: var(--radius-sm);
+                }
+                
+                /* Stat bars styling - Responsive scaling */
+                .character-carousel .character-card .stats {
+                    width: 90%;
+                    margin-top: 2%;
+                    margin-bottom: 5%;
+                    flex-shrink: 0;
+                }
+                
+                .character-carousel .stat {
+                    margin-bottom: 5px;
+                }
+                
+                .character-carousel .stat span {
+                    color: var(--orange);
+                    margin-bottom: 2px;
+                    font-weight: bold;
+                    display: block;
+                    font-family: var(--font-heading);
+                    font-size: var(--text-sm);
+                }
+                
+                .character-carousel .stat-bar {
+                    height: 5px;
+                    background-color: rgba(0, 0, 0, 0.6);
+                    border: 1px solid rgba(60, 60, 60, 0.8);
+                    border-radius: 3px;
+                    overflow: hidden;
+                }
+                
+                .character-carousel .stat-fill {
+                    background-color: var(--orange);
+                    height: 100%;
+                }
+                
+                /* Mobile adjustments */
+                @media (max-width: 768px) {
+                    .character-carousel .stat {
+                        margin-bottom: 4px;
+                    }
+                    
+                    .character-carousel .stat-bar {
+                        height: 4px;
+                    }
+                    
+                    .character-carousel .stat span {
+                        font-size: calc(var(--text-sm) - 1px);
+                    }
+                    
+                    .character-carousel .character-card h3 {
+                        font-size: var(--text-lg);
+                        margin-bottom: 5px;
+                    }
+                    
+                    .character-carousel .character-card p {
+                        font-size: var(--text-xs);
+                        margin-bottom: 3%;
+                    }
+                    
+                    .character-carousel .character-image {
+                        margin-bottom: 5%;
+                    }
+                }
+                
+                /* Fix for touch devices */
+                @media (hover: none) {
+                    .carousel-nav:active {
+                        background-color: var(--orange);
+                        color: black;
+                    }
+                    
+                    .carousel-footer .start-button:active,
+                    .carousel-footer .back-button:active {
+                        transform: scale(0.98);
+                        opacity: 0.9;
+                    }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+            
+            // Setup carousel navigation
+            const prevButton = document.querySelector('.prev-button');
+            const nextButton = document.querySelector('.next-button');
+            const carouselCards = document.querySelectorAll('.character-carousel .character-card');
+            let currentIndex = 0;
+            
+            prevButton.addEventListener('click', () => {
+                navigate('prev');
+                playButtonSound();
+            });
+            
+            nextButton.addEventListener('click', () => {
+                navigate('next');
+                playButtonSound();
+            });
+            
+            // Update UI to match original button functionality
+            const startButton = document.getElementById('start-game-button');
+            const backButton = document.getElementById('back-from-character');
+            
+            // Apply original functionality to new buttons
+            if (startButton) {
+                const handleStartGame = function(e) {
+                    if (e) e.preventDefault(); // Prevent double clicks
+                    try {
+                        // Get the selected character from the active card
+                        const activeCard = document.querySelector('.character-card.active');
+                        if (!activeCard) return;
+                        
+                        const selectedCharacter = activeCard.getAttribute('data-character');
+                        console.log('Selected character:', selectedCharacter);
+                        
+                        // Store character selection
+                        if (window.localStorage) {
+                            localStorage.setItem('selectedCharacter', selectedCharacter);
+                        }
+                        
+                        // Try multiple approaches to start the game
+                        // 1. First try clicking the original button directly
+                        if (originalStartButton && typeof originalStartButton.click === 'function') {
+                            originalStartButton.click();
+                            return;
+                        }
+                        
+                        // 2. Try the original function
+                        if (originalStartFunction) {
+                            originalStartFunction.call(originalStartButton || startButton);
+                            return;
+                        }
+                        
+                        // 3. Use screen toggling as fallback
+                        const gameScreen = document.getElementById('game-screen');
+                        if (gameScreen) {
+                            document.getElementById('character-selection-screen').classList.remove('active');
+                            gameScreen.classList.add('active');
+                        } else {
+                            // 4. Last resort: dispatch event
+                            window.dispatchEvent(new CustomEvent('startGame', { 
+                                detail: { character: selectedCharacter } 
+                            }));
+                        }
+                    } catch (e) {
+                        console.error('Error starting game:', e);
+                    }
+                };
+                
+                // Add event listeners for both mouse and touch
+                // Make sure click works properly by using multiple approaches
+                startButton.addEventListener('click', handleStartGame);
+                startButton.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    handleStartGame(e);
+                });
+                startButton.onclick = handleStartGame;
+                
+                // Make sure it's clickable
+                startButton.style.position = 'relative';
+                startButton.style.zIndex = '100';
+            }
+            
+            if (backButton) {
+                const handleBack = function(e) {
+                    e.preventDefault(); // Prevent double clicks
+                    
+                    // Use the original back button's function if available 
+                    if (originalBackFunction) {
+                        originalBackFunction.call(backButton, e);
+                        return;
+                    }
+                    
+                    // Fallback: toggle screens
+                    document.getElementById('character-selection-screen').classList.remove('active');
+                    document.getElementById('mode-selection-screen').classList.add('active');
+                };
+                
+                // Add event listeners for both mouse and touch
+                backButton.addEventListener('click', handleBack);
+                backButton.addEventListener('touchend', handleBack);
+                
+                // Make sure it's clickable
+                backButton.style.position = 'relative';
+                backButton.style.zIndex = '100';
+            }
+            
+            // Navigation function
+            function navigate(direction) {
+                // Hide current card
+                carouselCards[currentIndex].classList.remove('active', 'selected');
+                
+                // Update index
+                if (direction === 'next') {
+                    currentIndex = (currentIndex + 1) % carouselCards.length;
+                } else {
+                    currentIndex = (currentIndex - 1 + carouselCards.length) % carouselCards.length;
+                }
+                
+                // Show new card
+                carouselCards[currentIndex].classList.add('active', 'selected');
+            }
+            
+            // Play button sound
+            function playButtonSound() {
+                try {
+                    const buttonSound = document.getElementById('button-click');
+                    if (buttonSound) {
+                        buttonSound.currentTime = 0;
+                        buttonSound.play().catch(() => {});
+                    }
+                } catch (e) {
+                    // Silent catch
+                }
+            }
+            
+            console.log('Character carousel initialized successfully');
+            
+        } catch (error) {
+            console.error('Error setting up carousel:', error);
+            
+            // Restore original character selection if setup fails
+            characterSelection.innerHTML = originalHTML;
+            
+            // Show original button row again
+            if (originalButtonRow) {
+                originalButtonRow.style.display = '';
+            }
+        }
+    }
+});
