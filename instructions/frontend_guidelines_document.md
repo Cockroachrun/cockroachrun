@@ -1,3 +1,4 @@
+
 # Frontend Guideline Document for Cockroach Run
 
 This document outlines the overall frontend setup for Cockroach Run – an immersive 3D web-based game with a dark, cyberpunk aesthetic designed for both desktop and mobile browsers. It describes our approach to architecture, design principles, styling, components, state management, routing, performance, and testing. The goal is to create a clear, modular, and maintainable experience that can scale as the game evolves.
