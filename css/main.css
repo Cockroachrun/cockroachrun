@@ -64,6 +64,21 @@ button {
     outline: none;
 }
 
+/* Remove blue focus outline/background */
+button:focus, 
+input:focus,
+.character-card:focus,
+.mode-card:focus,
+*:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.9) !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important; /* For mobile */
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
+}
+
 /* Game Container */
 #game-container {
     position: fixed;
