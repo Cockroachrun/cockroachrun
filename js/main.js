@@ -3,6 +3,11 @@
  * Initializes all game components and manages the game flow
  */
 
+/**
+ * Cockroach Run - Main Game Script
+ * Initializes all game components and manages the game flow
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Cockroach Run...');
     

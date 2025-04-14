@@ -1,5 +1,11 @@
 import { createLoadingScreen } from '../../screens/loading-screen.js';
 import { createStartScreen } from '../../screens/start-screen.js';
+import { createModeSelectionScreen } from '../../screens/mode-selection-screen.js';
+import { createCharacterSelectionScreen } from '../../screens/character-selection-screen.js';
+import { createPauseScreen } from '../../screens/pause-screen.js';
+import { createGameOverScreen } from '../../screens/game-over-screen.js';
+import { createSettingsScreen } from '../../screens/settings-screen.js';
+import { createCreditsScreen } from '../../screens/credits-screen.js';
 
 class UIManager {
   constructor() {
@@ -19,6 +25,12 @@ class UIManager {
     // Initialize screens
     this.screens['loading-screen'] = createLoadingScreen(this);
     this.screens['start-screen'] = createStartScreen(this);
+    this.screens['mode-selection-screen'] = createModeSelectionScreen(this);
+    this.screens['character-selection-screen'] = createCharacterSelectionScreen(this);
+    this.screens['pause-screen'] = createPauseScreen(this);
+    this.screens['game-over-screen'] = createGameOverScreen(this);
+    this.screens['settings-screen'] = createSettingsScreen(this);
+    this.screens['credits-screen'] = createCreditsScreen(this);
     
     // Add screens to the DOM
     Object.values(this.screens).forEach(screen => {
@@ -37,11 +49,11 @@ class UIManager {
       return;
     }
     
-    // Hide active screen if there is one
-    if (this.activeScreen) {
-      this.activeScreen.element.classList.remove('active');
-      this.activeScreen.onHide?.();
-    }
+    // Hide all screens before showing the new one
+    Object.values(this.screens).forEach(s => {
+      s.element.classList.remove('active');
+      s.onHide?.();
+    });
     
     // Show new screen
     screen.element.classList.add('active');

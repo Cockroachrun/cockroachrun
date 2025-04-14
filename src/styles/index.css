@@ -104,7 +104,8 @@ canvas {
 
 /* ---------- Loading Screen ---------- */
 .progress-container {
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   height: 10px;
   background-color: var(--darker-bg);
   border-radius: 5px;
@@ -140,9 +141,52 @@ canvas {
   cursor: pointer;
   transition: all var(--transition-medium);
   margin: var(--space-xs);
-  min-width: 200px;
+  min-width: 120px;
   box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
   pointer-events: auto;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 400px) {
+  body, .screen {
+    padding-left: 2vw;
+    padding-right: 2vw;
+  }
+  .screen-content {
+    max-width: 96vw;
+    padding: var(--space-xs) 0;
+  }
+  .mode-card,
+  .character-card,
+  .progress-container {
+    max-width: 88vw;
+    padding: var(--space-xs);
+  }
+  .mode-card img,
+  .character-card img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  .button {
+    min-width: 60px;
+    font-size: 0.8rem;
+    padding: var(--space-xs) var(--space-xs);
+  }
+  h1, h2, h3 {
+    font-size: 0.95rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .mode-card-title, .character-card-title {
+    font-size: 0.95rem !important;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .flavor-text, .subtitle, .version, p {
+    font-size: 0.8rem !important;
+  }
 }
 
 .button:hover {
@@ -188,7 +232,8 @@ canvas {
   padding: var(--space-lg);
   border-radius: 8px;
   border: 2px solid var(--neon-green);
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   transition: all var(--transition-medium);
   cursor: pointer;
 }
@@ -211,7 +256,8 @@ canvas {
   padding: var(--space-md);
   border-radius: 8px;
   border: 2px solid var(--neon-green);
-  width: 200px;
+  width: 100%;
+  max-width: 200px;
   transition: all var(--transition-medium);
   cursor: pointer;
 }
@@ -253,4 +299,71 @@ canvas {
   font-size: var(--text-lg);
   color: var(--neon-green);
   text-shadow: var(--glow-green);
+}
+
+/* ---------- Stat Bars for Character Select ---------- */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.2rem 0;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  color: var(--neon-green);
+  text-shadow: var(--glow-green);
+  margin-bottom: 0.2rem;
+}
+.stat span {
+  flex: 0 0 auto;
+  font-size: 1em;
+  margin-right: 0.5em;
+  letter-spacing: 0.05em;
+}
+.stat-bar {
+  flex: 1 1 auto;
+  height: 14px;
+  background: rgba(32,32,32,0.7);
+  border-radius: 7px;
+  margin-left: 0.5em;
+  overflow: hidden;
+  min-width: 40px;
+  max-width: 120px;
+  border: 1px solid var(--neon-green);
+  box-shadow: 0 0 4px var(--neon-green);
+  position: relative;
+}
+.stat-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-green), var(--orange));
+  border-radius: 7px 0 0 7px;
+  transition: width 0.3s;
+}
+
+/* Responsive stat bars for small screens */
+@media (max-width: 400px) {
+  .stats {
+    gap: 0.2rem;
+    margin: 0.2rem 0 0.1rem 0;
+  }
+  .stat {
+    font-size: 0.7rem;
+    margin-bottom: 0.1rem;
+  }
+  .stat span {
+    font-size: 0.9em;
+    margin-right: 0.3em;
+  }
+  .stat-bar {
+    height: 8px;
+    min-width: 24px;
+    max-width: 60px;
+    margin-left: 0.3em;
+  }
+  .stat-fill {
+    border-radius: 4px 0 0 4px;
+  }
 }

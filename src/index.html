@@ -81,7 +81,7 @@
     <!-- Character Selection Screen -->
     <section id="character-selection-screen" class="screen" aria-label="Character Selection Screen">
       <div class="screen-content">
-        <h2>SELECT CHARACTER</h2>
+        <h2>SELECT COCKROACH</h2>
 
         <div class="characters-container">
           <div class="character-card" data-character="DEFAULT_ROACH">
@@ -102,7 +102,8 @@
           </div>
         </div>
 
-        <div class="button-container">
+        <!-- Moved buttons higher up -->
+        <div class="button-container" style="margin-top: -20px;">
           <button id="back-from-character" class="button">BACK</button>
           <button id="start-game-button" class="button">START GAME</button>
         </div>
@@ -140,7 +141,71 @@
         </div>
       </div>
     </section>
+    <!-- Settings Screen -->
+    <section id="settings-screen" class="screen" aria-label="Settings Screen">
+      <div class="screen-content">
+        <h2>SETTINGS</h2>
+        <form id="settings-form">
+          <div class="settings-group">
+            <label for="music-volume">Music Volume</label>
+            <input type="range" id="music-volume" min="0" max="100" value="80">
+          </div>
+          <div class="settings-group">
+            <label for="sfx-volume">SFX Volume</label>
+            <input type="range" id="sfx-volume" min="0" max="100" value="80">
+          </div>
+          <div class="settings-group">
+            <label for="graphics-quality">Graphics Quality</label>
+            <select id="graphics-quality">
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="settings-group">
+            <label for="control-scheme">Control Scheme</label>
+            <select id="control-scheme">
+              <option value="keyboard">Keyboard</option>
+              <option value="touch">Touch</option>
+            </select>
+          </div>
+        </form>
+        <div class="button-container">
+          <button id="save-settings-button" class="button">SAVE</button>
+          <button id="back-from-settings" class="button">BACK</button>
+        </div>
+      </div>
+    </section>
+    <!-- Credits Screen -->
+    <section id="credits-screen" class="screen" aria-label="Credits Screen">
+      <div class="screen-content">
+        <h2>CREDITS</h2>
+        <ul class="credits-list">
+          <li>Game Design: Cockroach Run Team</li>
+          <li>3D Art: NeonBug Studios</li>
+          <li>Programming: Open Source Contributors</li>
+          <li>Music & SFX: CyberSound Collective</li>
+        </ul>
+        <div class="button-container">
+          <button id="back-from-credits" class="button">BACK</button>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <!-- Audio Elements -->
+  <audio id="menu-music" loop preload="auto">
+    <source src="assets/sounds/music/Menu_loop.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="game-music" loop preload="auto">
+    <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="button-click" preload="auto">
+    <source src="assets/sounds/sfx/button_click.wav" type="audio/wav" />
+  </audio>
+  <audio id="scatter-sound" preload="auto">
+    <source src="assets/sounds/sfx/scatter.wav" type="audio/wav" />
+  </audio>
 
   <script type="module" src="js/main.js"></script>
 </body>

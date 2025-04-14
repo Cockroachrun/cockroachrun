@@ -69,9 +69,9 @@ function setupCarousel() {
                     <button class="carousel-nav next-button">&gt;</button>
                 </div>
                 
-                <div class="carousel-footer">
-                    <button id="start-game-button" class="start-button">START GAME</button>
-                    <button id="back-from-character" class="back-button">BACK</button>
+                <div class="menu-buttons" style="margin-top: -20px; width: 100%;">
+                    <button id="start-game-button" class="menu-button orange-hover">START GAME</button>
+                    <button id="back-from-character" class="menu-button orange-hover">BACK</button>
                 </div>
             `;
             
@@ -82,6 +82,52 @@ function setupCarousel() {
             const styleSheet = document.createElement("style");
             styleSheet.id = "carousel-styles";
             styleSheet.textContent = `
+                /* Lift up the carousel */
+                .character-carousel {
+                    margin-top: -30px;
+                }
+                
+                /* Responsive menu button styles */
+                @media (max-width: 480px) {
+                    #character-selection-screen .menu-button {
+                        padding: 12px 20px;
+                        font-size: 16px;
+                        min-width: 140px;
+                        margin: 10px auto;
+                        position: relative;
+                        z-index: 1000;
+                        pointer-events: auto;
+                        display: block;
+                        touch-action: manipulation;
+                    }
+                }
+                
+                /* Ensure buttons are clickable */
+                .menu-button {
+                    position: relative;
+                    z-index: 1000;
+                    pointer-events: auto;
+                    cursor: pointer;
+                    touch-action: manipulation;
+                }
+                
+                /* Orange border on hover and active states */
+                .orange-hover {
+                    transition: all 0.2s ease;
+                }
+                
+                .orange-hover:hover {
+                    border: 2px solid #FF9000 !important;
+                    box-shadow: 0 0 10px rgba(255, 144, 0, 0.7) !important;
+                    transform: translateY(-2px);
+                }
+                
+                .orange-hover:active {
+                    border: 2px solid #FF9000 !important;
+                    box-shadow: 0 0 15px rgba(255, 144, 0, 0.9) !important;
+                    transform: translateY(1px);
+                }
+                
                 .character-carousel {
                     display: flex;
                     align-items: center;
@@ -224,54 +270,48 @@ function setupCarousel() {
                     border-radius: var(--radius-sm);
                 }
                 
-                /* Stat bars styling */
+                /* Stat bars styling - with responsive scaling */
                 .character-carousel .character-card .stats {
                     width: 90%;
                     margin-top: 2%;
                     margin-bottom: 5%;
                     flex-shrink: 0;
+                    max-width: 100%;
+                    padding: 0 5%;
                 }
                 
                 .character-carousel .stat {
-                    margin-bottom: 5px;
+                    margin-bottom: clamp(4px, 1.5vw, 8px);
+                    width: 100%;
                 }
                 
                 .character-carousel .stat span {
                     color: var(--orange);
-                    margin-bottom: 2px;
+                    margin-bottom: clamp(1px, 0.5vw, 3px);
                     font-weight: bold;
                     display: block;
                     font-family: var(--font-heading);
-                    font-size: var(--text-sm);
+                    font-size: clamp(10px, 2.5vw, 14px);
+                    letter-spacing: 0.5px;
                 }
                 
                 .character-carousel .stat-bar {
-                    height: 5px;
+                    height: clamp(3px, 1vw, 6px);
                     background-color: rgba(0, 0, 0, 0.6);
                     border: 1px solid rgba(60, 60, 60, 0.8);
                     border-radius: 3px;
                     overflow: hidden;
+                    width: 100%;
                 }
                 
                 .character-carousel .stat-fill {
                     background-color: var(--orange);
                     height: 100%;
+                    transition: width 0.3s ease;
                 }
                 
-                /* Mobile adjustments */
+                /* Responsive adjustments for different screen sizes */
                 @media (max-width: 768px) {
-                    .character-carousel .stat {
-                        margin-bottom: 4px;
-                    }
-                    
-                    .character-carousel .stat-bar {
-                        height: 4px;
-                    }
-                    
-                    .character-carousel .stat span {
-                        font-size: calc(var(--text-sm) - 1px);
-                    }
-                    
                     .character-carousel .character-card h3 {
                         font-size: var(--text-lg);
                         margin-bottom: 5px;
@@ -284,6 +324,29 @@ function setupCarousel() {
                     
                     .character-carousel .character-image {
                         margin-bottom: 5%;
+                    }
+                }
+                
+                /* Small screen adjustments */
+                @media (max-width: 480px) {
+                    .character-carousel .character-card .stats {
+                        width: 100%;
+                        padding: 0 2%;
+                    }
+                    
+                    .character-carousel .stat span {
+                        font-size: 10px;
+                    }
+                    
+                    .character-carousel .stat-bar {
+                        height: 3px;
+                    }
+                }
+                
+                /* Extra small screen adjustments */
+                @media (max-width: 320px) {
+                    .character-carousel .stat {
+                        margin-bottom: 2px;
                     }
                 }
             `;
@@ -339,9 +402,15 @@ function setupCarousel() {
                 };
                 
                 // Add event listeners
-                startButton.addEventListener("click", handleStartGame);
+                startButton.addEventListener("click", function(e) {
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
+                    handleStartGame(e);
+                });
                 startButton.addEventListener("touchend", function(e) {
                     e.preventDefault();
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
                     handleStartGame(e);
                 });
                 
@@ -365,8 +434,16 @@ function setupCarousel() {
                 };
                 
                 // Add event listeners
-                backButton.addEventListener("click", handleBack);
-                backButton.addEventListener("touchend", handleBack);
+                backButton.addEventListener("click", function(e) {
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
+                    handleBack(e);
+                });
+                backButton.addEventListener("touchend", function(e) {
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
+                    handleBack(e);
+                });
                 
                 // Make clickable
                 backButton.style.position = "relative";
@@ -393,6 +470,8 @@ function setupCarousel() {
             // Navigation events
             if (prevButton) {
                 prevButton.addEventListener("click", () => {
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
                     const newIndex = (currentCardIndex - 1 + cards.length) % cards.length;
                     showCard(newIndex);
                 });
@@ -400,6 +479,8 @@ function setupCarousel() {
             
             if (nextButton) {
                 nextButton.addEventListener("click", () => {
+                    // Play button click sound directly
+                    AudioManager.playButtonClick();
                     const newIndex = (currentCardIndex + 1) % cards.length;
                     showCard(newIndex);
                 });

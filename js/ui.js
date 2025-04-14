@@ -51,24 +51,93 @@ const UIManager = {
     },
     
     addEventListeners() {
-        document.getElementById('play-button').addEventListener('click', () => {
+        // Add both click and touch events for better mobile support
+        const playButton = document.getElementById('play-button');
+        const handlePlayClick = () => {
             AudioManager.playButtonClick();
             this.showScreen('modeSelection');
+        };
+        
+        playButton.addEventListener('click', handlePlayClick);
+        playButton.addEventListener('touchend', (e) => {
+            e.preventDefault(); // Prevent default to avoid double firing
+            handlePlayClick();
         });
-        document.getElementById('settings-button').addEventListener('click', () => {
+        
+        // Make sure the button is clickable
+        playButton.style.position = 'relative';
+        playButton.style.zIndex = '1000';
+        playButton.style.pointerEvents = 'auto';
+        // Settings button with touch support
+        const settingsButton = document.getElementById('settings-button');
+        const handleSettingsClick = () => {
             AudioManager.playButtonClick();
             this.showScreen('settings');
+        };
+        
+        settingsButton.addEventListener('click', handleSettingsClick);
+        settingsButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleSettingsClick();
         });
-        document.getElementById('credits-button').addEventListener('click', () => {
+        
+        // Make sure the button is clickable
+        settingsButton.style.position = 'relative';
+        settingsButton.style.zIndex = '1000';
+        settingsButton.style.pointerEvents = 'auto';
+        
+        // Credits button with touch support
+        const creditsButton = document.getElementById('credits-button');
+        const handleCreditsClick = () => {
             AudioManager.playButtonClick();
             this.showScreen('credits');
+        };
+        
+        creditsButton.addEventListener('click', handleCreditsClick);
+        creditsButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleCreditsClick();
         });
+        
+        // Make sure the button is clickable
+        creditsButton.style.position = 'relative';
+        creditsButton.style.zIndex = '1000';
+        creditsButton.style.pointerEvents = 'auto';
+        
+        // Add direct event listeners to character selection buttons
+        const addSoundToButton = (buttonId) => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                const originalClick = button.onclick;
+                button.onclick = (e) => {
+                    AudioManager.playButtonClick();
+                    if (originalClick) originalClick.call(button, e);
+                };
+            }
+        };
+        
+        // Add sound to character selection buttons
+        addSoundToButton('back-from-character');
+        addSoundToButton('start-game-button');
 
-        document.getElementById('connect-wallet-button').addEventListener('click', () => {
+        // Connect wallet button with touch support
+        const connectWalletButton = document.getElementById('connect-wallet-button');
+        const handleConnectWalletClick = () => {
             AudioManager.playButtonClick();
             console.log('Connect Wallet button clicked');
             alert('Game exit functionality would be implemented here.');
+        };
+        
+        connectWalletButton.addEventListener('click', handleConnectWalletClick);
+        connectWalletButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleConnectWalletClick();
         });
+        
+        // Make sure the button is clickable
+        connectWalletButton.style.position = 'relative';
+        connectWalletButton.style.zIndex = '1000';
+        connectWalletButton.style.pointerEvents = 'auto';
         document.querySelectorAll('.mode-card').forEach(card => {
             card.addEventListener('click', () => {
                 AudioManager.playButtonClick();
@@ -178,9 +247,15 @@ const UIManager = {
                 clearInterval(interval);
                 setTimeout(() => {
                     this.showScreen('start');
-                    AudioManager.menuMusic.muted = false;
-                    AudioManager.menuMusic.play().catch((e) => {
+                    // Play menu music directly
+                    AudioManager.menuMusic.play().catch(e => {
                         console.warn('Autoplay blocked:', e);
+                        // Add a click handler to start music on first interaction
+                        const startMusic = () => {
+                            AudioManager.menuMusic.play();
+                            document.removeEventListener('click', startMusic);
+                        };
+                        document.addEventListener('click', startMusic);
                     });
                 }, 500);
             }

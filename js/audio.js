@@ -10,12 +10,19 @@ const AudioManager = {
     buttonClick: document.getElementById('button-click'),
     scatterSound: document.getElementById('scatter-sound'),
 
-    // Menu music playlist
-    menuMusicTracks: [
-        'assets/sounds/music/Menu_loop.mp3',
-        'assets/sounds/music/world_theme.mp3',
-        'assets/sounds/music/Cockroach run music.mp3'
-    ],
+    // Enhanced music system
+    musicTracks: {
+        menu: [
+            {id: 'menu-loop', name: 'Menu Theme', path: 'assets/sounds/music/Menu_loop.mp3'},
+            {id: 'world-theme', name: 'World Theme', path: 'assets/sounds/music/world_theme.mp3'},
+            {id: 'cockroach-run', name: 'Cockroach Run', path: 'assets/sounds/music/Cockroach run music.mp3'},
+            {id: 'your-new-track', name: 'YOUR_NEW_TRACK', path: 'assets/sounds/music/YOUR_NEW_TRACK.mp3'}
+        ],
+        game: [
+            // Game tracks here
+        ]
+    },
+    currentTrack: null,
     
     // Currently selected menu music track index (0 = random)
     currentMenuTrackIndex: 0,
@@ -76,9 +83,7 @@ const AudioManager = {
             <div class="dropdown-container">
                 <select id="music-track-select" class="styled-dropdown">
                     <option value="0">Random</option>
-                    <option value="1">Menu Loop</option>
-                    <option value="2">World Theme</option>
-                    <option value="3">Cockroach Run</option>
+                    ${this.musicTracks.menu.map((track, index) => `<option value="${index + 1}">${track.name}</option>`).join('')}
                 </select>
                 <div class="dropdown-arrow">▼</div>
             </div>
@@ -200,12 +205,12 @@ const AudioManager = {
      */
     preloadAudio() {
         // Check if menu music files exist
-        this.menuMusicTracks.forEach(track => {
+        this.musicTracks.menu.forEach(track => {
             const audio = new Audio();
-            audio.src = track;
+            audio.src = track.path;
             audio.preload = 'auto';
             audio.addEventListener('error', (e) => {
-                console.error(`Error loading audio file ${track}:`, e);
+                console.error(`Error loading audio file ${track.path}:`, e);
             });
         });
         
@@ -309,6 +314,7 @@ const AudioManager = {
      * Play menu music
      */
     playMenuMusic() {
+        console.log('Attempting to play menu music...');
         this.gameMusic.pause();
         this.gameMusic.currentTime = 0;
 
@@ -316,19 +322,20 @@ const AudioManager = {
         let selectedTrack;
         if (this.currentMenuTrackIndex === 0) {
             // Random selection
-            const randomIndex = Math.floor(Math.random() * this.menuMusicTracks.length);
-            selectedTrack = this.menuMusicTracks[randomIndex];
+            const randomIndex = Math.floor(Math.random() * this.musicTracks.menu.length);
+            selectedTrack = this.musicTracks.menu[randomIndex];
         } else {
             // Specific track (adjust index to match array)
             const trackIndex = this.currentMenuTrackIndex - 1;
-            selectedTrack = this.menuMusicTracks[trackIndex];
+            selectedTrack = this.musicTracks.menu[trackIndex];
         }
 
         // Update the <source> element inside menuMusic
         const source = this.menuMusic.querySelector('source');
         if (source) {
-            source.src = selectedTrack;
+            source.src = selectedTrack.path;
             this.menuMusic.load();
+            console.log(`Loading music track: ${selectedTrack.name}`);
         } else {
             console.warn('No <source> element found inside #menu-music');
         }
@@ -339,23 +346,41 @@ const AudioManager = {
         // Resume audio context if it exists
         this.resumeAudioContext();
 
-        // Try to play the music and handle autoplay restrictions
+        // Set up one-time event listeners for user interaction before attempting to play
+        const events = ['click', 'touchstart', 'keydown', 'mousedown'];
+        const startMusicOnInteraction = () => {
+            // Remove all event listeners
+            events.forEach(event => {
+                document.removeEventListener(event, startMusicOnInteraction);
+            });
+            
+            // Try to play music
+            this.menuMusic.play()
+                .then(() => console.log('Menu music started successfully after user interaction'))
+                .catch(e => console.warn('Still failed to play music after interaction:', e));
+        };
+        
+        // Add event listeners for common user interactions
+        events.forEach(event => {
+            document.addEventListener(event, startMusicOnInteraction, { once: true });
+        });
+
+        // Try to play the music immediately and handle autoplay restrictions
         const playPromise = this.menuMusic.play();
         
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
                     console.log('Menu music started successfully');
+                    // Remove event listeners if music started successfully
+                    events.forEach(event => {
+                        document.removeEventListener(event, startMusicOnInteraction);
+                    });
                 })
                 .catch(error => {
                     console.warn('Failed to play menu music (autoplay may be blocked):', error);
-                    
-                    // Set up a more aggressive retry mechanism
-                    this.setupMusicRetry();
+                    // Event listeners will handle starting music on interaction
                 });
-        } else {
-            // For browsers that don't return a promise
-            this.setupMusicRetry();
         }
     },
     
@@ -495,5 +520,55 @@ const AudioManager = {
         sound.play().catch(error => {
             console.warn('Failed to play scatter sound:', error);
         });
+    },
+    
+    /**
+     * Play a specific track
+     * @param {string} trackId - ID of the track to play
+     */
+    playTrack(trackId) {
+        // Find the track in the music tracks
+        const track = this.musicTracks.menu.find(track => track.id === trackId);
+        
+        if (track) {
+            // Update the current track
+            this.currentTrack = track;
+            
+            // Update the <source> element inside menuMusic
+            const source = this.menuMusic.querySelector('source');
+            if (source) {
+                source.src = track.path;
+                this.menuMusic.load();
+            } else {
+                console.warn('No <source> element found inside #menu-music');
+            }
+            
+            // Apply mute state
+            this.menuMusic.muted = this.isMusicMuted;
+            
+            // Resume audio context if it exists
+            this.resumeAudioContext();
+            
+            // Try to play the music and handle autoplay restrictions
+            const playPromise = this.menuMusic.play();
+            
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log(`Track ${track.name} started successfully`);
+                    })
+                    .catch(error => {
+                        console.warn(`Failed to play track ${track.name} (autoplay may be blocked):`, error);
+                        
+                        // Set up a more aggressive retry mechanism
+                        this.setupMusicRetry();
+                    });
+            } else {
+                // For browsers that don't return a promise
+                this.setupMusicRetry();
+            }
+        } else {
+            console.error(`Track ${trackId} not found`);
+        }
     }
 };
