@@ -1,54 +1,50 @@
 /**
- * CharacterCarousel - Clean, modular carousel for character selection
- * Cockroach Run Game
+ * Character Carousel Component
+ * Manages the character selection carousel with navigation
  */
-class CharacterCarousel {
-  /**
-   * Initialize the character carousel
-   * @param {Object} options - Configuration options
-   */
-  constructor(options = {}) {
-    // Default configuration
-    this.config = {
-      wrapperSelector: '#character-carousel-wrapper',
-      prevButtonSelector: '#prev-character',
-      nextButtonSelector: '#next-character',
-      indicatorsSelector: '#carousel-indicators',
-      startButtonSelector: '#start-game-button',
-      transitionDuration: 300,
-      enableSounds: true,
-      ...options
-    };
-
-    // Character data - single source of truth
-    this.characters = this.getDefaultCharacters();
-
-    // Find DOM elements
-    this.carouselContainer = document.querySelector(this.config.wrapperSelector);
-    this.prevButton = document.querySelector(this.config.prevButtonSelector);
-    this.nextButton = document.querySelector(this.config.nextButtonSelector);
-    this.dotsContainer = document.querySelector(this.config.indicatorsSelector);
-    this.startButton = document.querySelector(this.config.startButtonSelector);
-
-    // State
-    this.currentIndex = 0;
-    this.isTransitioning = false;
-    this.touchStartX = 0;
-    this.touchEndX = 0;
-    this.animationTimeout = null;
-
-    // Initialize
-    if (this.carouselContainer && this.prevButton && this.nextButton) {
-      this.init();
-    } else {
-      console.error('CharacterCarousel: Required elements not found, will retry in 100ms');
-      // Retry initialization after a short delay
-      setTimeout(() => {
-        this.carouselContainer = document.querySelector(this.config.wrapperSelector);
-        this.prevButton = document.querySelector(this.config.prevButtonSelector);
-        this.nextButton = document.querySelector(this.config.nextButtonSelector);
-        this.dotsContainer = document.querySelector(this.config.indicatorsSelector);
-        this.startButton = document.querySelector(this.config.startButtonSelector);
+const CharacterCarousel = {
+  // Current character index
+  currentIndex: 0,
+  
+  // Character data - replace with your actual character data
+  characters: [
+    {
+      name: "AMERICAN COCKROACH",
+      image: "assets/images/characters/american_cockroach.png",
+      stats: {
+        speed: 75,
+        durability: 60,
+        stealth: 80,
+        climbing: 65,
+        agility: 70,
+        burrowing: 55
+      }
+    },
+    {
+      name: "GERMAN COCKROACH",
+      image: "assets/images/characters/german_cockroach.png",
+      stats: {
+        speed: 85,
+        durability: 50,
+        stealth: 75,
+        climbing: 60,
+        agility: 90,
+        burrowing: 40
+      }
+    },
+    {
+      name: "ORIENTAL COCKROACH",
+      image: "assets/images/characters/oriental_cockroach.png",
+      stats: {
+        speed: 65,
+        durability: 80,
+        stealth: 70,
+        climbing: 50,
+        agility: 60,
+        burrowing: 85
+      }
+    }
+  ],
         
         if (this.carouselContainer && this.prevButton && this.nextButton) {
           this.init();
@@ -692,33 +688,11 @@ class CharacterCarousel {
       }
     } else {
       loadingEl.textContent = 'ERROR: THREE.JS NOT AVAILABLE';
-    }
   }
-}
+};
 
-// Multi-stage initialization to ensure carousel loads properly
-function initializeCarousel() {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.characterCarousel) {
-        console.log('Carousel already initialized, skipping');
-        return;
-      }
-      
-      window.characterCarousel = new CharacterCarousel();
-    });
-  } else {
-    if (window.characterCarousel) {
-      console.log('Carousel already initialized, skipping');
-      return;
-    }
-    
-    window.characterCarousel = new CharacterCarousel();
-  }
-}
-
-// Initialize on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', initializeCarousel);
-
-// Fallback initialization
-setTimeout(initializeCarousel, 500);
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const characterCarousel = new CharacterCarousel();
+  characterCarousel.init();
+});
