@@ -199,21 +199,32 @@
 }
 
 /* Asset indicators */
+/* Hide asset indicators on the main loading screen until needed */
 .assets-status {
+  display: none;  /* Only show when assets actually start loading */
+}
+
+/* When loading actually begins, then show indicators with better styling */
+.loading-started .assets-status {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
 }
 
+/* Better styling for asset indicators */
 .asset-indicator {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 144, 0, 0.3);
+  min-width: 60px;
   transition: all 0.3s ease;
 }
 
@@ -240,7 +251,16 @@
 /* Animated cockroach icon */
 .cockroach-icon {
   margin-top: 1.5rem;
+  opacity: 0.7;
+  max-height: 40px;
   animation: float 3s ease-in-out infinite;
+}
+
+/* Remove any random elements like 'X' from loading screen */
+#loading-screen .scan-line,
+#loading-screen .random-x,
+#loading-screen .unneeded-elements {
+  display: none;
 }
 
 @keyframes float {

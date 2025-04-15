@@ -66,6 +66,14 @@ class LoadingScreen {
 
     // Initialize
     this.init();
+    
+    // Only show asset indicators when actually loading
+    setTimeout(() => {
+      const loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        loadingScreen.classList.add('loading-started');
+      }
+    }, 1500); // Delay showing indicators to make loading seem smoother
   }
 
   /**

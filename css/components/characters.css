@@ -200,12 +200,12 @@
   transform: scale(1.2);
 }
 
-/* Button Stack - Vertical Styling */
+/* Button positioning fix */
 .button-stack {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin: 1.5rem auto 0 auto; /* Center the buttons */
   width: 80%;
   max-width: 240px;
 }
@@ -216,21 +216,27 @@
   display: none;
 }
 
-/* Style the start button */
+/* Make sure the buttons are properly sized and styled */
+.start-button, .back-button {
+  width: 100%;
+  padding: 0.75rem 0;
+  text-align: center;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Make start button more prominent */
 .start-button {
-  padding: 0.75rem 1.5rem;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   border: 2px solid #FF9000;
   color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
   text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
   box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
-  width: 100%;
-  text-transform: uppercase;
   font-weight: bold;
 }
 
@@ -248,19 +254,12 @@
   cursor: not-allowed;
 }
 
-/* Style the back button */
+/* Make back button less prominent */
 .back-button {
-  padding: 0.75rem 1.5rem;
-  background-color: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 144, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 144, 0, 0.5);
   color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
   font-size: 0.9rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  text-transform: uppercase;
 }
 
 .back-button:hover {

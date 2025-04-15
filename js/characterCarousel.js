@@ -137,21 +137,32 @@ class CharacterCarousel {
       card.className = `character-card ${index === 0 ? 'active' : ''}`;
       card.dataset.characterId = character.id;
 
-      // Fix image path - ensure path is correct and add fallback
-      const imagePath = character.imagePath || `assets/images/characters/${character.id}.png`;
-      
-      // Build card content with fixed image path
+      // Build card content - FIX IMAGE PATHS
       const imageEl = document.createElement('div');
       imageEl.className = 'character-image';
-      imageEl.style.backgroundImage = `url(${imagePath})`;
       
-      // Add error handling for images
-      const testImg = new Image();
-      testImg.onerror = () => {
-        console.error(`Failed to load image: ${imagePath}`);
-        imageEl.style.backgroundImage = `url(assets/images/characters/default.png)`;
-      };
-      testImg.src = imagePath;
+      // Try multiple image path formats to ensure one works
+      const possiblePaths = [
+        character.imagePath,
+        `assets/images/characters/${character.id}.png`,
+        `assets/images/characters/${character.name.toLowerCase().replace(' ', '-')}.png`,
+        `assets/images/characters/${character.id.replace('-', ' ')}.png`
+      ];
+      
+      // Set default image first
+      imageEl.style.backgroundImage = `url(assets/images/characters/default-roach.png)`;
+      
+      // Try to load the actual image
+      for (const path of possiblePaths) {
+        if (!path) continue;
+        
+        const img = new Image();
+        img.onload = () => {
+          // If this path works, use it
+          imageEl.style.backgroundImage = `url(${path})`;
+        };
+        img.src = path;
+      }
 
       const nameEl = document.createElement('h3');
       nameEl.className = 'character-name';
