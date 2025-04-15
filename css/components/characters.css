@@ -1,28 +1,16 @@
-/* Character Selection Screen - Responsive and Cyberpunk themed */
+/* Character Selection Screen - Cyberpunk-inspired */
+/* Variables can be overridden in variables.css if needed */
 
-/* Global variables and resets */
 :root {
-  --color-accent: #FF9000;       /* Cyberpunk orange */
-  --color-accent-light: #FFAA33; /* Lighter orange */
-  --color-accent-dark: #CC7300;  /* Darker orange */
-  --color-bg: rgba(0, 0, 0, 0.9); /* Nearly black background */
-  --color-text: #FFFFFF;         /* White text */
+  --color-neon: #FF9000;
+  --color-neon-lighter: #ffb84d;
+  --color-bg-dark: #121212;
+  --color-bg-darker: rgba(0,0,0,0.9);
   --font-heading: 'Orbitron', sans-serif;
-  --font-body: 'Rajdhani', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
 }
 
-/* Character Screen Background */
-.screen {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Force visibility of active screen */
+/* Screen */
 #character-selection-screen.active {
   display: flex !important;
   opacity: 1 !important;
@@ -34,84 +22,179 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 100; /* Ensure it's above other screens */
+  z-index: 100;
   overflow: auto;
 }
 
 /* Menu container */
 .menu-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0 auto;
 }
 
 /* Screen title */
 .screen-title {
-  color: var(--color-accent);
+  color: var(--color-neon);
   font-family: var(--font-heading);
-  font-size: 3vh;
-  margin: 2vh 0;
+  font-size: 4vh;
+  margin: 3vh 0;
   text-transform: uppercase;
+  text-align: center;
 }
 
-/* Button stack for character screen */
-.button-stack {
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-  max-width: 30vh;
-  margin: 2vh 0;
-}
-
-.button-stack button {
-  margin: 0.5vh 0;
-  padding: 1vh;
-  font-family: var(--font-heading);
-  font-size: 1.8vh;
-  color: var(--color-accent);
-  background-color: transparent;
-  border: 0.2vh solid var(--color-accent);
-  border-radius: 0; /* Sharp edges */
-  cursor: pointer;
-  text-transform: uppercase;
-}
-
-.button-stack button:hover {
-  background-color: var(--color-accent);
-  color: var(--color-bg);
-}
-
-.start-button {
-  margin-bottom: 1vh !important;
-}
-
-/* Ensure container allows overflow visibility */
+/* Carousel container */
 .carousel-container {
   position: relative;
   width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  overflow: visible; /* Allow content to be visible outside */
-  border-radius: 0;
   max-width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2vh;
 }
 
-/* Make sure the wrapper allows content to be visible outside */
+/* Carousel wrapper */
 .carousel-wrapper {
   position: relative;
-  width: 90vw;
-  max-width: 40vh;
-  height: 60vh;
-  margin: 0 auto;
-  overflow: visible; /* Allow arrows to be visible outside */
-  background-color: rgba(0, 0, 0, 0.9);
-  border: 0.2vh solid #FF9000;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  overflow: visible;
+  background-color: var(--color-bg-darker);
+  border: 0.25vh solid var(--color-neon);
+  box-shadow: 0 0 1vh var(--color-neon);
   border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2vh;
 }
 
-/* Position navigation arrows outside the card */
+/* Character card */
+.character-card {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.character-card.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+
+/* Character image container */
+.character-image-container {
+  position: relative;
+  width: 90%;
+  margin: 0 auto 2vh auto;
+  border: 0.15vh solid var(--color-neon);
+  background-color: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+/* Character image */
+.character-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 3D Toggle Button */
+.toggle-3d-btn {
+  position: absolute;
+  top: 1vh;
+  right: 1vh;
+  width: 3vh;
+  height: 3vh;
+  border: 0.15vh solid var(--color-neon);
+  background-color: var(--color-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.toggle-3d-btn img {
+  width: 60%;
+  height: 60%;
+  filter: invert(77%) sepia(55%) saturate(2000%) hue-rotate(80deg) brightness(119%) contrast(119%);
+}
+
+.toggle-3d-btn:hover {
+  background-color: var(--color-neon);
+}
+
+.toggle-3d-btn:hover img {
+  filter: none;
+}
+
+/* 3D Container */
+.character-3d-container {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 90%;
+  height: 60%;
+  background-color: #000;
+}
+
+.show-3d .character-3d-container {
+  display: block;
+}
+
+/* Character name */
+.character-name {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 2.5vh;
+  color: var(--color-neon);
+  text-align: center;
+  margin-bottom: 2vh;
+}
+
+/* Character stats */
+.character-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5vh;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.stat-label {
+  font-family: var(--font-heading);
+  color: var(--color-neon);
+  font-size: 1.7vh;
+  margin-bottom: 0.4vh;
+}
+
+.stat-value {
+  font-family: var(--font-body);
+  color: var(--color-neon-lighter);
+  font-size: 1.4vh;
+}
+
+/* Navigation arrows */
 .carousel-arrow {
   position: absolute;
   top: 50%;
@@ -120,209 +203,23 @@
   height: auto;
   background: none;
   border: none;
-  color: #FF9000;
-  font-size: 4vh;
+  color: var(--color-neon);
+  font-size: 3vh;
   font-weight: bold;
   cursor: pointer;
-  z-index: 20;
-  padding: 1vh;
-}
-
-.carousel-prev {
-  left: -6vh; /* Position outside the card */
-}
-
-.carousel-next {
-  right: -6vh; /* Position outside the card */
-}
-
-/* Hover effect for arrows */
-.carousel-arrow:hover {
-  color: #FFAA33; /* Slightly lighter orange on hover */
-}
-
-/* Fix for the character card to properly display */
-.character-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2vh;
-  background-color: rgba(0, 0, 0, 0.9);
-  border: none;
-  border-radius: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-}
-
-.character-card.active {
-  opacity: 1;
-  visibility: visible;
   z-index: 5;
 }
 
-/* Make image container large and centered */
-.character-image-container {
-  position: relative;
-  width: 90%;
-  height: 45%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 2vh 0;
-  border: 0.2vh solid #FF9000;
-  border-radius: 0;
-  overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.7);
-  box-shadow: none;
+.carousel-arrow:hover {
+  color: var(--color-neon-lighter);
 }
 
-/* Make image fill container properly */
-.character-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: none;
-  box-shadow: none;
-  -webkit-filter: none;
-  backdrop-filter: none;
-  margin: 0;
-  padding: 0;
+.carousel-prev {
+  left: -4vh;
 }
 
-/* Center character name */
-.character-name {
-  width: 100%;
-  text-align: center;
-  font-size: 2.5vh;
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  margin: 0 0 2vh 0;
-  text-transform: uppercase;
-  text-shadow: none;
-}
-
-.character-description {
-  width: 100%;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 0.5vh 0;
-  font-size: 1.4vh;
-  font-family: var(--font-body);
-  text-shadow: none; /* Remove any text shadow */
-}
-
-/* Two-column stats layout */
-.character-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Two equal columns */
-  gap: 2vh 3vh; /* Vertical and horizontal spacing */
-  width: 90%; /* Match image width */
-  margin: 0;
-  padding: 0;
-}
-
-/* Individual stat styling */
-.stat {
-  margin-bottom: 1vh;
-  width: 100%;
-}
-
-.stat-label {
-  display: flex;
-  justify-content: space-between;
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5vh;
-  margin-bottom: 0.5vh;
-  text-transform: uppercase;
-}
-
-/* Stat bar styling */
-.stat-bar {
-  width: 100%;
-  height: 0.8vh;
-  background-color: transparent;
-  border-bottom: 0.15vh solid rgba(255, 144, 0, 0.5);
-  border-top: none;
-  border-left: none; 
-  border-right: none;
-  border-radius: 0;
-  overflow: visible;
-  position: relative;
-}
-
-.stat-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background-color: #FF9000;
-  border-radius: 0;
-  box-shadow: none;
-  filter: none;
-}
-
-/* 3D button positioning */
-.three-d-toggle {
-  position: absolute;
-  top: 1vh;
-  right: 1vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5vh;
-  padding: 0.5vh 1vh;
-  border: 0.15vh solid #FF9000;
-  cursor: pointer;
-  z-index: 10;
-  border-radius: 0;
-}
-
-/* Toggle between 3D and 2D view buttons */
-.two-d-toggle {
-  display: none;
-}
-
-/* 3D Model Container */
-.three-d-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #000;
-  z-index: 20;
-  display: none;
-}
-
-.show-3d-view .three-d-container {
-  display: block;
-}
-
-.show-3d-view .two-d-toggle {
-  display: block;
-}
-
-.show-3d-view .three-d-toggle {
-  display: none;
-}
-
-/* Loading indicator for 3D model */
-.model-loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.9rem;
-  text-align: center;
+.carousel-next {
+  right: -4vh;
 }
 
 /* Indicator dots */
@@ -330,81 +227,95 @@
   display: flex;
   justify-content: center;
   gap: 1vh;
-  margin-top: 1vh;
+  margin: 1vh 0;
 }
 
 .carousel-dot {
   width: 1.2vh;
   height: 1.2vh;
-  border-radius: 0; /* Square indicators */
-  background-color: rgba(255, 144, 0, 0.3);
-  border: 0.15vh solid rgba(255, 144, 0, 0.5);
+  background-color: var(--color-bg-dark);
+  border: 0.15vh solid var(--color-neon);
+  border-radius: 50%;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .carousel-dot.active {
-  background-color: #FF9000;
+  background-color: var(--color-neon);
 }
 
-/* Fixed responsive sizing for mobile */
-@media (max-width: 480px) {
+/* Button stack */
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 70%;
+  margin: 2vh 0;
+}
+
+.button-stack button {
+  margin: 1vh 0;
+  padding: 1.5vh 3vh;
+  font-family: var(--font-heading);
+  font-size: 2vh;
+  text-transform: uppercase;
+  color: var(--color-neon);
+  background-color: transparent;
+  border: 0.2vh solid var(--color-neon);
+  cursor: pointer;
+  box-shadow: 0 0 0.5vh var(--color-neon);
+  transition: background-color 0.3s linear, color 0.3s linear;
+}
+
+.button-stack button:hover {
+  background-color: var(--color-neon);
+  color: var(--color-bg-dark);
+}
+
+/* Hover highlight on character card */
+.character-card:hover {
+  box-shadow: 0 0 1vh var(--color-neon-lighter);
+}
+
+/* Responsive media queries */
+@media (max-width: 768px) {
+  .screen-title {
+    font-size: 3vh;
+  }
+
   .carousel-wrapper {
-    width: 85vw;
-    height: min(400px, 75vh);
     max-width: 280px;
+    padding: 1.5vh;
   }
-  
-  .character-image-container {
-    height: 40%;
-  }
-  
-  .character-name {
-    font-size: 1.1rem;
-    margin: 0.25rem 0;
-  }
-  
-  .character-description {
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .stat-label {
-    font-size: 0.7rem;
-  }
-  
-  .stat-bar {
-    height: 8px;
-  }
-  
-  .carousel-prev {
-    left: -4vh;
-  }
-  
-  .carousel-next {
-    right: -4vh;
-  }
-}
 
-/* Ensure the UI is responsive on larger screens too */
-@media (min-width: 1200px) {
-  .carousel-wrapper {
-    width: 340px;
-    height: 460px;
+  .toggle-3d-btn {
+    width: 3vh;
+    height: 3vh;
+    top: 1vh;
+    right: 1vh;
   }
-  
-  .character-image-container {
-    height: 180px;
-  }
-  
+
   .character-name {
-    font-size: 1.4rem;
+    font-size: 2.2vh;
   }
-  
-  .stat-bar {
-    height: 16px;
-  }
-  
+
   .stat-label {
-    font-size: 0.9rem;
+    font-size: 1.5vh;
+  }
+
+  .stat-value {
+    font-size: 1.2vh;
+  }
+
+  .carousel-arrow {
+    font-size: 2.5vh;
+  }
+
+  .carousel-prev {
+    left: -3vh;
+  }
+
+  .carousel-next {
+    right: -3vh;
   }
 }

@@ -1,6 +1,15 @@
 /**
- * Simple Character Carousel
+ * Debounce function to limit rapid clicking
  */
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Character data
   const characters = [
@@ -41,126 +50,177 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   ];
-  
-  // Current character index
+
   let currentIndex = 0;
-  
-  // Get elements
+
+  // Grab essential elements
   const prevArrow = document.querySelector('.carousel-prev');
   const nextArrow = document.querySelector('.carousel-next');
   const dots = document.querySelectorAll('.carousel-dot');
   const card = document.querySelector('.character-card');
-  
-  // Function to update character
+
+  // Update character information
   function updateCharacter(index) {
     const character = characters[index];
-    
-    // Update image
-    const img = card.querySelector('img');
+
+    const img = card.querySelector('.character-image');
     img.src = character.image;
     img.alt = character.name;
-    
-    // Update name
-    card.querySelector('.character-name').textContent = character.name;
-    
+
+    card.querySelector('.character-name').textContent = character.name.toUpperCase();
+
     // Update stats
-    Object.entries(character.stats).forEach(([statName, value], i) => {
-      const statElements = card.querySelectorAll('.stat');
-      const statElement = statElements[i];
-      
-      if (statElement) {
-        const statLabel = statElement.querySelector('.stat-label');
-        statLabel.innerHTML = `${statName.toUpperCase()} <span>${value}%</span>`;
-        
-        const statFill = statElement.querySelector('.stat-fill');
-        statFill.style.width = `${value}%`;
+    const statElements = card.querySelectorAll('.stat');
+    const statKeys = Object.keys(character.stats);
+
+    for (let i = 0; i < statElements.length; i++) {
+      const statName = statKeys[i];
+      const statValue = character.stats[statName];
+      const labelEl = statElements[i].querySelector('.stat-label');
+      const valueEl = statElements[i].querySelector('.stat-value');
+
+      if (labelEl) {
+        labelEl.textContent = statName.toUpperCase();
       }
-    });
-    
-    // Update active dot
+      if (valueEl) {
+        valueEl.textContent = `${statValue}%`;
+      }
+    }
+
+    // Update dots
     dots.forEach((dot, i) => {
       dot.classList.toggle('active', i === index);
     });
-    
-    // Update current index
+
     currentIndex = index;
-    
-    // Update selected character in UI Manager if it exists
+
+    // If there's a UIManager, update the selected character
     if (window.UIManager) {
-      UIManager.selectedCharacter = `character-${index}`;
+      window.UIManager.selectedCharacter = `character-${index}`;
     }
   }
-  
-  // Add click event to previous arrow
+
+  // Previous arrow
   if (prevArrow) {
-    prevArrow.addEventListener('click', function() {
+    prevArrow.addEventListener('click', debounce(function() {
+      const currentCard = document.querySelector('.character-card.active');
+      if (!currentCard) return;
+
+      currentCard.classList.remove('active');
       const prevIndex = (currentIndex - 1 + characters.length) % characters.length;
+      currentIndex = prevIndex;
+
+      const newCard = document.querySelector(`.character-card[data-index="${prevIndex}"]`);
+      if (newCard) {
+        newCard.classList.add('active');
+      }
+
       updateCharacter(prevIndex);
-      console.log('Previous character');
-    });
+    }, 500));
   }
-  
-  // Add click event to next arrow
+
+  // Next arrow
   if (nextArrow) {
-    nextArrow.addEventListener('click', function() {
+    nextArrow.addEventListener('click', debounce(function() {
+      const currentCard = document.querySelector('.character-card.active');
+      if (!currentCard) return;
+
+      currentCard.classList.remove('active');
       const nextIndex = (currentIndex + 1) % characters.length;
+      currentIndex = nextIndex;
+
+      const newCard = document.querySelector(`.character-card[data-index="${nextIndex}"]`);
+      if (newCard) {
+        newCard.classList.add('active');
+      }
+
       updateCharacter(nextIndex);
-      console.log('Next character');
-    });
+    }, 500));
   }
-  
-  // Add click event to indicator dots
-  dots.forEach(function(dot, index) {
-    dot.addEventListener('click', function() {
-      updateCharacter(index);
-      console.log('Switch to character', index);
-    });
+
+  // Dot indicators
+  dots.forEach(function(dot, idx) {
+    dot.addEventListener('click', debounce(function() {
+      const currentCard = document.querySelector('.character-card.active');
+      if (currentCard) {
+        currentCard.classList.remove('active');
+      }
+      currentIndex = idx;
+
+      const newCard = document.querySelector(`.character-card[data-index="${idx}"]`);
+      if (newCard) {
+        newCard.classList.add('active');
+      }
+
+      updateCharacter(idx);
+    }, 500));
   });
-  
-  // Add event listener to 3D toggle button
-  const threeDToggle = document.querySelector('.three-d-toggle');
-  if (threeDToggle) {
-    threeDToggle.addEventListener('click', function() {
-      // Toggle 3D view
-      card.classList.toggle('show-3d-view');
-      
-      // Update button text
-      if (card.classList.contains('show-3d-view')) {
+
+  // 3D Toggle button
+  const toggleButton = card.querySelector('.toggle-3d-btn');
+  if (toggleButton) {
+    toggleButton.addEventListener('click', function() {
+      card.classList.toggle('show-3d');
+      if (card.classList.contains('show-3d')) {
         // Simulate loading a 3D model
-        const container = card.querySelector('.three-d-container');
+        const container = card.querySelector('.character-3d-container');
         if (container) {
           container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
           setTimeout(() => {
             container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
           }, 1000);
         }
-        
-        // Hide 3D button, show 2D button
-        threeDToggle.style.display = 'none';
-        
-        // Create 2D button if it doesn't exist
-        let twoDToggle = document.querySelector('.two-d-toggle');
-        if (!twoDToggle) {
-          twoDToggle = document.createElement('button');
-          twoDToggle.className = 'three-d-toggle two-d-toggle';
-          twoDToggle.textContent = '2D';
-          card.querySelector('.character-image-container').appendChild(twoDToggle);
-          
-          // Add click event to 2D button
-          twoDToggle.addEventListener('click', function() {
-            card.classList.remove('show-3d-view');
-            threeDToggle.style.display = '';
-            twoDToggle.style.display = 'none';
-          });
-        } else {
-          twoDToggle.style.display = '';
+        toggleButton.setAttribute('title', 'Toggle 2D View');
+      } else {
+        const container = card.querySelector('.character-3d-container');
+        if (container) {
+          container.innerHTML = '';
         }
+        toggleButton.setAttribute('title', 'Toggle 3D View');
       }
-      
-      console.log('Toggle 3D view');
     });
   }
-  
-  // Initialize with first character
+
+  // Initialize additional character cards for the 2nd and 3rd cockroaches
+  // This will allow us to transition properly with the data-index attributes
+  function createCharacterCard(index) {
+    const charInfo = characters[index];
+    const newCard = document.createElement('div');
+    newCard.classList.add('character-card');
+    newCard.setAttribute('data-index', index);
+
+    newCard.innerHTML = `
+      <div class="character-image-container">
+        <img
+          src="${charInfo.image}"
+          alt="${charInfo.name}"
+          class="character-image"
+        />
+        <button class="toggle-3d-btn" title="Toggle 3D View">
+          <img src="assets/icons/3d-icon.svg" alt="3D icon" />
+        </button>
+      </div>
+      <div class="character-3d-container"></div>
+      <h3 class="character-name">${charInfo.name.toUpperCase()}</h3>
+      <div class="character-stats">
+        ${Object.entries(charInfo.stats).map(([statName, value]) => `
+          <div class="stat">
+            <div class="stat-label">${statName.toUpperCase()}</div>
+            <div class="stat-value">${value}%</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    return newCard;
+  }
+
+  // Insert additional cards in .carousel-wrapper
+  const wrapper = document.querySelector('.carousel-wrapper');
+  for (let i = 1; i < characters.length; i++) {
+    const cardEl = createCharacterCard(i);
+    wrapper.appendChild(cardEl);
+  }
+
+  // Initialize with the first character
   updateCharacter(0);
 });
