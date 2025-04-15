@@ -1,18 +1,25 @@
-/* Character Selection Screen - Cyberpunk Orange Theme */
-/* Updated to be fully responsive with sharp edges */
+/* Character Selection Screen - Responsive and Cyberpunk themed */
 
+/* Global variables and resets */
 :root {
-  --orange: #FF9000;
+  --color-accent: #FF9000;       /* Cyberpunk orange */
+  --color-accent-light: #FFAA33; /* Lighter orange */
+  --color-accent-dark: #CC7300;  /* Darker orange */
+  --color-bg: rgba(0, 0, 0, 0.9); /* Nearly black background */
+  --color-text: #FFFFFF;         /* White text */
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
 }
 
-/* Fix z-index and isolation of screens */
+/* Character Screen Background */
 .screen {
-  z-index: 1;
-  isolation: isolate;
-}
-
-.screen.active {
-  z-index: 10;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Force visibility of active screen */
@@ -31,63 +38,80 @@
   overflow: auto;
 }
 
-/* Only show carousel elements when screen is active */
-#character-selection-screen:not(.active) .carousel-container,
-#character-selection-screen:not(.active) .carousel-indicators,
-#character-selection-screen:not(.active) .carousel-wrapper {
-  display: none !important;
-}
-
-/* Ensure proper z-index stacking to prevent bleed-through */
-#character-selection-screen.active {
-  z-index: 1000; /* Extremely high z-index to prevent any bleed-through */
-}
-
-#character-selection-screen.active .carousel-container {
-  z-index: 1001;
-}
-
-/* Menu container with background to prevent bleed-through */
-#character-selection-screen .menu-container {
-  background-color: rgba(0, 0, 0, 0.75);
-  padding: 1.5vh 0;
-  border-radius: 0;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-  margin: auto;
-  max-width: 90vw;
-  width: 90%;
-  z-index: 1001;
+/* Menu container */
+.menu-container {
+  width: 100%;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Carousel Container and Controls - Single Card View */
+/* Screen title */
+.screen-title {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 3vh;
+  margin: 2vh 0;
+  text-transform: uppercase;
+}
+
+/* Button stack for character screen */
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  max-width: 30vh;
+  margin: 2vh 0;
+}
+
+.button-stack button {
+  margin: 0.5vh 0;
+  padding: 1vh;
+  font-family: var(--font-heading);
+  font-size: 1.8vh;
+  color: var(--color-accent);
+  background-color: transparent;
+  border: 0.2vh solid var(--color-accent);
+  border-radius: 0; /* Sharp edges */
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.button-stack button:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.start-button {
+  margin-bottom: 1vh !important;
+}
+
+/* Ensure container allows overflow visibility */
 .carousel-container {
   position: relative;
   width: 100%;
   margin: 0 auto;
   padding: 0;
-  overflow: visible;
-  border: 0.2vh solid #FF9000;
+  overflow: visible; /* Allow content to be visible outside */
   border-radius: 0;
   max-width: 100%;
 }
 
-/* Allow arrows to be visible outside container */
+/* Make sure the wrapper allows content to be visible outside */
 .carousel-wrapper {
   position: relative;
   width: 90vw;
   max-width: 40vh;
   height: 60vh;
   margin: 0 auto;
-  overflow: visible;
+  overflow: visible; /* Allow arrows to be visible outside */
   background-color: rgba(0, 0, 0, 0.9);
   border: 0.2vh solid #FF9000;
   border-radius: 0;
 }
 
-/* Fix for arrows to be clean without borders */
+/* Position navigation arrows outside the card */
 .carousel-arrow {
   position: absolute;
   top: 50%;
@@ -102,17 +126,14 @@
   cursor: pointer;
   z-index: 20;
   padding: 1vh;
-  margin: 0;
-  padding: 0;
-  backdrop-filter: none;
 }
 
 .carousel-prev {
-  left: -6vh; /* Outside left edge */
+  left: -6vh; /* Position outside the card */
 }
 
 .carousel-next {
-  right: -6vh; /* Outside right edge */
+  right: -6vh; /* Position outside the card */
 }
 
 /* Hover effect for arrows */
@@ -120,46 +141,23 @@
   color: #FFAA33; /* Slightly lighter orange on hover */
 }
 
-.carousel-arrow:focus {
-  outline: none;
-}
-
-.carousel-arrow:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-/* Character card - create full width layout with centered content */
+/* Fix for the character card to properly display */
 .character-card {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2vh;
-  transition: opacity 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
   border: none;
   border-radius: 0;
-  overflow: visible;
-}
-
-/* Custom scrollbar styling */
-.character-card::-webkit-scrollbar {
-  width: 6px;
-}
-
-.character-card::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.character-card::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 144, 0, 0.5);
-  border-radius: 0; /* Sharp edges */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
 }
 
 .character-card.active {
@@ -172,20 +170,19 @@
 .character-image-container {
   position: relative;
   width: 90%;
-  height: 45%; /* Larger image area */
+  height: 45%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 0 2vh 0; /* Space below image */
+  margin: 0 0 2vh 0;
   border: 0.2vh solid #FF9000;
   border-radius: 0;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.7);
   box-shadow: none;
-  padding: 0;
 }
 
-/* Fill image container properly */
+/* Make image fill container properly */
 .character-card img {
   width: 100%;
   height: 100%;
@@ -196,103 +193,6 @@
   backdrop-filter: none;
   margin: 0;
   padding: 0;
-}
-
-/* 3D Toggle Button - Sharp Edges */
-.three-d-toggle {
-  position: absolute;
-  top: 1vh;
-  right: 1vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5vh;
-  padding: 0.5vh 1vh;
-  border: 0.15vh solid #FF9000;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s ease;
-  border-radius: 0;  /* Sharp edges */
-}
-
-/* Toggle between 3D and 2D view buttons */
-.show-3d-view .three-d-toggle {
-  display: none;
-}
-
-.two-d-toggle {
-  display: none;  /* Hidden by default */
-  position: absolute;
-  top: 1vh;
-  right: 1vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5vh;
-  padding: 0.5vh 1vh;
-  border: 0.15vh solid #FF9000;
-  cursor: pointer;
-  z-index: 30;
-  border-radius: 0;  /* Sharp edges */
-}
-
-.show-3d-view .two-d-toggle {
-  display: block;
-}
-
-/* Remove back button in 3D view since toggle serves that purpose */
-.back-from-3d-view {
-  display: none;
-}
-
-.three-d-toggle:hover {
-  background-color: #FF9000;
-  color: #000;
-}
-
-/* Back button for 3D view */
-
-
-/* 3D Model Container */
-.three-d-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #000;
-  z-index: 20;
-  display: none;
-  filter: none;          /* Remove any filters */
-  box-shadow: none;      /* Remove any shadow effects */
-  backdrop-filter: none; /* Remove any backdrop filters */
-}
-
-.show-3d-view .three-d-container {
-  display: block;
-}
-
-.stat-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background-color: #FF9000;
-  border-radius: 0;
-  box-shadow: none;
-  filter: none;
-}
-
-/* Loading indicator for 3D model */
-.model-loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #FF9000;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.9rem;
-  text-align: center;
 }
 
 /* Center character name */
@@ -343,17 +243,107 @@
   text-transform: uppercase;
 }
 
+/* Stat bar styling */
 .stat-bar {
   width: 100%;
   height: 0.8vh;
   background-color: transparent;
   border-bottom: 0.15vh solid rgba(255, 144, 0, 0.5);
   border-top: none;
-  border-left: none;
+  border-left: none; 
   border-right: none;
   border-radius: 0;
   overflow: visible;
   position: relative;
+}
+
+.stat-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #FF9000;
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
+}
+
+/* 3D button positioning */
+.three-d-toggle {
+  position: absolute;
+  top: 1vh;
+  right: 1vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5vh;
+  padding: 0.5vh 1vh;
+  border: 0.15vh solid #FF9000;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 0;
+}
+
+/* Toggle between 3D and 2D view buttons */
+.two-d-toggle {
+  display: none;
+}
+
+/* 3D Model Container */
+.three-d-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 20;
+  display: none;
+}
+
+.show-3d-view .three-d-container {
+  display: block;
+}
+
+.show-3d-view .two-d-toggle {
+  display: block;
+}
+
+.show-3d-view .three-d-toggle {
+  display: none;
+}
+
+/* Loading indicator for 3D model */
+.model-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Indicator dots */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 1vh;
+  margin-top: 1vh;
+}
+
+.carousel-dot {
+  width: 1.2vh;
+  height: 1.2vh;
+  border-radius: 0; /* Square indicators */
+  background-color: rgba(255, 144, 0, 0.3);
+  border: 0.15vh solid rgba(255, 144, 0, 0.5);
+  cursor: pointer;
+}
+
+.carousel-dot.active {
+  background-color: #FF9000;
 }
 
 /* Fixed responsive sizing for mobile */
@@ -364,10 +354,8 @@
     max-width: 280px;
   }
   
-  .character-image {
-    width: 120px;
-    height: 120px;
-    min-height: 120px;
+  .character-image-container {
+    height: 40%;
   }
   
   .character-name {
@@ -387,6 +375,14 @@
   .stat-bar {
     height: 8px;
   }
+  
+  .carousel-prev {
+    left: -4vh;
+  }
+  
+  .carousel-next {
+    right: -4vh;
+  }
 }
 
 /* Ensure the UI is responsive on larger screens too */
@@ -396,10 +392,8 @@
     height: 460px;
   }
   
-  .character-image {
-    width: 180px;
+  .character-image-container {
     height: 180px;
-    min-height: 180px;
   }
   
   .character-name {
@@ -412,236 +406,5 @@
   
   .stat-label {
     font-size: 0.9rem;
-  }
-}
-
-/* Character that's locked */
-.character-card.locked .character-image {
-  filter: grayscale(100%) brightness(0.6);
-}
-
-/* Navigation Indicators - Squares */
-/* Update indicator squares */
-.carousel-indicators {
-  display: flex;
-  justify-content: center;
-  gap: 1vh;
-  margin-top: 1vh;
-  margin-bottom: 1vh;
-}
-
-.carousel-dot {
-  width: 1.2vh;
-  height: 1.2vh;
-  border-radius: 0; /* Square indicators for cyberpunk look */
-  background-color: rgba(255, 144, 0, 0.3);
-  border: 0.15vh solid rgba(255, 144, 0, 0.5);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.carousel-dot.active {
-  background-color: #FF9000;
-  transform: scale(1.2);
-  /* No glow effects */
-}
-
-/* Button positioning fix */
-.button-stack {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0.5vh;
-  width: 100%;
-}
-
-/* Remove buttons from loading screen */
-#loading-screen .button-row,
-#loading-screen .button-stack {
-  display: none;
-}
-
-/* Make sure the buttons are properly sized and styled */
-.start-button, .back-button {
-  width: 100%;
-  padding: 1.5vh 0;
-  text-align: center;
-  border-radius: 0; /* Sharp edges to match design */
-  text-transform: uppercase;
-  font-family: 'Orbitron', sans-serif;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  font-size: 2vh;
-}
-
-/* Make start button more prominent */
-.start-button {
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 2px solid #FF9000;
-  color: #FF9000;
-  font-size: 1.1rem;
-  letter-spacing: 1px;
-  text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
-  font-weight: bold;
-}
-
-.start-button:hover {
-  background-color: rgba(255, 144, 0, 0.2);
-  box-shadow: 0 0 15px rgba(255, 144, 0, 0.5);
-}
-
-.start-button:active {
-  transform: scale(0.98);
-}
-
-.start-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Make back button less prominent */
-.back-button {
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 144, 0, 0.5);
-  color: #FF9000;
-  font-size: 0.9rem;
-}
-
-.back-button:hover {
-  background-color: rgba(0, 0, 0, 0.8);
-  border-color: #FF9000;
-  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
-}
-
-/* Lock Overlay */
-.locked-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-}
-
-.locked-overlay .screen-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #FF9000;
-  text-align: center;
-  margin-bottom: 0.75rem;
-  text-shadow: 0 0 15px rgba(255, 144, 0, 0.7);
-  text-transform: uppercase;
-}
-
-/* Ensure consistent scaling at all screen sizes */
-@media (max-width: 768px) {
-  .carousel-wrapper {
-    width: 90vw;
-    max-width: 40vh;
-    height: 65vh;
-  }
-  
-  .character-image-container {
-    height: 22vh;
-  }
-  
-  .button-stack {
-    width: 90%;
-    max-width: 30vh;
-  }
-  
-  .stat-label {
-    font-size: 1.4vh;
-  }
-  
-  .carousel-arrow {
-    font-size: 3.5vh;
-    padding: 0.8vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .carousel-wrapper {
-    width: 90vw;
-    max-width: 40vh;
-    height: 70vh;
-  }
-  
-  .character-image-container {
-    height: 20vh;
-  }
-  
-  .carousel-arrow {
-    font-size: 3vh;
-    padding: 0.6vh;
-  }
-  
-  .stat-label {
-    font-size: 1.3vh;
-  }
-}
-
-.locked-overlay p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-}
-
-/* Touch Support & Responsive Design */
-@media (max-width: 768px) {
-  .carousel-arrow {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-  .carousel-wrapper {
-    width: min(300px, 90vw);
-    height: 400px;
-    margin: 0;
-  }
-  .character-image {
-    width: 130px;
-    height: 130px;
-  }
-  .button-stack {
-    max-width: 280px;
-    width: 90%;
-  }
-}
-
-/* Fix for mobile */
-@media (max-width: 480px) {
-  .carousel-container {
-    margin: 0.5rem 0;
-  }
-  
-  .carousel-wrapper {
-    width: 85vw;
-    height: 350px;
-  }
-  
-  .character-image {
-    width: 110px;
-    height: 110px;
-  }
-  
-  .carousel-arrow {
-    width: 36px;
-    height: 36px;
-    margin: 0;
-  }
-  
-  .button-stack {
-    margin-top: 0.5rem;
-  }
-  
-  .screen-title {
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
   }
 }

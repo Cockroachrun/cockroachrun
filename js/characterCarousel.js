@@ -1,8 +1,7 @@
 /**
- * Character Carousel Component for Cockroach Run
+ * Character Selection Carousel for Cockroach Run
  */
 const CharacterCarousel = {
-  // Current character index
   currentIndex: 0,
   
   // Character data
@@ -50,40 +49,33 @@ const CharacterCarousel = {
    */
   init() {
     console.log('Initializing character carousel');
-    // Create the carousel structure
-    this.createCarousel();
-    // Add event listeners for navigation
-    this.setupEventListeners();
-    // Show the first character
-    setTimeout(() => this.showCharacter(0), 100);
+    this.setupCarousel();
+    this.setupEvents();
+    this.showCharacter(0);
   },
   
   /**
    * Create the carousel structure
    */
-  createCarousel() {
-    console.log('Creating carousel structure');
+  setupCarousel() {
     const wrapper = document.querySelector('.carousel-wrapper');
-    if (!wrapper) {
-      console.error('Carousel wrapper not found');
-      return;
-    }
+    if (!wrapper) return;
     
-    // Clear any existing content
+    // Clear existing content
     wrapper.innerHTML = '';
     
-    // Create character cards
+    // Create all character cards
     this.characters.forEach((character, index) => {
-      // Create card
+      // Create the card container
       const card = document.createElement('div');
       card.className = 'character-card';
-      card.dataset.index = index;
+      card.setAttribute('data-index', index);
       
       // Create image container
       const imageContainer = document.createElement('div');
       imageContainer.className = 'character-image-container';
       
-      // Create character image
+      // Add character image
       const img = document.createElement('img');
       img.src = character.image;
       img.alt = character.name;
@@ -93,22 +85,22 @@ const CharacterCarousel = {
       const threeDToggle = document.createElement('button');
       threeDToggle.className = 'three-d-toggle';
       threeDToggle.textContent = '3D';
-      threeDToggle.onclick = () => this.toggle3DView(index, true);
+      threeDToggle.addEventListener('click', () => this.toggle3DView(index, true));
       imageContainer.appendChild(threeDToggle);
       
-      // Add 2D toggle button
+      // Add 2D toggle button (initially hidden)
       const twoDToggle = document.createElement('button');
       twoDToggle.className = 'three-d-toggle two-d-toggle';
       twoDToggle.textContent = '2D';
-      twoDToggle.onclick = () => this.toggle3DView(index, false);
+      twoDToggle.addEventListener('click', () => this.toggle3DView(index, false));
       imageContainer.appendChild(twoDToggle);
       
-      // Add 3D container
+      // Add 3D container (initially hidden)
       const threeDContainer = document.createElement('div');
       threeDContainer.className = 'three-d-container';
       threeDContainer.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
       
-      // Create character name
+      // Add character name
       const name = document.createElement('h3');
       name.className = 'character-name';
       name.textContent = character.name;
@@ -145,10 +137,11 @@ const CharacterCarousel = {
       card.appendChild(name);
       card.appendChild(statsContainer);
       
+      // Add card to wrapper
       wrapper.appendChild(card);
     });
     
-    // Add navigation arrows
+    // Create navigation arrows
     const prevArrow = document.createElement('div');
     prevArrow.className = 'carousel-arrow carousel-prev';
     prevArrow.innerHTML = '&lt;';
@@ -168,77 +161,45 @@ const CharacterCarousel = {
       this.characters.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.className = 'carousel-dot';
-        dot.dataset.index = index;
+        dot.setAttribute('data-index', index);
         indicators.appendChild(dot);
       });
     }
   },
   
   /**
-   * Add event listeners for navigation
+   * Set up event listeners
    */
-  setupEventListeners() {
-    console.log('Setting up event listeners');
-    // Previous arrow
-    const prevArrow = document.querySelector('.carousel-prev');
-    if (prevArrow) {
-      prevArrow.addEventListener('click', () => this.prevCharacter());
-    }
+  setupEvents() {
+    // Previous button
+    document.querySelector('.carousel-prev').addEventListener('click', () => {
+      this.prevCharacter();
+    });
     
-    // Next arrow
-    const nextArrow = document.querySelector('.carousel-next');
-    if (nextArrow) {
-      nextArrow.addEventListener('click', () => this.nextCharacter());
-    }
+    // Next button
+    document.querySelector('.carousel-next').addEventListener('click', () => {
+      this.nextCharacter();
+    });
     
     // Indicator dots
     document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-      dot.addEventListener('click', () => this.showCharacter(index));
+      dot.addEventListener('click', () => {
+        this.showCharacter(index);
+      });
     });
-    
-    // Touch swipe support
-    const wrapper = document.querySelector('.carousel-wrapper');
-    if (wrapper) {
-      let startX, moveX;
-      
-      wrapper.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-      });
-      
-      wrapper.addEventListener('touchmove', (e) => {
-        moveX = e.touches[0].clientX;
-      });
-      
-      wrapper.addEventListener('touchend', () => {
-        if (startX && moveX) {
-          const diff = startX - moveX;
-          if (diff > 50) {
-            this.nextCharacter();
-          } else if (diff < -50) {
-            this.prevCharacter();
-          }
-        }
-        startX = null;
-        moveX = null;
-      });
-    }
   },
   
   /**
-   * Show the character at the specified index
+   * Show character at specific index
    */
   showCharacter(index) {
-    console.log('Showing character at index', index);
-    // Hide all character cards
+    // Hide all cards
     document.querySelectorAll('.character-card').forEach(card => {
       card.classList.remove('active');
     });
     
-    // Show only the selected character card
-    const selectedCard = document.querySelectorAll('.character-card')[index];
-    if (selectedCard) {
-      selectedCard.classList.add('active');
-    }
+    // Show selected card
+    document.querySelectorAll('.character-card')[index].classList.add('active');
     
     // Update indicator dots
     document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
@@ -248,67 +209,57 @@ const CharacterCarousel = {
     // Update current index
     this.currentIndex = index;
     
-    // Update selected character in the UI Manager
+    // Update selected character in UI Manager
     if (window.UIManager) {
       UIManager.selectedCharacter = `character-${index}`;
     }
   },
   
   /**
-   * Navigate to the previous character
+   * Navigate to previous character
    */
   prevCharacter() {
-    console.log('Navigating to previous character');
-    const totalCharacters = this.characters.length;
-    const prevIndex = (this.currentIndex - 1 + totalCharacters) % totalCharacters;
+    const prevIndex = (this.currentIndex - 1 + this.characters.length) % this.characters.length;
     this.showCharacter(prevIndex);
   },
   
   /**
-   * Navigate to the next character
+   * Navigate to next character
    */
   nextCharacter() {
-    console.log('Navigating to next character');
-    const totalCharacters = this.characters.length;
-    const nextIndex = (this.currentIndex + 1) % totalCharacters;
+    const nextIndex = (this.currentIndex + 1) % this.characters.length;
     this.showCharacter(nextIndex);
   },
   
   /**
-   * Toggle 3D/2D view
+   * Toggle 3D view
    */
   toggle3DView(index, show3D) {
-    console.log('Toggling 3D view:', show3D);
     const card = document.querySelectorAll('.character-card')[index];
-    if (card) {
-      if (show3D) {
-        card.classList.add('show-3d-view');
-        this.load3DModel(index);
-      } else {
-        card.classList.remove('show-3d-view');
-      }
+    
+    if (show3D) {
+      card.classList.add('show-3d-view');
+      this.load3DModel(index);
+    } else {
+      card.classList.remove('show-3d-view');
     }
   },
   
   /**
-   * Load 3D model (placeholder function)
+   * Load 3D model
    */
   load3DModel(index) {
-    console.log('Loading 3D model for character', index);
     const container = document.querySelectorAll('.three-d-container')[index];
-    if (container) {
-      container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
-      
-      // Simulate loading a 3D model
-      setTimeout(() => {
-        container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
-      }, 1000);
-    }
+    container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
+    
+    // Simulate loading a 3D model
+    setTimeout(() => {
+      container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
+    }, 1000);
   }
 };
 
-// Initialize carousel when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing character carousel');
+// Initialize when the DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
   CharacterCarousel.init();
 });
