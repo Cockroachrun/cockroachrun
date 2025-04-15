@@ -74,7 +74,9 @@
   max-width: 100%;
 }
 
-/* Single Card View - Show only one card at a time */
+/* Single Card View with Clean Navigation Arrows */
+
+/* Ensure one card is visible at a time */
 .carousel-wrapper {
   position: relative;
   width: 90vw;
@@ -87,7 +89,7 @@
   border-radius: 0; /* Sharp edges */
 }
 
-/* Clean Navigation Arrows - No borders, just simple arrows */
+/* Clean Navigation Arrows - Just simple arrows, no borders */
 .carousel-arrow {
   position: absolute;
   top: 50%;
@@ -95,13 +97,13 @@
   width: auto;
   height: auto;
   background: none; /* No background */
-  border: none;     /* No border */
-  color: #FF9000;   /* Orange color */
-  font-size: 4vh;   /* Large, clear font size */
+  border: none; /* No border */
+  color: #FF9000; /* Orange color */
+  font-size: 4vh; /* Large, clear font size */
   font-weight: bold;
   cursor: pointer;
   z-index: 20;
-  padding: 1vh;     /* Add padding for better touch target */
+  padding: 1vh; /* Add padding for better touch target */
 }
 
 .carousel-prev {
@@ -112,20 +114,17 @@
   right: 1vh;
 }
 
-/* Hover effect for arrows - Optional */
+/* Hover effect for arrows */
 .carousel-arrow:hover {
   color: #FFAA33; /* Slightly lighter orange on hover */
 }
 
-.carousel-arrow:hover, .carousel-arrow:focus {
-  background-color: rgba(0, 0, 0, 0.9);
-  border-color: #FF9000;
-  box-shadow: none;
+.carousel-arrow:focus {
   outline: none;
 }
 
 .carousel-arrow:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .character-card {
@@ -143,8 +142,6 @@
   transition: opacity 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
   border: none; /* Remove border since wrapper has border */
-  border-radius: 0; /* Sharp edges */
-  overflow: hidden; /* Ensure no overflow */
 }
 
 /* Custom scrollbar styling */

@@ -378,19 +378,16 @@ class CharacterCarousel {
     // Set transitioning flag
     this.isTransitioning = true;
     
-    // Update current index
-    this.currentIndex = index;
-    
-    // Hide all cards
+    // Hide all characters
     const cards = this.carouselContainer.querySelectorAll('.character-card');
     cards.forEach(card => {
       card.classList.remove('active');
     });
     
-    // Show only the selected card
+    // Show only the selected character
     cards[index].classList.add('active');
     
-    // Update indicators
+    // Update indicator dots if they exist
     if (this.dotsContainer) {
       const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
       dots.forEach(dot => {
@@ -398,6 +395,9 @@ class CharacterCarousel {
       });
       dots[index].classList.add('active');
     }
+    
+    // Update current index
+    this.currentIndex = index;
     
     // Update selected character
     this.selectedCharacter = this.characters[index];
@@ -410,8 +410,6 @@ class CharacterCarousel {
     
     // Reset transitioning flag after animation
     setTimeout(() => {
-      // Update state
-      this.currentIndex = index;
       this.isTransitioning = false;
     }, animate ? this.config.transitionDuration : 0);
   }
