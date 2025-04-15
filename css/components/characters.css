@@ -125,6 +125,7 @@
   transform: translateY(-50%) scale(0.95);
 }
 
+/* Fix for the character card layout to properly fill the width */
 .character-card {
   position: absolute;
   top: 0;
@@ -133,13 +134,20 @@
   height: 100%;
   opacity: 0;
   visibility: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid; /* Change to grid layout */
+  grid-template-columns: 1fr 1fr; /* Create two equal columns */
+  grid-template-areas:
+    "image image"
+    "name name"
+    "stats stats"; /* Define grid areas */
   align-items: center;
-  padding: 0; /* No padding to avoid gaps */
+  justify-items: center;
+  padding: 2vh;
+  gap: 1vh;
   transition: opacity 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
-  border: none; /* Remove border since wrapper has border */
+  border: none;
+  border-radius: 0;
 }
 
 /* Custom scrollbar styling */
@@ -162,15 +170,16 @@
   z-index: 5;
 }
 
-/* Fix for the image container to properly display the cockroach */
+/* Place image container in proper grid area */
 .character-image-container {
+  grid-area: image;
   position: relative;
-  width: calc(100% - 2vh);
+  width: 100%; /* Full width of grid area */
   height: 25vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1vh;
+  margin: 0;
   border: 0.2vh solid #FF9000;
   border-radius: 0;
   overflow: hidden;
@@ -290,14 +299,15 @@
   text-align: center;
 }
 
-/* Fix character name display */
+/* Place character name in proper grid area */
 .character-name {
+  grid-area: name;
   width: 100%;
   text-align: center;
-  font-size: 2vh;
+  font-size: 2.5vh;
   color: #FF9000;
   font-family: 'Orbitron', sans-serif;
-  margin: 0.5vh 0;
+  margin: 1vh 0;
   text-transform: uppercase;
   text-shadow: none;
 }
@@ -312,18 +322,20 @@
   text-shadow: none; /* Remove any text shadow */
 }
 
-/* Implement proper two-column layout for stats */
+/* Place stats in proper grid area and spread across width */
 .character-stats {
+  grid-area: stats;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1vh;
-  width: calc(100% - 2vh);
-  margin: 0.5vh 1vh 1vh 1vh;
+  grid-template-columns: 1fr 1fr; /* Two columns for stats */
+  gap: 2vh 4vh; /* More space between columns */
+  width: 100%;
+  margin: 0;
   padding: 0;
 }
 
+/* Ensure each stat takes full width of its cell */
 .stat {
-  margin-bottom: 0.5vh;  /* Reduce to prevent overflow */
+  margin-bottom: 1vh;
   width: 100%;
 }
 
