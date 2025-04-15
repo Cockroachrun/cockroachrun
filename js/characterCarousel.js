@@ -545,8 +545,9 @@ class CharacterCarousel {
   /**
    * Toggle 3D view for a character
    * @param {string} characterId - ID of the character to toggle 3D view
+   * @param {boolean} show3D - Whether to show 3D view or not
    */
-  toggle3DView(characterId) {
+  toggle3DView(characterId, show3D = null) {
     console.log(`Toggling 3D view for ${characterId}`);
     
     // Get the character data
@@ -557,8 +558,16 @@ class CharacterCarousel {
     const card = document.querySelector(`.character-card[data-character-id="${characterId}"]`);
     if (!card) return;
     
-    // Toggle 3D view class
-    card.classList.toggle('show-3d-view');
+    // If show3D is null, toggle the current state
+    // Otherwise, set to the specified state
+    if (show3D === null) {
+      card.classList.toggle('show-3d-view');
+    } else if (show3D) {
+      card.classList.add('show-3d-view');
+    } else {
+      card.classList.remove('show-3d-view');
+      return; // Exit early if explicitly hiding
+    }
     
     // If showing 3D view, load the 3D model
     if (card.classList.contains('show-3d-view')) {
@@ -569,6 +578,7 @@ class CharacterCarousel {
       if (!threeDContainer) {
         threeDContainer = document.createElement('div');
         threeDContainer.className = 'three-d-container';
+        threeDContainer.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
         imageContainer.appendChild(threeDContainer);
         
         // Add 2D toggle button that appears in 3D view
@@ -577,7 +587,7 @@ class CharacterCarousel {
         twoDToggle.textContent = '2D';
         twoDToggle.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.exit3DView(characterId);
+          this.toggle3DView(characterId, false);
         });
         
         // Add 2D toggle button to the container
@@ -594,25 +604,7 @@ class CharacterCarousel {
     }
   }
   
-  /**
-   * Exit 3D view mode
-   * @param {string} characterId - ID of the character to exit 3D view
-   */
-  exit3DView(characterId) {
-    console.log(`Exiting 3D view for ${characterId}`);
-    
-    // Get the character card
-    const card = document.querySelector(`.character-card[data-character-id="${characterId}"]`);
-    if (!card) return;
-    
-    // Remove 3D view class
-    card.classList.remove('show-3d-view');
-    
-    // Play sound if available
-    if (this.config.enableSounds && window.AudioManager) {
-      window.AudioManager.playSound('ui_back');
-    }
-  }
+  // We've merged exit3DView functionality into toggle3DView(characterId, false)
   
   /**
    * Load a 3D model into a container

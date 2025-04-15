@@ -1,6 +1,10 @@
 /* Character Selection Screen - Cyberpunk Orange Theme */
 /* Updated to be fully responsive with sharp edges */
 
+:root {
+  --orange: #FF9000;
+}
+
 /* Fix z-index and isolation of screens */
 .screen {
   z-index: 1;
@@ -65,41 +69,40 @@
   margin: 0 auto;
   padding: 0;
   overflow: hidden;
-  border: 2px solid #FF9000;
+  border: 0.2vh solid #FF9000;
+  border-radius: 0;
   max-width: 100%;
 }
 
-/* Responsive dimensions for cards and elements */
+/* Updated character card sizing with viewport units */
 .carousel-wrapper {
   position: relative;
-  width: 100%;
-  height: 60vh;
-  margin: 0;
+  width: 90vw;  /* Use viewport width for responsive scaling */
+  max-width: 40vh;  /* Limit maximum width */
+  height: 60vh;  /* Use viewport height for proper scaling */
+  margin: 0 auto;  /* Center the card */
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.9);
-  border-radius: 0; /* Sharp edges */
+  border-radius: 0;  /* Sharp edges */
   border: 0.2vh solid #FF9000;
 }
 
-/* Carousel arrows enhancement - positioned over the card */
+/* Update navigation controls */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 4vh;
+  height: 4vh;
   background-color: rgba(0, 0, 0, 0.8);
-  border: 2px solid #FF9000;
+  border: 0.2vh solid #FF9000;
   color: #FF9000;
-  border-radius: 0; /* Sharp edges */
-  font-size: 1.2rem;
-  font-weight: bold;
+  border-radius: 0;  /* Sharp edges */
+  font-size: 2vh;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: none;
   z-index: 20;
 }
 
@@ -135,12 +138,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 0.75rem; /* Small padding inside the card */
+  padding: 0;  /* Remove padding inside card */
   transition: all 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
   border: none; /* Remove border since wrapper has border */
   box-shadow: none;
-  overflow-y: auto; /* Allow scrolling if content is too tall */
+  overflow: hidden;  /* Ensure no overflow */
   scrollbar-width: thin; 
   scrollbar-color: rgba(255, 144, 0, 0.5) rgba(0, 0, 0, 0.3);
   border-radius: 0; /* Sharp edges */
@@ -174,21 +177,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1vh;
+  margin: 1vh 1vh 0.5vh 1vh;  /* Reduce bottom margin */
   border: 0.2vh solid #FF9000;
   border-radius: 0; /* Sharp edges */
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.7);
+  box-shadow: none; /* Remove any shadow effects */
 }
 
-/* Make the character image a fixed size and ratio */
+/* Ensure NO glow effects on cockroach images or 3D models */
 .character-card img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: none;
+  filter: none;           /* Remove any filters */
+  box-shadow: none;       /* Remove any shadow effects */
+  -webkit-filter: none;   /* Ensure no filter on WebKit browsers */
+  backdrop-filter: none;  /* Remove any backdrop filters */
   margin: 0; /* No margin on image */
   padding: 0; /* No padding on image */
+  width: 100%;
+  height: 100%;
 }
 
 /* 3D Toggle Button - Sharp Edges */
@@ -205,25 +214,37 @@
   cursor: pointer;
   z-index: 10;
   transition: all 0.2s ease;
+  border-radius: 0;  /* Sharp edges */
 }
 
 /* Toggle between 3D and 2D view buttons */
-.show-3d-view .three-d-toggle:not(.two-d-toggle) {
+.show-3d-view .three-d-toggle {
   display: none;
 }
 
 .two-d-toggle {
-  display: none;
+  display: none;  /* Hidden by default */
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 1vh;
+  right: 1vh;
   background-color: rgba(0, 0, 0, 0.7);
   color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5vh;
+  padding: 0.5vh 1vh;
+  border: 0.15vh solid #FF9000;
+  cursor: pointer;
   z-index: 30;
+  border-radius: 0;  /* Sharp edges */
 }
 
 .show-3d-view .two-d-toggle {
   display: block;
+}
+
+/* Remove back button in 3D view since toggle serves that purpose */
+.back-from-3d-view {
+  display: none;
 }
 
 .three-d-toggle:hover {
@@ -244,10 +265,24 @@
   background-color: #000;
   z-index: 20;
   display: none;
+  filter: none;          /* Remove any filters */
+  box-shadow: none;      /* Remove any shadow effects */
+  backdrop-filter: none; /* Remove any backdrop filters */
 }
 
 .show-3d-view .three-d-container {
   display: block;
+}
+
+.stat-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #FF9000;
+  border-radius: 0; /* Sharp edges */
+  box-shadow: none;      /* Remove any shadow/glow */
+  filter: none;          /* Remove any filters */
 }
 
 /* Loading indicator for 3D model */
@@ -263,29 +298,34 @@
 }
 
 .character-name {
-  font-family: 'Orbitron', sans-serif;
-  color: #FF9000;
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  width: 100%;
   text-align: center;
-  text-shadow: 0 0 10px rgba(255, 144, 0, 0.5);
+  font-size: 2vh;
+  color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  margin: 0.5vh 0;
+  text-transform: uppercase;
+  text-shadow: none; /* Remove any text shadow */
 }
 
 .character-description {
-  color: #FFFFFF;
-  font-size: 0.9rem;
-  margin-bottom: 1.25rem;
+  width: 100%;
   text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 0.5vh 0;
+  font-size: 1.4vh;
+  font-family: var(--font-body);
+  text-shadow: none; /* Remove any text shadow */
 }
 
-/* Character Stats - Two Column Layout */
+/* Implement proper two-column layout for stats */
 .character-stats {
-  width: calc(100% - 2vh);
-  margin: 1vh;
-  padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1vh;
+  grid-template-columns: 1fr 1fr;  /* Create two equal columns */
+  gap: 1vh;  /* Add small gap between columns */
+  width: calc(100% - 2vh);
+  margin: 0.5vh 1vh 1vh 1vh;  /* Adjust margins to remove gaps */
+  padding: 0;
 }
 
 .stat {
@@ -293,14 +333,13 @@
   width: 100%;
 }
 
-/* Add stat labels to match the design */
 .stat-label {
   display: flex;
   justify-content: space-between;
   color: #FF9000;
   font-family: 'Orbitron', sans-serif;
-  font-size: 0.8rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.5vh;
+  margin-bottom: 0.25vh;
 }
 
 .stat-bar {
@@ -311,13 +350,6 @@
   border-radius: 0; /* Sharp edges */
   overflow: hidden;
   position: relative;
-}
-
-.stat-fill {
-  height: 100%;
-  background-color: #FF9000;
-  box-shadow: 0 0 8px #FF9000;
-  border-radius: 0; /* Sharp edges */
 }
 
 /* Fixed responsive sizing for mobile */
@@ -385,11 +417,12 @@
 }
 
 /* Navigation Indicators - Squares */
+/* Update indicator squares */
 .carousel-indicators {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 1rem;
+  gap: 1vh;
+  margin-top: 1vh;
 }
 
 .carousel-dot {
@@ -412,10 +445,8 @@
 .button-stack {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1vh;
-  margin: 1.5rem auto 0 auto; /* Center the buttons */
-  width: 80%;
-  max-width: 240px;
+  margin-bottom: 0.5vh;
+  width: 100%;
 }
 
 /* Remove buttons from loading screen */
@@ -503,7 +534,46 @@
   text-transform: uppercase;
 }
 
-/* We're using viewport units for proportional scaling instead of media queries */
+/* Responsive design updates */
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    width: 90vw;
+    max-width: 40vh;
+    height: 65vh;
+  }
+  
+  .character-image-container {
+    height: 22vh;
+  }
+  
+  .button-stack {
+    width: 90%;
+    max-width: 30vh;
+  }
+  
+  .stat-label {
+    font-size: 1.4vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    height: 70vh;
+  }
+  
+  .character-image-container {
+    height: 20vh;
+  }
+  
+  .carousel-arrow {
+    width: 3.5vh;
+    height: 3.5vh;
+  }
+  
+  .stat-label {
+    font-size: 1.3vh;
+  }
+}
 
 .locked-overlay p {
   color: rgba(255, 255, 255, 0.8);
