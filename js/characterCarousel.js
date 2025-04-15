@@ -137,10 +137,21 @@ class CharacterCarousel {
       card.className = `character-card ${index === 0 ? 'active' : ''}`;
       card.dataset.characterId = character.id;
 
-      // Build card content
+      // Fix image path - ensure path is correct and add fallback
+      const imagePath = character.imagePath || `assets/images/characters/${character.id}.png`;
+      
+      // Build card content with fixed image path
       const imageEl = document.createElement('div');
       imageEl.className = 'character-image';
-      imageEl.style.backgroundImage = `url(${character.imagePath})`;
+      imageEl.style.backgroundImage = `url(${imagePath})`;
+      
+      // Add error handling for images
+      const testImg = new Image();
+      testImg.onerror = () => {
+        console.error(`Failed to load image: ${imagePath}`);
+        imageEl.style.backgroundImage = `url(assets/images/characters/default.png)`;
+      };
+      testImg.src = imagePath;
 
       const nameEl = document.createElement('h3');
       nameEl.className = 'character-name';
@@ -217,10 +228,11 @@ class CharacterCarousel {
    * Add all event listeners
    */
   addEventListeners() {
-    // Previous and next buttons
+    // Previous and next buttons with sound
     this.prevButton.addEventListener('click', (e) => {
       // Only respond if character screen is active
       if (document.getElementById('character-selection-screen').classList.contains('active')) {
+        this.playNavigationSound();
         this.prev();
         e.stopPropagation(); // Prevent event bubbling
       }
@@ -228,6 +240,7 @@ class CharacterCarousel {
     
     this.nextButton.addEventListener('click', (e) => {
       if (document.getElementById('character-selection-screen').classList.contains('active')) {
+        this.playNavigationSound();
         this.next();
         e.stopPropagation();
       }
@@ -252,8 +265,23 @@ class CharacterCarousel {
       this.handleSwipe();
     }, { passive: true });
 
-    // Start game button
-    this.startButton.addEventListener('click', () => this.selectCurrentCharacter());
+    // Start button with sound
+    this.startButton.addEventListener('click', () => {
+      if (this.config.enableSounds && window.AudioManager) {
+        window.AudioManager.playSound('ui_select');
+      }
+      this.selectCurrentCharacter();
+    });
+
+    // Back button with sound
+    const backButton = document.getElementById('back-from-character');
+    if (backButton) {
+      backButton.addEventListener('click', () => {
+        if (this.config.enableSounds && window.AudioManager) {
+          window.AudioManager.playSound('ui_back');
+        }
+      });
+    }
 
     // Update start button state
     this.updateStartButtonState();
@@ -277,6 +305,10 @@ class CharacterCarousel {
    */
   prev() {
     if (this.isTransitioning) return;
+    
+    // Play sound effect
+    this.playNavigationSound();
+    
     const newIndex = this.currentIndex - 1 < 0 ? this.characters.length - 1 : this.currentIndex - 1;
     this.goToSlide(newIndex);
   }
@@ -286,8 +318,21 @@ class CharacterCarousel {
    */
   next() {
     if (this.isTransitioning) return;
+    
+    // Play sound effect
+    this.playNavigationSound();
+    
     const newIndex = (this.currentIndex + 1) % this.characters.length;
     this.goToSlide(newIndex);
+  }
+  
+  /**
+   * Play navigation sound effect
+   */
+  playNavigationSound() {
+    if (this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_navigation');
+    }
   }
 
   /**

@@ -1,10 +1,21 @@
 /* Character Selection Screen - Cyberpunk Orange Theme */
 
+/* Fix z-index and isolation of screens */
+.screen {
+  z-index: 1;
+  isolation: isolate;
+}
+
+.screen.active {
+  z-index: 10;
+}
+
 /* Force visibility of active screen */
 #character-selection-screen.active {
   display: flex !important;
   opacity: 1 !important;
   visibility: visible !important;
+  background-color: rgba(0, 0, 0, 0.95);
 }
 
 /* Only show carousel elements when screen is active */
@@ -46,19 +57,22 @@
   box-shadow: 0 0 20px rgba(255, 144, 0, 0.2);
 }
 
+/* Carousel arrows enhancement */
 .carousel-arrow {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background-color: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 144, 0, 0.4);
+  border: 2px solid #FF9000;
   color: #FF9000;
   border-radius: 50%;
-  font-size: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.4);
 }
 
 .carousel-arrow:hover, .carousel-arrow:focus {
@@ -86,7 +100,9 @@
   align-items: center;
   padding: 1.5rem;
   transition: all 0.3s ease;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2px solid #FF9000;
+  box-shadow: 0 0 20px rgba(255, 144, 0, 0.3);
 }
 
 .character-card.active {
@@ -95,13 +111,15 @@
   z-index: 5;
 }
 
+/* Fix image display */
 .character-image {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 10px rgba(255, 144, 0, 0.5));
 }
 
 .character-name {
@@ -125,30 +143,33 @@
   width: 100%;
 }
 
+/* Enhance stat bars */
 .stat {
   margin-bottom: 0.75rem;
 }
 
 .stat-label {
+  font-family: 'Orbitron', sans-serif;
   font-size: 0.8rem;
+  color: #FF9000;
   margin-bottom: 4px;
   display: block;
-  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 5px rgba(255, 144, 0, 0.4);
 }
 
 .stat-bar {
   height: 8px;
   background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 144, 0, 0.4);
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid rgba(255, 144, 0, 0.3);
 }
 
 .stat-fill {
   height: 100%;
   background: linear-gradient(90deg, #FF6B00, #FF9000);
   border-radius: 4px;
-  box-shadow: 0 0 8px rgba(255, 144, 0, 0.7);
+  box-shadow: 0 0 8px rgba(255, 144, 0, 0.5) inset;
 }
 
 /* Character that's locked */
@@ -179,19 +200,27 @@
   transform: scale(1.2);
 }
 
-/* Button Row */
-.button-row {
+/* Button Stack - Vertical Styling */
+.button-stack {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 1rem;
   margin-top: 1.5rem;
-  width: 100%;
-  max-width: 400px;
+  width: 80%;
+  max-width: 240px;
 }
 
-.back-button, .start-button {
+/* Remove buttons from loading screen */
+#loading-screen .button-row,
+#loading-screen .button-stack {
+  display: none;
+}
+
+/* Style the start button */
+.start-button {
   padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(255, 144, 0, 0.6);
   background-color: rgba(0, 0, 0, 0.7);
+  border: 2px solid #FF9000;
   color: #FF9000;
   font-family: 'Orbitron', sans-serif;
   font-size: 1rem;
@@ -199,17 +228,45 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
+  width: 100%;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
-.back-button:hover, .start-button:hover {
-  background-color: rgba(0, 0, 0, 0.9);
-  border-color: #FF9000;
+.start-button:hover {
+  background-color: rgba(255, 144, 0, 0.2);
   box-shadow: 0 0 15px rgba(255, 144, 0, 0.5);
+}
+
+.start-button:active {
+  transform: scale(0.98);
 }
 
 .start-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Style the back button */
+.back-button {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 144, 0, 0.6);
+  color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-transform: uppercase;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  border-color: #FF9000;
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
 }
 
 /* Lock Overlay */
@@ -256,7 +313,23 @@
     width: 90px;
     height: 90px;
   }
-  .button-row {
+  .button-stack {
     max-width: 300px;
+  }
+}
+
+/* Fix for mobile */
+@media (max-width: 480px) {
+  .carousel-container {
+    margin: 1rem 0;
+  }
+  
+  .character-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .button-stack {
+    margin-top: 1rem;
   }
 }
