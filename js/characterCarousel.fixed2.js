@@ -98,7 +98,6 @@ class CharacterCarousel {
     this.characters.forEach((character, index) => {
       const card = document.createElement('div');
       card.className = `character-card ${index === 0 ? 'active' : ''}`;
-      card.style.display = index === 0 ? 'flex' : 'none'; // Only show the first card
       card.dataset.characterId = character.id;
       
       // Add 3D toggle button
@@ -118,62 +117,58 @@ class CharacterCarousel {
       const imageEl = document.createElement('div');
       imageEl.className = 'character-image';
       
-      // Set image with reliable direct path format using character.imagePath
+      // Set image with reliable path format
       let imageSrc = '';
-      if (character.imagePath) {
-        // Use the direct path from character data
-        imageSrc = character.imagePath;
-      } else {
-        // Fallback paths if imagePath not available
-        switch(character.id) {
-          case 'german-roach':
-            imageSrc = 'assets/images/characters/German_Roach.png';
-            break;
-          case 'american-roach':
-            imageSrc = 'assets/images/characters/American_Roach.png';
-            break;
-          case 'oriental-roach':
-            imageSrc = 'assets/images/characters/Oriental_Roach.png';
-            break;
-          default:
-            imageSrc = 'assets/images/characters/default-roach.png';
-        }
+      switch(character.id) {
+        case 'german-roach':
+          imageSrc = 'assets/images/characters/German_Roach.png';
+          break;
+        case 'american-roach':
+          imageSrc = 'assets/images/characters/American_Roach.png';
+          break;
+        case 'oriental-roach':
+          imageSrc = 'assets/images/characters/Oriental_Roach.png';
+          break;
+        default:
+          imageSrc = 'assets/images/characters/default-roach.png';
       }
       
-      // Set a default colored background first
-      imageEl.style.backgroundColor = '#000';
+      // Set image with absolute path
+      imageEl.style.backgroundImage = `url('${imageSrc}')`;
       
-      // Create an actual image element instead of background
-      const actualImg = document.createElement('img');
-      actualImg.src = imageSrc;
-      actualImg.alt = character.name;
-      actualImg.style.width = '100%';
-      actualImg.style.height = '100%';
-      actualImg.style.objectFit = 'contain';
-      actualImg.style.filter = 'drop-shadow(0 0 10px rgba(255, 144, 0, 0.5))';
+      // Debug image loading
+      console.log(`Attempting to load image: ${imageSrc}`);
       
-      // Handle load error with backup options
-      actualImg.onerror = () => {
-        console.error(`Failed to load image: ${imageSrc}`);
-        // Try direct URL from character data as backup
-        if (character.imagePath && imageSrc !== character.imagePath) {
-          actualImg.src = character.imagePath;
-        } else {
-          // If still failing, show a proper fallback
-          actualImg.style.display = 'none';
-          imageEl.innerHTML = `
-            <div style="text-align: center; color: #FF9000; font-family: 'Orbitron', sans-serif;">
-              <svg viewBox="0 0 100 100" width="100" height="100" fill="#FF9000">
-                <path d="M50 20 L65 5 L60 25 L80 30 L60 45 L70 80 L50 65 L30 80 L40 45 L20 30 L40 25 L35 5 Z" />
-              </svg>
-            </div>
-          `;
-        }
+      // Test image loading with explicit element
+      const testImg = new Image();
+      testImg.onload = () => {
+        console.log(`Successfully loaded image: ${imageSrc}`);
       };
-      
-      // Clear any previous content and add the image
-      imageEl.innerHTML = '';
-      imageEl.appendChild(actualImg);
+      testImg.onerror = () => {
+        console.error(`Failed to load image: ${imageSrc}`);
+        // Try alternate path format with underscores instead of spaces
+        const altSrc = character.imagePath ? character.imagePath.replace(/ /g, '_') : '';
+        console.log(`Trying alternate path: ${altSrc}`);
+        imageEl.style.backgroundImage = `url('${altSrc}')`;
+        
+        // If that also fails, use a colored placeholder
+        const finalTestImg = new Image();
+        finalTestImg.onerror = () => {
+          console.error(`Failed to load any image for ${character.name}`);
+          // Set a colored background as fallback
+          imageEl.style.backgroundImage = 'none';
+          imageEl.style.backgroundColor = '#663300';
+          
+          // Add a simple cockroach SVG as content
+          imageEl.innerHTML = `
+            <svg viewBox="0 0 100 100" width="80" height="80" fill="#FF9000">
+              <path d="M50 20 L60 10 L55 25 L70 30 L55 40 L60 70 L50 60 L40 70 L45 40 L30 30 L45 25 L40 10 Z" />
+            </svg>
+          `;
+        };
+        finalTestImg.src = altSrc;
+      };
+      testImg.src = imageSrc;
 
       // Add elements to container
       imageContainer.appendChild(imageEl);
@@ -359,48 +354,52 @@ class CharacterCarousel {
       this.isTransitioning = true;
     }
     
-    // Hide ALL slides first - this ensures only one is visible at a time
-    const allSlides = this.carouselContainer.querySelectorAll('.character-card');
-    allSlides.forEach(slide => {
-      slide.classList.remove('active');
-      slide.style.opacity = '0';
-      slide.style.visibility = 'hidden';
-      slide.style.display = 'none'; // Explicitly hide all slides
-    });
+    // Get current and target slides
+    const currentSlide = this.carouselContainer.querySelector('.character-card.active');
+    const targetSlide = this.carouselContainer.querySelectorAll('.character-card')[index];
     
-    // Get target slide
-    const targetSlide = allSlides[index];
-    if (!targetSlide) return;
+    if (!currentSlide || !targetSlide) return;
     
     // Handle transition with or without animation
-    if (animate && this.currentIndex !== null) {
-      // Prepare new slide but keep it hidden during setup
-      targetSlide.style.display = 'flex';
-      targetSlide.style.visibility = 'visible';
-      targetSlide.style.opacity = '0';
-      targetSlide.style.transform = this.currentIndex < index ? 'translateX(100%)' : 'translateX(-100%)';
+    if (animate) {
+      // Transition out current slide
+      currentSlide.style.opacity = '0';
+      currentSlide.style.transform = index > this.currentIndex ? 'translateX(-10%)' : 'translateX(10%)';
       
-      // Force reflow
-      void targetSlide.offsetWidth;
-      
-      // Transition in new slide
-      targetSlide.style.opacity = '1';
-      targetSlide.style.transform = 'translateX(0)';
-      targetSlide.classList.add('active');
-      
-      // Update dots
-      this.updateDots(index);
-      
-      // Update state
-      this.currentIndex = index;
-      
-      // End transition after duration
+      // After a short delay, transition in the new slide
       this.animationTimeout = setTimeout(() => {
-        this.isTransitioning = false;
-      }, this.config.transitionDuration);
+        currentSlide.classList.remove('active');
+        currentSlide.style.visibility = 'hidden';
+        
+        // Reset and prepare new slide
+        targetSlide.style.transform = index > this.currentIndex ? 'translateX(10%)' : 'translateX(-10%)';
+        targetSlide.style.visibility = 'visible';
+        
+        // Force reflow
+        void targetSlide.offsetWidth;
+        
+        // Transition in new slide
+        targetSlide.style.opacity = '1';
+        targetSlide.style.transform = 'translateX(0)';
+        targetSlide.classList.add('active');
+        
+        // Update dots
+        this.updateDots(index);
+        
+        // Update state
+        this.currentIndex = index;
+        
+        // End transition after duration
+        this.animationTimeout = setTimeout(() => {
+          this.isTransitioning = false;
+        }, this.config.transitionDuration);
+      }, this.config.transitionDuration / 2);
     } else {
       // Instant transition without animation
-      targetSlide.style.display = 'flex';
+      currentSlide.classList.remove('active');
+      currentSlide.style.opacity = '0';
+      currentSlide.style.visibility = 'hidden';
+      
       targetSlide.classList.add('active');
       targetSlide.style.opacity = '1';
       targetSlide.style.transform = 'translateX(0)';
@@ -411,7 +410,6 @@ class CharacterCarousel {
       
       // Update state
       this.currentIndex = index;
-      this.isTransitioning = false;
     }
   }
 
@@ -571,18 +569,6 @@ class CharacterCarousel {
         threeDContainer.className = 'three-d-container';
         imageContainer.appendChild(threeDContainer);
         
-        // Add 2D toggle button that appears in 3D view
-        const twoDToggle = document.createElement('button');
-        twoDToggle.className = 'three-d-toggle two-d-toggle';
-        twoDToggle.textContent = '2D';
-        twoDToggle.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.exit3DView(characterId);
-        });
-        
-        // Add 2D toggle button to the container
-        imageContainer.appendChild(twoDToggle);
-        
         // Load 3D model with Three.js
         this.load3DModel(character.modelPath, threeDContainer);
         
@@ -591,26 +577,6 @@ class CharacterCarousel {
           window.AudioManager.playSound('ui_special');
         }
       }
-    }
-  }
-  
-  /**
-   * Exit 3D view mode
-   * @param {string} characterId - ID of the character to exit 3D view
-   */
-  exit3DView(characterId) {
-    console.log(`Exiting 3D view for ${characterId}`);
-    
-    // Get the character card
-    const card = document.querySelector(`.character-card[data-character-id="${characterId}"]`);
-    if (!card) return;
-    
-    // Remove 3D view class
-    card.classList.remove('show-3d-view');
-    
-    // Play sound if available
-    if (this.config.enableSounds && window.AudioManager) {
-      window.AudioManager.playSound('ui_back');
     }
   }
   
