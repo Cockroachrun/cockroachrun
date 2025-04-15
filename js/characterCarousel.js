@@ -280,21 +280,40 @@ class CharacterCarousel {
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (document.querySelector('#character-selection-screen.active')) {
-        if (e.key === 'ArrowLeft') this.prev();
-        else if (e.key === 'ArrowRight') this.next();
+        if (e.key === 'ArrowLeft') this.prevSlide();
+        else if (e.key === 'ArrowRight') this.nextSlide();
         else if (e.key === 'Enter') this.selectCurrentCharacter();
       }
     });
 
     // Touch support
     this.carouselContainer.addEventListener('touchstart', (e) => {
-      this.touchStartX = e.changedTouches[0].screenX;
+      this.touchStartX = e.touches[0].clientX;
     }, { passive: true });
 
     this.carouselContainer.addEventListener('touchend', (e) => {
-      this.touchEndX = e.changedTouches[0].screenX;
-      this.handleSwipe();
-    }, { passive: true });
+      if (!this.touchStartX) return;
+      
+      this.touchEndX = e.changedTouches[0].clientX;
+      
+      // Calculate difference
+      const diffX = this.touchStartX - this.touchEndX;
+      
+      // Determine direction and threshold
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          // Swipe left - next slide
+          this.nextSlide();
+        } else {
+          // Swipe right - previous slide
+          this.prevSlide();
+        }
+      }
+      
+      // Reset touch tracking
+      this.touchStartX = 0;
+      this.touchEndX = 0;
+    });
 
     // Start button with sound
     this.startButton.addEventListener('click', () => {
@@ -317,102 +336,84 @@ class CharacterCarousel {
   }
 
   /**
-   * Handle swipe gestures
+   * Go to the previous slide
    */
-  handleSwipe() {
-    const threshold = 50;
-    if (this.touchEndX < this.touchStartX - threshold) {
-      this.next();
-    } else if (this.touchEndX > this.touchStartX + threshold) {
-      this.prev();
+  prevSlide() {
+    const prevIndex = (this.currentIndex - 1 + this.characters.length) % this.characters.length;
+    this.goToSlide(prevIndex);
+    
+    // Play sound if enabled
+    if (this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_select');
     }
   }
 
   /**
-   * Go to previous slide
+   * Go to the next slide
    */
-  prev() {
-    if (this.isTransitioning) return;
-    const prevIndex = this.currentIndex - 1 >= 0 ? this.currentIndex - 1 : this.characters.length - 1;
-    this.goToSlide(prevIndex);
-  }
-
-  /**
-   * Go to next slide
-   */
-  next() {
-    if (this.isTransitioning) return;
-    const nextIndex = this.currentIndex + 1 < this.characters.length ? this.currentIndex + 1 : 0;
+  nextSlide() {
+    const nextIndex = (this.currentIndex + 1) % this.characters.length;
     this.goToSlide(nextIndex);
+    
+    // Play sound if enabled
+    if (this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_select');
+    }
   }
 
   /**
-   * Go to a specific slide by index
-   * @param {number} index - Slide index
+   * Go to a specific slide
+   * @param {number} index - Index of the slide to go to
    * @param {boolean} animate - Whether to animate the transition
    */
   goToSlide(index, animate = true) {
     if (this.isTransitioning) return;
-    if (index < 0 || index >= this.characters.length) return;
     
-    if (animate) {
-      this.isTransitioning = true;
+    // Validate index
+    if (index < 0 || index >= this.characters.length) {
+      console.error(`Invalid slide index: ${index}`);
+      return;
     }
     
-    // Hide ALL slides first - this ensures only one is visible at a time
-    const allSlides = this.carouselContainer.querySelectorAll('.character-card');
-    allSlides.forEach(slide => {
-      slide.classList.remove('active');
-      slide.style.opacity = '0';
-      slide.style.visibility = 'hidden';
-      slide.style.display = 'none'; // Explicitly hide all slides
+    // Set transitioning flag
+    this.isTransitioning = true;
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Hide all cards
+    const cards = this.carouselContainer.querySelectorAll('.character-card');
+    cards.forEach(card => {
+      card.classList.remove('active');
     });
     
-    // Get target slide
-    const targetSlide = allSlides[index];
-    if (!targetSlide) return;
+    // Show only the selected card
+    cards[index].classList.add('active');
     
-    // Handle transition with or without animation
-    if (animate && this.currentIndex !== null) {
-      // Prepare new slide but keep it hidden during setup
-      targetSlide.style.display = 'flex';
-      targetSlide.style.visibility = 'visible';
-      targetSlide.style.opacity = '0';
-      targetSlide.style.transform = this.currentIndex < index ? 'translateX(100%)' : 'translateX(-100%)';
-      
-      // Force reflow
-      void targetSlide.offsetWidth;
-      
-      // Transition in new slide
-      targetSlide.style.opacity = '1';
-      targetSlide.style.transform = 'translateX(0)';
-      targetSlide.classList.add('active');
-      
-      // Update dots
-      this.updateDots(index);
-      
-      // Update state
-      this.currentIndex = index;
-      
-      // End transition after duration
-      this.animationTimeout = setTimeout(() => {
-        this.isTransitioning = false;
-      }, this.config.transitionDuration);
-    } else {
-      // Instant transition without animation
-      targetSlide.style.display = 'flex';
-      targetSlide.classList.add('active');
-      targetSlide.style.opacity = '1';
-      targetSlide.style.transform = 'translateX(0)';
-      targetSlide.style.visibility = 'visible';
-      
-      // Update dots
-      this.updateDots(index);
-      
+    // Update indicators
+    if (this.dotsContainer) {
+      const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
+      dots.forEach(dot => {
+        dot.classList.remove('active');
+      });
+      dots[index].classList.add('active');
+    }
+    
+    // Update selected character
+    this.selectedCharacter = this.characters[index];
+    
+    // Notify listeners about the change
+    this.dispatchCustomEvent('character-selected', {
+      character: this.selectedCharacter,
+      index: index
+    });
+    
+    // Reset transitioning flag after animation
+    setTimeout(() => {
       // Update state
       this.currentIndex = index;
       this.isTransitioning = false;
-    }
+    }, animate ? this.config.transitionDuration : 0);
   }
 
   /**

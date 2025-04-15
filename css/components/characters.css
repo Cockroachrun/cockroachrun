@@ -74,44 +74,47 @@
   max-width: 100%;
 }
 
-/* Updated character card sizing with viewport units */
+/* Single Card View - Show only one card at a time */
 .carousel-wrapper {
   position: relative;
-  width: 90vw;  /* Use viewport width for responsive scaling */
-  max-width: 40vh;  /* Limit maximum width */
-  height: 60vh;  /* Use viewport height for proper scaling */
-  margin: 0 auto;  /* Center the card */
+  width: 90vw;
+  max-width: 40vh;
+  height: 60vh;
+  margin: 0 auto;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.9);
-  border-radius: 0;  /* Sharp edges */
   border: 0.2vh solid #FF9000;
+  border-radius: 0; /* Sharp edges */
 }
 
-/* Update navigation controls */
+/* Clean Navigation Arrows - No borders, just simple arrows */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 4vh;
-  height: 4vh;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 0.2vh solid #FF9000;
-  color: #FF9000;
-  border-radius: 0;  /* Sharp edges */
-  font-size: 2vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: auto;
+  height: auto;
+  background: none; /* No background */
+  border: none;     /* No border */
+  color: #FF9000;   /* Orange color */
+  font-size: 4vh;   /* Large, clear font size */
+  font-weight: bold;
   cursor: pointer;
   z-index: 20;
+  padding: 1vh;     /* Add padding for better touch target */
 }
 
 .carousel-prev {
-  left: 0;
+  left: 1vh;
 }
 
 .carousel-next {
-  right: 0;
+  right: 1vh;
+}
+
+/* Hover effect for arrows - Optional */
+.carousel-arrow:hover {
+  color: #FFAA33; /* Slightly lighter orange on hover */
 }
 
 .carousel-arrow:hover, .carousel-arrow:focus {
@@ -125,7 +128,6 @@
   transform: scale(0.95);
 }
 
-/* Character Card Styling with Sharp Edges */
 .character-card {
   position: absolute;
   top: 0;
@@ -137,16 +139,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0;  /* Remove padding inside card */
-  transition: all 0.3s ease;
+  padding: 0; /* No padding to avoid gaps */
+  transition: opacity 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
   border: none; /* Remove border since wrapper has border */
-  box-shadow: none;
-  overflow: hidden;  /* Ensure no overflow */
-  scrollbar-width: thin; 
-  scrollbar-color: rgba(255, 144, 0, 0.5) rgba(0, 0, 0, 0.3);
   border-radius: 0; /* Sharp edges */
+  overflow: hidden; /* Ensure no overflow */
 }
 
 /* Custom scrollbar styling */
