@@ -1,57 +1,3791 @@
 /**
- * Character Carousel for Cockroach Run
- * Mobile-responsive carousel for character selection
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
  */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
 
-// Run when the page loads
-document.addEventListener("DOMContentLoaded", function() {
-    // Set up carousel
-    setupCarousel();
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
     
-    // Also run when clicking mode cards
-    document.querySelectorAll(".mode-card").forEach(card => {
-        card.addEventListener("click", function() {
-            // Small delay to allow screen transition
-            setTimeout(setupCarousel, 50);
-        });
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
     });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+ * Character Carousel - A modular, configurable carousel for character selection
+ * @description Provides a single source of truth for character data and implements
+ * a clean, maintainable carousel UI for character selection.
+ */
+class CharacterCarousel {
+  constructor(options = {}) {
+    // Configuration with defaults
+    this.config = {
+      containerSelector: '#character-carousel',
+      dotsContainerSelector: '#carousel-dots',
+      infoContainerSelector: '#character-info',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      cardClass: 'carousel-card',
+      activeCardClass: 'active',
+      dotClass: 'carousel-dot',
+      activeDotClass: 'active',
+      animationDuration: 400, // milliseconds
+      playSound: true,
+      ...options
+    };
+    
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imageClass: 'default-roach',
+        imageSrc: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 30
+        },
+        imageClass: 'stealth-roach',
+        imageSrc: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 40,
+          stealth: 80
+        },
+        imageClass: 'glider-roach',
+        imageSrc: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+    
+    // State
+    this.currentIndex = 0;
+    this.carouselContainer = document.querySelector(this.config.containerSelector);
+    this.dotsContainer = document.querySelector(this.config.dotsContainerSelector);
+    this.infoContainer = document.querySelector(this.config.infoContainerSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    
+    // Don't initialize if any required element is missing
+    if (!this.carouselContainer || !this.dotsContainer || !this.infoContainer || 
+        !this.prevButton || !this.nextButton) {
+      console.error('Character Carousel: Required elements not found');
+      return;
+    }
+    
+    this.init();
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Initialize the carousel
+   */
+  init() {
+    // Clear any existing content
+    this.carouselContainer.innerHTML = '';
+    this.dotsContainer.innerHTML = '';
+    
+    // Generate carousel cards
+    this.generateCards();
+    
+    // Generate navigation dots
+    this.generateDots();
+    
+    // Add event listeners
+    this.addEventListeners();
+    
+    // Set initial state
+    this.goToSlide(0, false);
+    
+    console.log('Character Carousel initialized');
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Generate character cards
+   */
+  generateCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `${this.config.cardClass} ${index === 0 ? this.config.activeCardClass : ''}`;
+      if (!character.unlocked) {
+        card.classList.add('locked');
+      }
+      card.dataset.index = index;
+      card.dataset.character = character.id;
+      
+      card.innerHTML = `
+        <div class="character-image ${character.imageClass}" 
+             style="background-image: url('${character.imageSrc}');">
+        </div>
+        <h3>${character.name}</h3>
+        <p>${character.description}</p>
+        <div class="stats">
+          <div class="stat">
+            <span>SPEED</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${character.stats.speed}%;"></div>
+            </div>
+          </div>
+          <div class="stat">
+            <span>DURABILITY</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${character.stats.durability}%;"></div>
+            </div>
+          </div>
+          <div class="stat">
+            <span>STEALTH</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${character.stats.stealth}%;"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class="locked-overlay">
+            <span>LOCKED</span>
+            <p>Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+      
+      this.carouselContainer.appendChild(card);
+    });
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Generate navigation dots
+   */
+  generateDots() {
+    this.characters.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.className = `${this.config.dotClass} ${index === 0 ? this.config.activeDotClass : ''}`;
+      dot.dataset.index = index;
+      dot.addEventListener('click', () => this.goToSlide(index));
+      this.dotsContainer.appendChild(dot);
+    });
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Add event listeners for carousel navigation
+   */
+  addEventListeners() {
+    // Previous button click
+    this.prevButton.addEventListener('click', () => {
+      this.goToSlide(this.currentIndex - 1);
+    });
+    
+    // Next button click
+    this.nextButton.addEventListener('click', () => {
+      this.goToSlide(this.currentIndex + 1);
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      // Only handle keys when character selection screen is active
+      const characterScreen = document.getElementById('character-selection-screen');
+      if (!characterScreen || !characterScreen.classList.contains('active')) {
+        return;
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.goToSlide(this.currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        this.goToSlide(this.currentIndex + 1);
+      }
+    });
+    
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.carouselContainer.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.carouselContainer.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      this.handleSwipe();
+    });
+    
+    const handleSwipe = () => {
+      const swipeThreshold = 50; // minimum distance for swipe
+      
+      if (touchEndX < touchStartX - swipeThreshold) {
+        // Swipe left (next)
+        this.goToSlide(this.currentIndex + 1);
+      } else if (touchEndX > touchStartX + swipeThreshold) {
+        // Swipe right (previous)
+        this.goToSlide(this.currentIndex - 1);
+      }
+    };
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Navigate to a specific slide
+   * @param {number} index - Target slide index
+   * @param {boolean} playSound - Whether to play navigation sound
+   */
+  goToSlide(index, playSound = true) {
+    // Handle wrapping
+    if (index < 0) {
+      index = this.characters.length - 1;
+    } else if (index >= this.characters.length) {
+      index = 0;
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Update transform
+    this.carouselContainer.style.transform = `translateX(-${index * 100}%)`;
+    
+    // Update active classes on cards and dots
+    const cards = this.carouselContainer.querySelectorAll(`.${this.config.cardClass}`);
+    const dots = this.dotsContainer.querySelectorAll(`.${this.config.dotClass}`);
+    
+    cards.forEach((card, i) => {
+      card.classList.toggle(this.config.activeCardClass, i === index);
+    });
+    
+    dots.forEach((dot, i) => {
+      dot.classList.toggle(this.config.activeDotClass, i === index);
+    });
+    
+    // Update selection in the GameState
+    if (window.GameState) {
+      window.GameState.selectedCharacter = this.characters[index].id;
+    }
+    
+    // Update info display
+    this.updateInfoDisplay();
+    
+    // Play sound if enabled
+    if (playSound && this.config.playSound && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Update the character info display
+   */
+  updateInfoDisplay() {
+    const character = this.characters[this.currentIndex];
+    
+    // You can customize what information is shown here
+    this.infoContainer.innerHTML = `
+      <h3>${character.name}</h3>
+      <p>${character.description}</p>
+    `;
+    
+    // Update the start button state based on whether character is locked
+    const startButton = document.getElementById('start-game-button');
+    if (startButton) {
+      if (character.unlocked) {
+        startButton.removeAttribute('disabled');
+        startButton.style.opacity = '1';
+      } else {
+        startButton.setAttribute('disabled', 'true');
+        startButton.style.opacity = '0.5';
+      }
+    }
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    // Add to characters array
+    this.characters.push(character);
+    
+    // Regenerate carousel
+    this.init();
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Update an existing character
+   * @param {string} characterId - ID of the character to update
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(characterId, updates) {
+    const index = this.characters.findIndex(char => char.id === characterId);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init();
+    }
+  }
+  
+  /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+*
+   * Get the currently selected character
+   * @returns {Object} Selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+}
+
+// Initialize the carousel when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait for AudioManager to be available, or initialize without sound
+  window.characterCarousel = new CharacterCarousel({
+    playSound: !!window.AudioManager
+  });
 });
 
-// Main carousel setup function
-function setupCarousel() {
-    try {
-        console.log("Setting up character carousel");
-        
-        // Get container element
-        const characterSelection = document.querySelector(".character-selection");
-        if (!characterSelection) {
-            console.warn("Character selection container not found");
-            return;
-        }
-        
-        // Get original character cards
-        const characterCards = document.querySelectorAll(".character-card");
-        if (!characterCards.length) {
-            console.warn("No character cards found");
-            return;
-        }
-        
-        // Get original buttons
-        const originalButtonRow = document.querySelector("#character-selection-screen .button-row");
-        const originalStartButton = document.getElementById("start-game-button");
-        const originalBackButton = document.getElementById("back-from-character");
-        
-        // Store original HTML and button functions
-        const originalHTML = characterSelection.innerHTML;
-        const originalStartFunction = originalStartButton ? originalStartButton.onclick : null;
-        const originalBackFunction = originalBackButton ? originalBackButton.onclick : null;
-        
-        // Hide original button row
-        if (originalButtonRow) {
-            originalButtonRow.style.display = "none";
-        }
-        
-        try {
             // Create carousel HTML
             const carouselHTML = `
                 <div class="character-carousel">
@@ -82,12 +3816,702 @@ function setupCarousel() {
             const styleSheet = document.createElement("style");
             styleSheet.id = "carousel-styles";
             styleSheet.textContent = `
-                /* Lift up the carousel */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Lift up the carousel */
                 .character-carousel {
                     margin-top: -30px;
                 }
                 
-                /* Responsive menu button styles */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Responsive menu button styles */
                 @media (max-width: 480px) {
                     #character-selection-screen .menu-button {
                         padding: 12px 20px;
@@ -102,7 +4526,352 @@ function setupCarousel() {
                     }
                 }
                 
-                /* Ensure buttons are clickable */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Ensure buttons are clickable */
                 .menu-button {
                     position: relative;
                     z-index: 1000;
@@ -111,7 +4880,352 @@ function setupCarousel() {
                     touch-action: manipulation;
                 }
                 
-                /* Orange border on hover and active states */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Orange border on hover and active states */
                 .orange-hover {
                     transition: all 0.2s ease;
                 }
@@ -270,7 +5384,352 @@ function setupCarousel() {
                     border-radius: var(--radius-sm);
                 }
                 
-                /* Stat bars styling - with responsive scaling */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Stat bars styling - with responsive scaling */
                 .character-carousel .character-card .stats {
                     width: 90%;
                     margin-top: 2%;
@@ -310,7 +5769,352 @@ function setupCarousel() {
                     transition: width 0.3s ease;
                 }
                 
-                /* Responsive adjustments for different screen sizes */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Responsive adjustments for different screen sizes */
                 @media (max-width: 768px) {
                     .character-carousel .character-card h3 {
                         font-size: var(--text-lg);
@@ -327,7 +6131,352 @@ function setupCarousel() {
                     }
                 }
                 
-                /* Small screen adjustments */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Small screen adjustments */
                 @media (max-width: 480px) {
                     .character-carousel .character-card .stats {
                         width: 100%;
@@ -343,7 +6492,352 @@ function setupCarousel() {
                     }
                 }
                 
-                /* Extra small screen adjustments */
+                /**
+ * CharacterCarousel - Clean, modular carousel for character selection
+ * Cockroach Run Game
+ */
+class CharacterCarousel {
+  /**
+   * Initialize the character carousel
+   * @param {Object} options - Configuration options
+   */
+  constructor(options = {}) {
+    // Default configuration
+    this.config = {
+      wrapperSelector: '#character-carousel-wrapper',
+      prevButtonSelector: '#prev-character',
+      nextButtonSelector: '#next-character',
+      indicatorsSelector: '#carousel-indicators',
+      startButtonSelector: '#start-game-button',
+      transitionDuration: 300,
+      enableSounds: true,
+      ...options
+    };
+
+    // Character data - single source of truth
+    this.characters = [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'Fastest roach',
+        unlocked: true,
+        stats: {
+          speed: 70,
+          durability: 40,
+          stealth: 40
+        },
+        imagePath: './assets/images/characters/German Cockroach with bg.png'
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'Strongest roach',
+        unlocked: false,
+        stats: {
+          speed: 50,
+          durability: 50,
+          stealth: 90
+        },
+        imagePath: './assets/images/characters/American Cockroach with bg.png'
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'Sneakiest roach',
+        unlocked: false,
+        stats: {
+          speed: 60,
+          durability: 30,
+          stealth: 80
+        },
+        imagePath: './assets/images/characters/Oriental Cockroach with bg.png'
+      }
+    ];
+
+    // Find DOM elements
+    this.wrapper = document.querySelector(this.config.wrapperSelector);
+    this.prevButton = document.querySelector(this.config.prevButtonSelector);
+    this.nextButton = document.querySelector(this.config.nextButtonSelector);
+    this.indicators = document.querySelector(this.config.indicatorsSelector);
+    this.startButton = document.querySelector(this.config.startButtonSelector);
+
+    // State
+    this.currentIndex = 0;
+    this.isTransitioning = false;
+
+    // Initialize
+    if (this.wrapper && this.prevButton && this.nextButton) {
+      this.init();
+    } else {
+      console.error('CharacterCarousel: Required elements not found');
+    }
+  }
+
+  /**
+   * Initialize the carousel
+   */
+  init() {
+    // Clear previous content
+    this.wrapper.innerHTML = '';
+    this.indicators.innerHTML = '';
+
+    // Create character cards
+    this.createCharacterCards();
+    
+    // Create indicators
+    this.createIndicators();
+
+    // Set up event listeners
+    this.setupEventListeners();
+
+    // Show the first character
+    this.showCharacter(0, false);
+
+    console.log('CharacterCarousel initialized with', this.characters.length, 'characters');
+  }
+
+  /**
+   * Create character cards in the DOM
+   */
+  createCharacterCards() {
+    this.characters.forEach((character, index) => {
+      const card = document.createElement('div');
+      card.className = `character-card ${index === 0 ? 'active' : ''} ${!character.unlocked ? 'locked' : ''}`;
+      card.id = `character-${character.id}`;
+      card.dataset.index = index;
+
+      // Card content
+      card.innerHTML = `
+        <div class=\"character-image\" style=\"background-image: url('${character.imagePath}')\"></div>
+        <h3 class=\"character-name\">${character.name}</h3>
+        <p class=\"character-description\">${character.description}</p>
+        <div class=\"character-stats\">
+          <div class=\"stat\">
+            <span class=\"stat-label\">SPEED</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.speed}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">DURABILITY</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.durability}%\"></div>
+            </div>
+          </div>
+          <div class=\"stat\">
+            <span class=\"stat-label\">STEALTH</span>
+            <div class=\"stat-bar\">
+              <div class=\"stat-fill\" style=\"width: ${character.stats.stealth}%\"></div>
+            </div>
+          </div>
+        </div>
+        ${!character.unlocked ? `
+          <div class=\"locked-overlay\">
+            <span class=\"locked-label\">LOCKED</span>
+            <p class=\"unlock-text\">Connect wallet to unlock</p>
+          </div>
+        ` : ''}
+      `;
+
+      this.wrapper.appendChild(card);
+    });
+  }
+
+  /**
+   * Create indicator dots for navigation
+   */
+  createIndicators() {
+    this.characters.forEach((_, index) => {
+      const indicator = document.createElement('div');
+      indicator.className = `carousel-indicator ${index === 0 ? 'active' : ''}`;
+      indicator.dataset.index = index;
+      indicator.addEventListener('click', () => this.showCharacter(index));
+      this.indicators.appendChild(indicator);
+    });
+  }
+
+  /**
+   * Set up event listeners for navigation
+   */
+  setupEventListeners() {
+    // Navigation buttons
+    this.prevButton.addEventListener('click', () => this.prev());
+    this.nextButton.addEventListener('click', () => this.next());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('character-selection-screen').classList.contains('active')) {
+        return; // Only respond when character selection screen is active
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        this.prev();
+      } else if (e.key === 'ArrowRight') {
+        this.next();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    this.wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    this.wrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const difference = touchStartX - touchEndX;
+      
+      // Detect swipe (with a threshold)
+      if (Math.abs(difference) > 30) {
+        if (difference > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    });
+
+    // Update start button state based on character unlock status
+    if (this.startButton) {
+      this.startButton.addEventListener('click', () => {
+        const currentCharacter = this.getSelectedCharacter();
+        if (currentCharacter && currentCharacter.unlocked) {
+          // Start the game with selected character
+          if (window.GameState) {
+            window.GameState.selectedCharacter = currentCharacter.id;
+          }
+          console.log(`Starting game with ${currentCharacter.name}`);
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigate to the previous character
+   */
+  prev() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === 0 ? 
+      this.characters.length - 1 : this.currentIndex - 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  next() {
+    if (this.isTransitioning) return;
+    
+    const newIndex = this.currentIndex === this.characters.length - 1 ? 
+      0 : this.currentIndex + 1;
+    this.showCharacter(newIndex);
+  }
+
+  /**
+   * Show a specific character
+   * @param {number} index - Index of the character to show
+   * @param {boolean} playSound - Whether to play a sound effect
+   */
+  showCharacter(index, playSound = true) {
+    if (this.isTransitioning || index === this.currentIndex) return;
+    
+    this.isTransitioning = true;
+    
+    // Get all cards and indicators
+    const cards = this.wrapper.querySelectorAll('.character-card');
+    const dots = this.indicators.querySelectorAll('.carousel-indicator');
+    
+    // Hide current card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update indicators
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.remove('active');
+    }
+    
+    // Update current index
+    this.currentIndex = index;
+    
+    // Show new card
+    if (cards[this.currentIndex]) {
+      cards[this.currentIndex].classList.add('active');
+    }
+    
+    // Update indicator
+    if (dots[this.currentIndex]) {
+      dots[this.currentIndex].classList.add('active');
+    }
+    
+    // Update start button state
+    if (this.startButton) {
+      const character = this.characters[this.currentIndex];
+      this.startButton.disabled = !character.unlocked;
+      this.startButton.style.opacity = character.unlocked ? '1' : '0.5';
+    }
+    
+    // Play sound if enabled
+    if (playSound && this.config.enableSounds && window.AudioManager) {
+      window.AudioManager.playSound('ui_click');
+    }
+    
+    // Clear transition flag after animation completes
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, this.config.transitionDuration);
+  }
+
+  /**
+   * Get the currently selected character
+   * @returns {Object} The selected character data
+   */
+  getSelectedCharacter() {
+    return this.characters[this.currentIndex];
+  }
+
+  /**
+   * Add a new character to the carousel
+   * @param {Object} character - Character data object
+   */
+  addCharacter(character) {
+    this.characters.push(character);
+    this.init(); // Rebuild the carousel
+  }
+
+  /**
+   * Update an existing character
+   * @param {string} id - Character ID
+   * @param {Object} updates - Properties to update
+   */
+  updateCharacter(id, updates) {
+    const index = this.characters.findIndex(char => char.id === id);
+    if (index !== -1) {
+      this.characters[index] = { ...this.characters[index], ...updates };
+      this.init(); // Rebuild the carousel
+    }
+  }
+  
+  /**
+   * Unlock a character
+   * @param {string} id - Character ID to unlock
+   */
+  unlockCharacter(id) {
+    this.updateCharacter(id, { unlocked: true });
+  }
+}
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Create a single global instance
+  window.characterCarousel = new CharacterCarousel({
+    enableSounds: true
+  });
+});
+ Extra small screen adjustments */
                 @media (max-width: 320px) {
                     .character-carousel .stat {
                         margin-bottom: 2px;

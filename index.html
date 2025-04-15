@@ -72,53 +72,45 @@
         </div>
 
         <!-- Character Selection Screen -->
-        <div id="character-selection-screen" class="screen">
-            <div class="menu-container">
-                <h2 class="screen-title">SELECT COCKROACH</h2>
-                <div class="character-selection">
-                    <div class="character-card selected" data-character="german-roach">
-                        <div class="character-image default-roach"></div>
-                        <h3>GERMAN ROACH</h3>
-                        <p>Fastest roach</p>
-                        <div class="stats">
-                            <div class="stat">
-                                <span>SPEED</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" style="width: 70%"></div>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span>JUMP</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" style="width: 60%"></div>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span>STEALTH</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" style="width: 40%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="character-card locked" data-character="american-roach">
-                        <div class="character-image stealth-roach"></div>
-                        <h3>AMERICAN ROACH</h3>
-                        <p>Strongest roach</p>
-                        <div class="stats">
-                            <div class="stat">
-                                <span>SPEED</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" style="width: 50%"></div>
-                                </div>
-                            </div>
-                            <div class="stat">
-                                <span>JUMP</span>
-                                <div class="stat-bar">
-                                    <div class="stat-fill" style="width: 50%"></div>
-                                </div>
-                            </div>
-                            <div class="stat">
+        <!-- Character Selection Screen -->
+<div id="character-selection-screen" class="screen">
+  <div class="menu-container">
+    <h2 class="screen-title">SELECT COCKROACH</h2>
+    <!-- Simple Carousel Structure -->
+    <div class="carousel-container">
+      <button id="prev-character" class="carousel-arrow carousel-prev">←</button>
+      <div id="character-carousel-wrapper" class="carousel-wrapper">
+        <!-- Cards will be generated here by JavaScript -->
+      </div>
+      <button id="next-character" class="carousel-arrow carousel-next">→</button>
+    </div>
+    <!-- Navigation Indicators -->
+    <div id="carousel-indicators" class="carousel-indicators"></div>
+    <!-- Button Row -->
+    <div class="button-row">
+      <button id="back-from-character" class="back-button">BACK</button>
+      <button id="start-game-button" class="start-button">START GAME</button>
+    </div>
+  </div>
+</div>
+
+  <div class="menu-container">
+    <h2 class="screen-title">SELECT COCKROACH</h2>
+    <div class="character-selection">
+      <div id="character-carousel" class="carousel-track"></div>
+      <div class="carousel-controls">
+        <button id="prev-character" class="carousel-nav">&#60;</button>
+        <div id="carousel-dots" class="carousel-dots"></div>
+        <button id="next-character" class="carousel-nav">&#62;</button>
+      </div>
+      <div id="character-info" class="character-info"></div>
+    </div>
+    <div class="menu-buttons">
+      <button id="start-game-button" class="menu-button orange-hover">START GAME</button>
+      <button id="back-from-character" class="menu-button orange-hover">BACK</button>
+    </div>
+  </div>
+</div>
                                 <span>STEALTH</span>
                                 <div class="stat-bar">
                                     <div class="stat-fill" style="width: 90%"></div>

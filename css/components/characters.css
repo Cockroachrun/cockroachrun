@@ -1,45 +1,372 @@
-.characters-container {
+/* Character Carousel - Clean Implementation */
+
+/* Container and Controls */
+.carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-md) 0;
+  width: 100%;
+}
+
+.carousel-wrapper {
+  width: 280px;
+  height: 350px;
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius-md);
+  margin: 0 var(--space-md);
+}
+
+.carousel-arrow {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 144, 0, 0.4);
+  color: var(--orange);
+  border-radius: 50%;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.carousel-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-color: var(--orange);
+  box-shadow: var(--orange-glow);
+}
+
+/* Character Cards */
+.character-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-md);
+  transition: all var(--transition-normal);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.character-card.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+.character-image {
+  width: 80px;
+  height: 80px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: var(--space-sm);
+}
+
+.character-name {
+  font-family: var(--font-heading);
+  color: var(--orange);
+  font-size: var(--text-md);
+  margin-bottom: var(--space-xs);
+  text-align: center;
+}
+
+.character-description {
+  color: var(--text-color);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.character-stats {
+  width: 100%;
+}
+
+.stat {
+  margin-bottom: var(--space-xs);
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.stat-bar {
+  height: 4px;
+  background-color: rgba(80, 80, 80, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-fill {
+  height: 100%;
+  background-color: var(--orange);
+}
+
+/* Character that's locked */
+.character-card.locked .character-image {
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.locked-label {
+  color: var(--red);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.unlock-text {
+  color: var(--text-color);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* Indicators */
+.carousel-indicators {
   display: flex;
   justify-content: center;
-  gap: var(--space-md);
-  margin: var(--space-lg) 0;
-  flex-wrap: wrap;
+  margin-top: var(--space-md);
+  gap: var(--space-xs);
 }
 
-.character-card {
-  background-color: var(--lighter-bg);
-  padding: var(--space-md);
-  border-radius: 8px;
-  border: 2px solid var(--neon-green);
-  width: 200px;
-  transition: all var(--transition-medium);
+.carousel-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 144, 0, 0.3);
   cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-.character-card:not(.locked):hover,
-.character-card.selected {
-  transform: translateY(-5px);
-  box-shadow: var(--glow-green);
+.carousel-indicator.active {
+  background-color: var(--orange);
+  box-shadow: var(--orange-glow);
 }
 
-.character-card.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border-color: rgba(0, 255, 65, 0.3);
-}
-
-.lock-indicator {
-  font-size: var(--text-xs);
-  margin-top: var(--space-sm);
-  color: var(--neon-green);
-}
-
+/* Responsive adjustments */
 @media (max-width: 480px) {
-  .characters-container {
-    flex-direction: column;
+  .carousel-wrapper {
+    width: 240px;
+    height: 320px;
   }
   
-  .character-card {
-    width: 100%;
+  .carousel-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
+}
+
+
+.character-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.carousel-track {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 320px;
+  height: 340px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+  transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.carousel-card {
+  flex: 0 0 100%;
+  background: var(--lighter-bg);
+  border: 2px solid var(--neon-orange, #ff7a00);
+  border-radius: 12px;
+  margin: 0 8px;
+  box-shadow: 0 0 24px 4px var(--neon-orange, #ff7a00);
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.4s;
+  opacity: 0.7;
+  transform: scale(0.94);
+  position: relative;
+  min-width: 0;
+  z-index: 1;
+}
+.carousel-card.active {
+  opacity: 1;
+  border-color: var(--neon-orange, #ff7a00);
+  box-shadow: 0 0 40px 8px var(--neon-orange, #ff7a00), 0 0 0 2px #fff3;
+  transform: scale(1.05);
+  z-index: 2;
+}
+.carousel-card.locked {
+  opacity: 0.5;
+  filter: grayscale(0.7);
+  pointer-events: none;
+}
+
+.character-image {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px auto;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid var(--neon-orange, #ff7a00);
+  box-shadow: 0 0 16px 4px var(--neon-orange, #ff7a00);
+}
+
+.locked-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(18, 18, 18, 0.85);
+  color: var(--neon-orange, #ff7a00);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  border-radius: 12px;
+  z-index: 10;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 12px 0 8px 0;
+}
+
+.carousel-nav {
+  background: transparent;
+  border: 2px solid var(--neon-orange, #ff7a00);
+  color: var(--neon-orange, #ff7a00);
+  font-size: 2.2em;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 10px 2px var(--neon-orange, #ff7a00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+.carousel-nav:hover,
+.carousel-nav:focus {
+  background: var(--neon-orange, #ff7a00);
+  color: #181818;
+  box-shadow: 0 0 24px 6px var(--neon-orange, #ff7a00);
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.carousel-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  border: 2px solid var(--neon-orange, #ff7a00);
+  box-shadow: 0 0 8px 2px var(--neon-orange, #ff7a00) inset;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+.carousel-dot.active {
+  background: var(--neon-orange, #ff7a00);
+  border-color: #fff;
+  opacity: 1;
+}
+
+.character-info {
+  margin: 18px 0 10px 0;
+  color: var(--neon-orange, #ff7a00);
+  font-family: var(--font-heading, 'Orbitron', 'Exo 2', sans-serif);
+  font-size: 1.15em;
+  text-align: center;
+  min-height: 44px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px #ff7a00, 0 0 2px #fff2;
+}
+
+.stats {
+  margin-top: 8px;
+}
+.stat {
+  margin-bottom: 4px;
+}
+.stat span {
+  font-size: 0.9em;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.stat-bar {
+  width: 100px;
+  height: 8px;
+  background: #222;
+  border-radius: 5px;
+  margin: 3px 0 5px 0;
+  overflow: hidden;
+  box-shadow: 0 0 4px 1px var(--neon-orange, #ff7a00) inset;
+}
+.stat-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff7a00 0%, #ffb347 100%);
+  border-radius: 5px 0 0 5px;
+}
+
+@media (max-width: 600px) {
+  .carousel-track {
+    width: 98vw;
+    min-width: 0;
+    height: 270px;
+  }
+  .carousel-card {
+    min-width: 0;
+    padding: 12px 6px;
+  }
+  .character-image {
+    width: 80px;
+    height: 80px;
+  }
+  .carousel-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1.4em;
+  }
+}
+
+/* Remove legacy character card styles */
+.characters-container, .character-card, .character-card.selected, .character-card.locked, .lock-indicator {
+  all: unset;
+  display: revert;
 }
