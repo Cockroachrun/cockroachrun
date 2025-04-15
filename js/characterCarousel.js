@@ -21,44 +21,7 @@ class CharacterCarousel {
     };
 
     // Character data - single source of truth
-    this.characters = [
-      {
-        id: 'german-roach',
-        name: 'GERMAN ROACH',
-        description: 'Fastest roach',
-        unlocked: true,
-        stats: {
-          speed: 70,
-          durability: 40,
-          stealth: 40
-        },
-        imagePath: 'assets/images/characters/German Cockroach with bg.png'
-      },
-      {
-        id: 'american-roach',
-        name: 'AMERICAN ROACH',
-        description: 'Strongest roach',
-        unlocked: false,
-        stats: {
-          speed: 50,
-          durability: 90,
-          stealth: 30
-        },
-        imagePath: 'assets/images/characters/American Cockroach with bg.png'
-      },
-      {
-        id: 'oriental-roach',
-        name: 'ORIENTAL ROACH',
-        description: 'Sneakiest roach',
-        unlocked: false,
-        stats: {
-          speed: 60,
-          durability: 30,
-          stealth: 80
-        },
-        imagePath: 'assets/images/characters/Oriental Cockroach with bg.png'
-      }
-    ];
+    this.characters = this.getDefaultCharacters();
 
     // Find DOM elements
     this.carouselContainer = document.querySelector(this.config.wrapperSelector);
@@ -211,10 +174,10 @@ class CharacterCarousel {
       imageContainer.appendChild(imageEl);
       imageContainer.appendChild(threeDButton);
       
-      // Create name with proper styling
+      // Create name with proper styling - already uppercase in data
       const nameEl = document.createElement('h3');
       nameEl.className = 'character-name';
-      nameEl.textContent = character.name.toUpperCase().replace('ROACH', 'COCKROACH');
+      nameEl.textContent = character.name;
       
       // Create stats with improved styling
       const statsEl = document.createElement('div');
@@ -525,11 +488,63 @@ class CharacterCarousel {
   }
   
   /**
+   * Default characters for the carousel
+   * @returns {Array} Array of character objects
+   */
+  getDefaultCharacters() {
+    return [
+      {
+        id: 'german-roach',
+        name: 'GERMAN ROACH',
+        description: 'The fastest cockroach with enhanced speed and agility.',
+        unlocked: true,
+        imagePath: 'assets/images/characters/German Cockroach with bg.png',
+        modelPath: 'assets/models/German Cockroach.glb',
+        stats: {
+          speed: 90,
+          durability: 50,
+          stealth: 60
+        }
+      },
+      {
+        id: 'american-roach',
+        name: 'AMERICAN ROACH',
+        description: 'The strongest cockroach with superior durability.',
+        unlocked: false,
+        imagePath: 'assets/images/characters/American Cockroach with bg.png',
+        modelPath: 'assets/models/American Cockroach.glb',
+        stats: {
+          speed: 70,
+          durability: 90,
+          stealth: 40
+        }
+      },
+      {
+        id: 'oriental-roach',
+        name: 'ORIENTAL ROACH',
+        description: 'The stealthiest cockroach with enhanced hiding abilities.',
+        unlocked: false,
+        imagePath: 'assets/images/characters/Oriental Cockroach with bg.png',
+        modelPath: 'assets/models/Oriental Cockroach.glb',
+        stats: {
+          speed: 60,
+          durability: 70,
+          stealth: 90
+        }
+      }
+    ];
+  }
+  
+  /**
    * Toggle 3D view for a character
    * @param {string} characterId - ID of the character to toggle 3D view
    */
   toggle3DView(characterId) {
     console.log(`Toggling 3D view for ${characterId}`);
+    
+    // Get the character data
+    const character = this.characters.find(char => char.id === characterId);
+    if (!character) return;
     
     // Get the character card
     const card = document.querySelector(`.character-card[data-character-id="${characterId}"]`);
@@ -542,21 +557,15 @@ class CharacterCarousel {
     if (card.classList.contains('show-3d-view')) {
       const imageContainer = card.querySelector('.character-image-container');
       
-      // Create 3D view container if it doesn't exist
+      // Create or find 3D container
       let threeDContainer = card.querySelector('.three-d-container');
       if (!threeDContainer) {
         threeDContainer = document.createElement('div');
         threeDContainer.className = 'three-d-container';
         imageContainer.appendChild(threeDContainer);
         
-        // Here you would load your 3D model
-        // This is a placeholder - you'll need to implement the actual 3D loading
-        threeDContainer.innerHTML = `
-          <div class="three-d-placeholder">
-            <p>3D Model Loading...</p>
-            <p>ID: ${characterId}</p>
-          </div>
-        `;
+        // Load 3D model with Three.js
+        this.load3DModel(character.modelPath, threeDContainer);
         
         // Play sound if available
         if (this.config.enableSounds && window.AudioManager) {
@@ -564,6 +573,120 @@ class CharacterCarousel {
         }
       }
     }
+  }
+  
+  /**
+   * Load and render 3D model with Three.js
+   * @param {string} modelPath - Path to the 3D model file
+   * @param {HTMLElement} container - Container element for the 3D view
+   */
+  load3DModel(modelPath, container) {
+    // Check if Three.js is available
+    if (typeof THREE === 'undefined') {
+      console.error('Three.js is not loaded. Cannot display 3D model.');
+      container.innerHTML = '<div class="model-loading">Three.js not loaded</div>';
+      return;
+    }
+    
+    // Set up Three.js scene
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Create scene, camera, renderer
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 5);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(renderer.domElement);
+    
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xFF9000, 0.5);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xFFAA33, 1);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+    
+    // Show loading indicator
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'model-loading';
+    loadingEl.textContent = 'Loading 3D Model...';
+    container.appendChild(loadingEl);
+    
+    // Load GLB model
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      modelPath,
+      (gltf) => {
+        // Model loaded successfully
+        const model = gltf.scene;
+        
+        // Center and scale model
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        
+        model.position.x = -center.x;
+        model.position.y = -center.y;
+        model.position.z = -center.z;
+        
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 3.5 / maxDim;
+        model.scale.set(scale, scale, scale);
+        
+        // Add model to scene
+        scene.add(model);
+        
+        // Remove loading indicator
+        container.removeChild(loadingEl);
+        
+        // Animation function
+        const animate = () => {
+          if (!container.isConnected) return; // Stop if element removed from DOM
+          
+          requestAnimationFrame(animate);
+          model.rotation.y += 0.01;
+          renderer.render(scene, camera);
+        };
+        
+        animate();
+      },
+      (progress) => {
+        // Loading progress
+        const percent = Math.floor((progress.loaded / progress.total) * 100);
+        loadingEl.textContent = `Loading 3D Model: ${percent}%`;
+      },
+      (error) => {
+        // Error handling
+        console.error('Error loading 3D model:', error);
+        loadingEl.textContent = 'Error loading 3D model';
+      }
+    );
+    
+    // Handle window resize
+    const resizeObserver = new ResizeObserver(() => {
+      const newWidth = container.clientWidth;
+      const newHeight = container.clientHeight;
+      
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(newWidth, newHeight);
+    });
+    
+    resizeObserver.observe(container);
+    
+    // Return cleanup function
+    return () => {
+      resizeObserver.disconnect();
+      container.removeChild(renderer.domElement);
+      renderer.dispose();
+    };
   }
 }
 
