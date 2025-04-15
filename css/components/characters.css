@@ -162,7 +162,7 @@
   z-index: 5;
 }
 
-/* Ensure image container properly displays the cockroach image */
+/* Fix for the image container to properly display the cockroach */
 .character-image-container {
   position: relative;
   width: calc(100% - 2vh);
@@ -176,13 +176,15 @@
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.7);
   box-shadow: none;
-  padding: 0;  /* No padding to avoid gaps */
+  padding: 0;
 }
 
+/* Make the image fill the container properly */
 .character-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;  /* Use contain to show the whole cockroach */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  object-fit: cover; /* Cover the container */
+  object-position: center; /* Center the image */
   filter: none;
   box-shadow: none;
   -webkit-filter: none;
@@ -271,9 +273,9 @@
   left: 0;
   height: 100%;
   background-color: #FF9000;
-  border-radius: 0; /* Sharp edges */
-  box-shadow: none;      /* Remove any shadow/glow */
-  filter: none;          /* Remove any filters */
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
 }
 
 /* Loading indicator for 3D model */
@@ -288,6 +290,7 @@
   text-align: center;
 }
 
+/* Fix character name display */
 .character-name {
   width: 100%;
   text-align: center;
@@ -331,15 +334,19 @@
   font-family: 'Orbitron', sans-serif;
   font-size: 1.5vh;
   margin-bottom: 0.25vh;
+  text-transform: uppercase; /* Ensure text is uppercase */
 }
 
 .stat-bar {
   width: 100%;
-  height: 1.2vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  border: 0.15vh solid rgba(255, 144, 0, 0.5);
-  border-radius: 0; /* Sharp edges */
-  overflow: hidden;
+  height: 0.8vh;
+  background-color: transparent;
+  border-bottom: 0.15vh solid rgba(255, 144, 0, 0.5);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  overflow: visible;
   position: relative;
 }
 
