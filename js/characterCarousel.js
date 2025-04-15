@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       name: "GERMAN COCKROACH",
-      image: "assets/images/characters/German Cockroach.png",
+      image: "assets/images/characters/german_cockroach.png",
       stats: {
         speed: 85,
         durability: 50,
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       name: "ORIENTAL COCKROACH",
-      image: "assets/images/characters/Oriental Cockroach.png",
+      image: "assets/images/characters/Oreintal Cockroach.png",
       stats: {
         speed: 65,
         durability: 80,
@@ -283,6 +283,10 @@ document.addEventListener('DOMContentLoaded', function() {
         this.parentNode.innerHTML = '3D';
         this.parentNode.style.fontSize = '1.5vh';
         this.parentNode.style.fontFamily = 'var(--font-heading)';
+        this.parentNode.style.color = '#FF9000';
+        this.parentNode.style.display = 'flex';
+        this.parentNode.style.alignItems = 'center';
+        this.parentNode.style.justifyContent = 'center';
       };
     });
   }

@@ -113,13 +113,19 @@
 
 /* 3D Toggle Button */
 .toggle-3d-btn {
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+    width: 3vh;
+    height: 3vh;
+    border: 0.15vh solid #000000;
   position: absolute;
   top: 1vh;
   right: 1vh;
   width: 3vh;
   height: 3vh;
   border: 0.15vh solid var(--color-neon);
-  background-color: var(--color-bg-dark);
+  background-color: rgba(255, 144, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -289,6 +295,18 @@
   }
 
   .toggle-3d-btn {
+    position: absolute;
+    top: 1vh;
+    right: 1vh;
+    width: 3vh;
+    height: 3vh;
+    border: 0.15vh solid #000000;
+    background-color: rgba(255, 144, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
     width: 3vh;
     height: 3vh;
     top: 1vh;
