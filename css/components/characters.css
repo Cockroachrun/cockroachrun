@@ -1,11 +1,11 @@
-/* Character Carousel - Clean Implementation */
+/* Character Selection Screen - Cyberpunk Orange Theme */
 
-/* Container and Controls */
+/* Carousel Container and Controls */
 .carousel-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: var(--space-md) 0;
+  margin: 2rem 0;
   width: 100%;
 }
 
@@ -15,8 +15,10 @@
   position: relative;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.6);
-  border-radius: var(--radius-md);
-  margin: 0 var(--space-md);
+  border-radius: 12px;
+  margin: 0 1.5rem;
+  border: 1px solid rgba(255, 144, 0, 0.4);
+  box-shadow: 0 0 20px rgba(255, 144, 0, 0.2);
 }
 
 .carousel-arrow {
@@ -24,20 +26,25 @@
   height: 40px;
   background-color: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 144, 0, 0.4);
-  color: var(--orange);
+  color: #FF9000;
   border-radius: 50%;
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
-.carousel-arrow:hover {
+.carousel-arrow:hover, .carousel-arrow:focus {
   background-color: rgba(0, 0, 0, 0.9);
-  border-color: var(--orange);
-  box-shadow: var(--orange-glow);
+  border-color: #FF9000;
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.5);
+  outline: none;
+}
+
+.carousel-arrow:active {
+  transform: scale(0.95);
 }
 
 /* Character Cards */
@@ -50,8 +57,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-md);
-  transition: all var(--transition-normal);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -62,53 +69,59 @@
 }
 
 .character-image {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 0.75rem;
 }
 
 .character-name {
-  font-family: var(--font-heading);
-  color: var(--orange);
-  font-size: var(--text-md);
-  margin-bottom: var(--space-xs);
+  font-family: 'Orbitron', sans-serif;
+  color: #FF9000;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
   text-align: center;
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.5);
 }
 
 .character-description {
-  color: var(--text-color);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-md);
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
   text-align: center;
 }
 
+/* Character Stats */
 .character-stats {
   width: 100%;
 }
 
 .stat {
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.75rem;
 }
 
 .stat-label {
-  font-size: var(--text-xs);
-  margin-bottom: 2px;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
   display: block;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .stat-bar {
-  height: 4px;
-  background-color: rgba(80, 80, 80, 0.3);
-  border-radius: 2px;
+  height: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
   overflow: hidden;
+  border: 1px solid rgba(255, 144, 0, 0.3);
 }
 
 .stat-fill {
   height: 100%;
-  background-color: var(--orange);
+  background: linear-gradient(90deg, #FF6B00, #FF9000);
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(255, 144, 0, 0.7);
 }
 
 /* Character that's locked */
@@ -116,257 +129,110 @@
   filter: grayscale(100%) brightness(0.6);
 }
 
+/* Navigation Indicators */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  background-color: rgba(255, 144, 0, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+  background-color: #FF9000;
+  box-shadow: 0 0 8px rgba(255, 144, 0, 0.7);
+  transform: scale(1.2);
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.back-button, .start-button {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(255, 144, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #FF9000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+}
+
+.back-button:hover, .start-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-color: #FF9000;
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.5);
+}
+
+.start-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Lock Overlay */
 .locked-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 2;
 }
 
-.locked-label {
-  color: var(--red);
-  font-family: var(--font-heading);
-  font-size: var(--text-lg);
-  margin-bottom: var(--space-xs);
+.locked-overlay span {
+  font-family: 'Orbitron', sans-serif;
+  color: #FF9000;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.7);
 }
 
-.unlock-text {
-  color: var(--text-color);
-  font-size: var(--text-sm);
-  text-align: center;
+.locked-overlay p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
 }
 
-/* Indicators */
-.carousel-indicators {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-md);
-  gap: var(--space-xs);
-}
-
-.carousel-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: rgba(255, 144, 0, 0.3);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.carousel-indicator.active {
-  background-color: var(--orange);
-  box-shadow: var(--orange-glow);
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-  .carousel-wrapper {
-    width: 240px;
-    height: 320px;
-  }
-  
+/* Touch Support & Responsive Design */
+@media (max-width: 768px) {
   .carousel-arrow {
     width: 36px;
     height: 36px;
     font-size: 18px;
   }
-}
-
-
-.character-selection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.carousel-track {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  width: 320px;
-  height: 340px;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 16px;
-  transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-.carousel-card {
-  flex: 0 0 100%;
-  background: var(--lighter-bg);
-  border: 2px solid var(--neon-orange, #ff7a00);
-  border-radius: 12px;
-  margin: 0 8px;
-  box-shadow: 0 0 24px 4px var(--neon-orange, #ff7a00);
-  transition: box-shadow 0.3s, border-color 0.3s, transform 0.4s;
-  opacity: 0.7;
-  transform: scale(0.94);
-  position: relative;
-  min-width: 0;
-  z-index: 1;
-}
-.carousel-card.active {
-  opacity: 1;
-  border-color: var(--neon-orange, #ff7a00);
-  box-shadow: 0 0 40px 8px var(--neon-orange, #ff7a00), 0 0 0 2px #fff3;
-  transform: scale(1.05);
-  z-index: 2;
-}
-.carousel-card.locked {
-  opacity: 0.5;
-  filter: grayscale(0.7);
-  pointer-events: none;
-}
-
-.character-image {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 16px auto;
-  border-radius: 50%;
-  background-size: cover;
-  background-position: center;
-  border: 3px solid var(--neon-orange, #ff7a00);
-  box-shadow: 0 0 16px 4px var(--neon-orange, #ff7a00);
-}
-
-.locked-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(18, 18, 18, 0.85);
-  color: var(--neon-orange, #ff7a00);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.2em;
-  border-radius: 12px;
-  z-index: 10;
-}
-
-.carousel-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin: 12px 0 8px 0;
-}
-
-.carousel-nav {
-  background: transparent;
-  border: 2px solid var(--neon-orange, #ff7a00);
-  color: var(--neon-orange, #ff7a00);
-  font-size: 2.2em;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 0 10px 2px var(--neon-orange, #ff7a00);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-}
-.carousel-nav:hover,
-.carousel-nav:focus {
-  background: var(--neon-orange, #ff7a00);
-  color: #181818;
-  box-shadow: 0 0 24px 6px var(--neon-orange, #ff7a00);
-}
-
-.carousel-dots {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.carousel-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #2a2a2a;
-  border: 2px solid var(--neon-orange, #ff7a00);
-  box-shadow: 0 0 8px 2px var(--neon-orange, #ff7a00) inset;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
-}
-.carousel-dot.active {
-  background: var(--neon-orange, #ff7a00);
-  border-color: #fff;
-  opacity: 1;
-}
-
-.character-info {
-  margin: 18px 0 10px 0;
-  color: var(--neon-orange, #ff7a00);
-  font-family: var(--font-heading, 'Orbitron', 'Exo 2', sans-serif);
-  font-size: 1.15em;
-  text-align: center;
-  min-height: 44px;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 8px #ff7a00, 0 0 2px #fff2;
-}
-
-.stats {
-  margin-top: 8px;
-}
-.stat {
-  margin-bottom: 4px;
-}
-.stat span {
-  font-size: 0.9em;
-  color: #fff;
-  letter-spacing: 1px;
-}
-.stat-bar {
-  width: 100px;
-  height: 8px;
-  background: #222;
-  border-radius: 5px;
-  margin: 3px 0 5px 0;
-  overflow: hidden;
-  box-shadow: 0 0 4px 1px var(--neon-orange, #ff7a00) inset;
-}
-.stat-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff7a00 0%, #ffb347 100%);
-  border-radius: 5px 0 0 5px;
-}
-
-@media (max-width: 600px) {
-  .carousel-track {
-    width: 98vw;
-    min-width: 0;
-    height: 270px;
+  
+  .carousel-wrapper {
+    width: 260px;
+    height: 330px;
+    margin: 0 1rem;
   }
-  .carousel-card {
-    min-width: 0;
-    padding: 12px 6px;
-  }
+  
   .character-image {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
   }
-  .carousel-nav {
-    width: 36px;
-    height: 36px;
-    font-size: 1.4em;
+  
+  .button-row {
+    max-width: 300px;
   }
-}
-
-/* Remove legacy character card styles */
-.characters-container, .character-card, .character-card.selected, .character-card.locked, .lock-indicator {
-  all: unset;
-  display: revert;
 }
