@@ -68,20 +68,20 @@
   width: 100%;
   margin: 0 auto;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   border: 0.2vh solid #FF9000;
   border-radius: 0;
   max-width: 100%;
 }
 
-/* Ensure all elements use vh/vw units for consistent scaling */
+/* Allow arrows to be visible outside container */
 .carousel-wrapper {
   position: relative;
   width: 90vw;
   max-width: 40vh;
   height: 60vh;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: visible;
   background-color: rgba(0, 0, 0, 0.9);
   border: 0.2vh solid #FF9000;
   border-radius: 0;
@@ -102,14 +102,17 @@
   cursor: pointer;
   z-index: 20;
   padding: 1vh;
+  margin: 0;
+  padding: 0;
+  backdrop-filter: none;
 }
 
 .carousel-prev {
-  left: 1vh;
+  left: -6vh; /* Outside left edge */
 }
 
 .carousel-next {
-  right: 1vh;
+  right: -6vh; /* Outside right edge */
 }
 
 /* Hover effect for arrows */
@@ -125,7 +128,7 @@
   transform: translateY(-50%) scale(0.95);
 }
 
-/* Fix for the character card layout to properly fill the width */
+/* Character card - create full width layout with centered content */
 .character-card {
   position: absolute;
   top: 0;
@@ -134,20 +137,15 @@
   height: 100%;
   opacity: 0;
   visibility: hidden;
-  display: grid; /* Change to grid layout */
-  grid-template-columns: 1fr 1fr; /* Create two equal columns */
-  grid-template-areas:
-    "image image"
-    "name name"
-    "stats stats"; /* Define grid areas */
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-items: center;
   padding: 2vh;
-  gap: 1vh;
   transition: opacity 0.3s ease;
   background-color: rgba(0, 0, 0, 0.9);
   border: none;
   border-radius: 0;
+  overflow: visible;
 }
 
 /* Custom scrollbar styling */
@@ -170,16 +168,15 @@
   z-index: 5;
 }
 
-/* Place image container in proper grid area */
+/* Make image container large and centered */
 .character-image-container {
-  grid-area: image;
   position: relative;
-  width: 100%; /* Full width of grid area */
-  height: 25vh;
+  width: 90%;
+  height: 45%; /* Larger image area */
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0;
+  margin: 0 0 2vh 0; /* Space below image */
   border: 0.2vh solid #FF9000;
   border-radius: 0;
   overflow: hidden;
@@ -188,12 +185,11 @@
   padding: 0;
 }
 
-/* Make the image fill the container properly */
+/* Fill image container properly */
 .character-card img {
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  object-fit: cover; /* Cover the container */
-  object-position: center; /* Center the image */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   filter: none;
   box-shadow: none;
   -webkit-filter: none;
@@ -299,15 +295,14 @@
   text-align: center;
 }
 
-/* Place character name in proper grid area */
+/* Center character name */
 .character-name {
-  grid-area: name;
   width: 100%;
   text-align: center;
   font-size: 2.5vh;
   color: #FF9000;
   font-family: 'Orbitron', sans-serif;
-  margin: 1vh 0;
+  margin: 0 0 2vh 0;
   text-transform: uppercase;
   text-shadow: none;
 }
@@ -322,18 +317,17 @@
   text-shadow: none; /* Remove any text shadow */
 }
 
-/* Place stats in proper grid area and spread across width */
+/* Two-column stats layout */
 .character-stats {
-  grid-area: stats;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns for stats */
-  gap: 2vh 4vh; /* More space between columns */
-  width: 100%;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 2vh 3vh; /* Vertical and horizontal spacing */
+  width: 90%; /* Match image width */
   margin: 0;
   padding: 0;
 }
 
-/* Ensure each stat takes full width of its cell */
+/* Individual stat styling */
 .stat {
   margin-bottom: 1vh;
   width: 100%;
@@ -345,8 +339,8 @@
   color: #FF9000;
   font-family: 'Orbitron', sans-serif;
   font-size: 1.5vh;
-  margin-bottom: 0.25vh;
-  text-transform: uppercase; /* Ensure text is uppercase */
+  margin-bottom: 0.5vh;
+  text-transform: uppercase;
 }
 
 .stat-bar {
