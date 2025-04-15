@@ -1,5 +1,7 @@
 /* Import Components */
 @import url('./components/forms.css');
+@import url('./components/loading-screen.css');
+@import url('./components/characters.css');
 
 /* Reset and Base Styles */
 * {

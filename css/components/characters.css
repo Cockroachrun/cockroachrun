@@ -1,22 +1,47 @@
 /* Character Selection Screen - Cyberpunk Orange Theme */
 
+/* Force visibility of active screen */
+#character-selection-screen.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Only show carousel elements when screen is active */
+#character-selection-screen:not(.active) .carousel-container,
+#character-selection-screen:not(.active) .carousel-indicators,
+#character-selection-screen:not(.active) .carousel-wrapper {
+  display: none !important;
+}
+
+/* Ensure proper z-index stacking to prevent bleed-through */
+#character-selection-screen.active {
+  z-index: 10;
+}
+
+#character-selection-screen.active .carousel-container {
+  z-index: 11;
+}
+
 /* Carousel Container and Controls */
 .carousel-container {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 2rem 0;
   width: 100%;
+  margin: 2rem 0;
+  z-index: 10;
 }
 
 .carousel-wrapper {
+  position: relative;
   width: 280px;
   height: 350px;
-  position: relative;
+  margin: 0 1.5rem;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.6);
   border-radius: 12px;
-  margin: 0 1.5rem;
   border: 1px solid rgba(255, 144, 0, 0.4);
   box-shadow: 0 0 20px rgba(255, 144, 0, 0.2);
 }
@@ -50,6 +75,8 @@
 /* Character Cards */
 .character-card {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   opacity: 0;
@@ -65,7 +92,7 @@
 .character-card.active {
   opacity: 1;
   visibility: visible;
-  z-index: 1;
+  z-index: 5;
 }
 
 .character-image {
@@ -220,18 +247,15 @@
     height: 36px;
     font-size: 18px;
   }
-  
   .carousel-wrapper {
     width: 260px;
     height: 330px;
     margin: 0 1rem;
   }
-  
   .character-image {
     width: 90px;
     height: 90px;
   }
-  
   .button-row {
     max-width: 300px;
   }

@@ -1,0 +1,263 @@
+/* Cyberpunk Loading Screen - Orange Theme
+   Enhanced with glitch effects, pulse animations, and scan lines */
+
+/* Basic loading screen layout */
+#loading-screen {
+  background-color: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-content {
+  text-align: center;
+  width: 80%;
+  max-width: 500px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Logo container with scan effects */
+.logo-container {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.game-logo {
+  filter: drop-shadow(0 0 15px rgba(255, 144, 0, 0.5));
+  max-width: 100%;
+}
+
+/* Scanner effect overlay */
+.scanner-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    rgba(255, 144, 0, 0.1), 
+    rgba(255, 144, 0, 0.0) 20%,
+    rgba(255, 144, 0, 0.0) 80%,
+    rgba(255, 144, 0, 0.1)
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Scanning line animation */
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(255, 144, 0, 0.5);
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.8);
+  animation: scan 2s linear infinite;
+  z-index: 4;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* Loading title with glitch effect */
+.loading-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: #FF9000;
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.7);
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Glitch text effect */
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text::before, 
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.glitch-text::before {
+  animation: glitch-effect 3s infinite;
+  color: #00AAFF;
+  clip: rect(24px, 550px, 90px, 0);
+  left: 2px;
+}
+
+.glitch-text::after {
+  animation: glitch-effect 2s infinite;
+  color: #FF3300;
+  clip: rect(85px, 550px, 140px, 0);
+  left: -2px;
+}
+
+@keyframes glitch-effect {
+  0% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+  10% {
+    clip: rect(85px, 550px, 140px, 0);
+  }
+  20% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+  30% {
+    clip: rect(85px, 550px, 140px, 0);
+  }
+  40% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+  50% {
+    clip: rect(85px, 550px, 140px, 0);
+  }
+  60% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+  70% {
+    clip: rect(85px, 550px, 140px, 0);
+  }
+  80% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+  90% {
+    clip: rect(85px, 550px, 140px, 0);
+  }
+  100% {
+    clip: rect(24px, 550px, 90px, 0);
+  }
+}
+
+/* Enhanced progress bar */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #FF9000;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #FF6B00, #FF9000);
+  border-radius: 4px;
+  position: relative;
+  transition: width 0.2s ease;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 107, 0, 0.1),
+    rgba(255, 144, 0, 0.4),
+    rgba(255, 107, 0, 0.1)
+  );
+  animation: progress-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* Text styling */
+.loading-text {
+  font-family: 'Orbitron', sans-serif;
+  color: #FF9000;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+}
+
+.flavor-text {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.8;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Asset indicators */
+.assets-status {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.asset-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 144, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.asset-indicator[data-status="loading"] {
+  border-color: #FF9000;
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.4);
+}
+
+.asset-indicator[data-status="complete"] {
+  border-color: #00CC66;
+  box-shadow: 0 0 10px rgba(0, 204, 102, 0.4);
+}
+
+.asset-icon {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.asset-status {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Animated cockroach icon */
+.cockroach-icon {
+  margin-top: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Make sure cockroach icon spins when clicked */
+.cockroach-icon:hover {
+  cursor: pointer;
+}
+
+.cockroach-icon.spin {
+  animation: spin 0.5s linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
