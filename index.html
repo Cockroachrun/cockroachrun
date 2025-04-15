@@ -9,6 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/main.css" />
+    
+    <!-- Preload character images -->
+    <link rel="preload" href="assets/images/characters/German_Roach.png" as="image">
+    <link rel="preload" href="assets/images/characters/American_Roach.png" as="image">
+    <link rel="preload" href="assets/images/characters/Oriental_Roach.png" as="image">
+    <link rel="preload" href="assets/images/characters/default-roach.png" as="image">
 </head>
 <body>
     <!-- Game Canvas Container -->
@@ -20,44 +26,20 @@
     <div id="ui-container">
         <!-- Loading Screen -->
         <div id="loading-screen" class="screen active">
-            <div class="loading-content">
-                <div class="logo-container">
-                    <div class="scanner-effect"></div>
-                    <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
-                    <div class="scan-line"></div>
-                </div>
-                
-                <div class="loading-title glitch-text" data-text="SYSTEM LOADING">SYSTEM LOADING</div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar"></div>
-                </div>
-                
-                <p class="loading-text">Loading... <span id="loading-percent">0</span>%</p>
-                <p class="flavor-text">Preparing for infestation...</p>
-                
-                <div class="assets-status">
-                    <div class="asset-indicator" data-type="models">
-                        <span class="asset-icon">📦</span>
-                        <span class="asset-status">Waiting</span>
-                    </div>
-                    <div class="asset-indicator" data-type="textures">
-                        <span class="asset-icon">🖼️</span>
-                        <span class="asset-status">Waiting</span>
-                    </div>
-                    <div class="asset-indicator" data-type="audio">
-                        <span class="asset-icon">🔊</span>
-                        <span class="asset-status">Waiting</span>
-                    </div>
-                </div>
-                
-                <div class="cockroach-icon">
-                    <!-- Simple cockroach shape -->
-                    <svg width="40" height="40" viewBox="0 0 40 40">
-                        <path fill="#FF9000" d="M20,8 L28,2 L26,12 L32,15 L25,19 L28,30 L20,25 L12,30 L15,19 L8,15 L14,12 L12,2 Z" />
-                    </svg>
-                </div>
+          <div class="loading-content">
+            <div class="logo-container">
+              <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
             </div>
+            
+            <div class="loading-title">SYSTEM LOADING</div>
+            
+            <div class="progress-container">
+              <div class="progress-bar"></div>
+            </div>
+            
+            <p class="loading-text">Loading... <span id="loading-percent">0</span>%</p>
+            <p class="flavor-text">Initializing survival protocols...</p>
+          </div>
         </div>
 
         <!-- Start Screen -->

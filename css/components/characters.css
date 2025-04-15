@@ -45,10 +45,11 @@
   z-index: 10;
 }
 
+/* Fix responsive dimensions for cards and elements */
 .carousel-wrapper {
   position: relative;
-  width: 280px;
-  height: 350px;
+  width: 280px;  /* Fixed width */
+  height: 380px; /* Increased height to fit all content */
   margin: 0 1.5rem;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.6);
@@ -86,7 +87,7 @@
   transform: scale(0.95);
 }
 
-/* Character Cards */
+/* Make character cards fit properly in the wrapper */
 .character-card {
   position: absolute;
   top: 0;
@@ -98,11 +99,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.5rem;
+  justify-content: flex-start;
+  padding: 1rem;
   transition: all 0.3s ease;
   background-color: rgba(0, 0, 0, 0.6);
   border: 2px solid #FF9000;
   box-shadow: 0 0 20px rgba(255, 144, 0, 0.3);
+  overflow-y: auto; /* Allow scrolling if content is too tall */
+  scrollbar-width: thin; 
+  scrollbar-color: rgba(255, 144, 0, 0.5) rgba(0, 0, 0, 0.3);
+}
+
+/* Custom scrollbar styling */
+.character-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.character-card::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.character-card::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 144, 0, 0.5);
+  border-radius: 3px;
 }
 
 .character-card.active {
@@ -111,15 +130,79 @@
   z-index: 5;
 }
 
-/* Fix image display */
+/* Character image container with positioning for 3D button */
+.character-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Make the character image a fixed size and ratio */
 .character-image {
   width: 120px;
   height: 120px;
-  margin: 0 auto 1rem;
+  min-height: 120px; /* Prevent shrinking */
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   filter: drop-shadow(0 0 10px rgba(255, 144, 0, 0.5));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 3D toggle button */
+.three-d-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #FF9000;
+  border: 1px solid #FF9000;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+}
+
+.three-d-toggle:hover {
+  background-color: #FF9000;
+  color: #000;
+}
+
+/* 3D view container */
+.three-d-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.show-3d-view .three-d-container {
+  opacity: 1;
+  visibility: visible;
+}
+
+.three-d-placeholder {
+  color: #FF9000;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
 }
 
 .character-name {
@@ -139,30 +222,34 @@
 }
 
 /* Character Stats */
+/* Keep stat bars at a fixed size */
 .character-stats {
   width: 100%;
+  margin-top: 0.5rem;
 }
 
-/* Enhance stat bars */
 .stat {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .stat-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #FF9000;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: block;
-  text-shadow: 0 0 5px rgba(255, 144, 0, 0.4);
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .stat-bar {
-  height: 8px;
+  width: 100%;
+  height: 6px;
+  margin-bottom: 6px;
   background-color: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 144, 0, 0.4);
+  border: 1px solid rgba(255, 144, 0, 0.5);
   border-radius: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 .stat-fill {
@@ -170,6 +257,38 @@
   background: linear-gradient(90deg, #FF6B00, #FF9000);
   border-radius: 4px;
   box-shadow: 0 0 8px rgba(255, 144, 0, 0.5) inset;
+}
+
+/* Fixed responsive sizing for mobile */
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    width: 240px;
+    height: 360px;
+  }
+  
+  .character-image {
+    width: 100px;
+    height: 100px;
+    min-height: 100px;
+  }
+  
+  .character-name {
+    font-size: 1.1rem;
+    margin: 0.25rem 0;
+  }
+  
+  .character-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.7rem;
+  }
+  
+  .stat-bar {
+    height: 5px;
+  }
 }
 
 /* Character that's locked */

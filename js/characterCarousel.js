@@ -136,73 +136,113 @@ class CharacterCarousel {
       const card = document.createElement('div');
       card.className = `character-card ${index === 0 ? 'active' : ''}`;
       card.dataset.characterId = character.id;
-
-      // Build card content - FIX IMAGE PATHS
+      
+      // Add 3D toggle button
+      const threeDButton = document.createElement('button');
+      threeDButton.className = 'three-d-toggle';
+      threeDButton.textContent = '3D';
+      threeDButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggle3DView(character.id);
+      });
+      
+      // Create image container with 3D button
+      const imageContainer = document.createElement('div');
+      imageContainer.className = 'character-image-container';
+      
+      // Image element
       const imageEl = document.createElement('div');
       imageEl.className = 'character-image';
       
-      // Try multiple image path formats to ensure one works
-      const possiblePaths = [
-        character.imagePath,
-        `assets/images/characters/${character.id}.png`,
-        `assets/images/characters/${character.name.toLowerCase().replace(' ', '-')}.png`,
-        `assets/images/characters/${character.id.replace('-', ' ')}.png`
-      ];
-      
-      // Set default image first
-      imageEl.style.backgroundImage = `url(assets/images/characters/default-roach.png)`;
-      
-      // Try to load the actual image
-      for (const path of possiblePaths) {
-        if (!path) continue;
-        
-        const img = new Image();
-        img.onload = () => {
-          // If this path works, use it
-          imageEl.style.backgroundImage = `url(${path})`;
-        };
-        img.src = path;
+      // Set image with reliable path format
+      let imageSrc = '';
+      switch(character.id) {
+        case 'german-roach':
+          imageSrc = 'assets/images/characters/German_Roach.png';
+          break;
+        case 'american-roach':
+          imageSrc = 'assets/images/characters/American_Roach.png';
+          break;
+        case 'oriental-roach':
+          imageSrc = 'assets/images/characters/Oriental_Roach.png';
+          break;
+        default:
+          imageSrc = 'assets/images/characters/default-roach.png';
       }
+      
+      // Set image with absolute path
+      imageEl.style.backgroundImage = `url('${imageSrc}')`;
+      
+      // Debug image loading
+      console.log(`Attempting to load image: ${imageSrc}`);
+      
+      // Test image loading with explicit element
+      const testImg = new Image();
+      testImg.onload = () => {
+        console.log(`Successfully loaded image: ${imageSrc}`);
+      };
+      testImg.onerror = () => {
+        console.error(`Failed to load image: ${imageSrc}`);
+        // Try alternate path format with underscores instead of spaces
+        const altSrc = character.imagePath ? character.imagePath.replace(/ /g, '_') : '';
+        console.log(`Trying alternate path: ${altSrc}`);
+        imageEl.style.backgroundImage = `url('${altSrc}')`;
+        
+        // If that also fails, use a colored placeholder
+        const finalTestImg = new Image();
+        finalTestImg.onerror = () => {
+          console.error(`Failed to load any image for ${character.name}`);
+          // Set a colored background as fallback
+          imageEl.style.backgroundImage = 'none';
+          imageEl.style.backgroundColor = '#663300';
+          
+          // Add a simple cockroach SVG as content
+          imageEl.innerHTML = `
+            <svg viewBox="0 0 100 100" width="80" height="80" fill="#FF9000">
+              <path d="M50 20 L60 10 L55 25 L70 30 L55 40 L60 70 L50 60 L40 70 L45 40 L30 30 L45 25 L40 10 Z" />
+            </svg>
+          `;
+        };
+        finalTestImg.src = altSrc;
+      };
+      testImg.src = imageSrc;
 
+      // Add elements to container
+      imageContainer.appendChild(imageEl);
+      imageContainer.appendChild(threeDButton);
+      
+      // Create name with proper styling
       const nameEl = document.createElement('h3');
       nameEl.className = 'character-name';
-      nameEl.textContent = character.name;
-
-      const descEl = document.createElement('p');
-      descEl.className = 'character-description';
-      descEl.textContent = character.description;
-
-      // Create stats container
+      nameEl.textContent = character.name.toUpperCase().replace('ROACH', 'COCKROACH');
+      
+      // Create stats with improved styling
       const statsEl = document.createElement('div');
       statsEl.className = 'character-stats';
-
-      // Add stats
+      
+      // Add stats with proper styling
       const { speed, durability, stealth } = character.stats;
       statsEl.innerHTML = `
         <div class="stat">
-          <span class="stat-label">SPEED</span>
           <div class="stat-bar">
             <div class="stat-fill" style="width: ${speed}%;"></div>
           </div>
         </div>
         <div class="stat">
-          <span class="stat-label">DURABILITY</span>
           <div class="stat-bar">
             <div class="stat-fill" style="width: ${durability}%;"></div>
           </div>
         </div>
         <div class="stat">
-          <span class="stat-label">STEALTH</span>
           <div class="stat-bar">
             <div class="stat-fill" style="width: ${stealth}%;"></div>
           </div>
         </div>
       `;
 
-      // Append all elements to card
-      card.appendChild(imageEl);
+      // Append elements to card
+      card.appendChild(imageContainer);
       card.appendChild(nameEl);
-      card.appendChild(descEl);
       card.appendChild(statsEl);
 
       // Add locked overlay if character is locked
@@ -482,6 +522,48 @@ class CharacterCarousel {
    */
   unlockCharacter(id) {
     this.updateCharacter(id, { unlocked: true });
+  }
+  
+  /**
+   * Toggle 3D view for a character
+   * @param {string} characterId - ID of the character to toggle 3D view
+   */
+  toggle3DView(characterId) {
+    console.log(`Toggling 3D view for ${characterId}`);
+    
+    // Get the character card
+    const card = document.querySelector(`.character-card[data-character-id="${characterId}"]`);
+    if (!card) return;
+    
+    // Toggle 3D view class
+    card.classList.toggle('show-3d-view');
+    
+    // If showing 3D view, load the 3D model
+    if (card.classList.contains('show-3d-view')) {
+      const imageContainer = card.querySelector('.character-image-container');
+      
+      // Create 3D view container if it doesn't exist
+      let threeDContainer = card.querySelector('.three-d-container');
+      if (!threeDContainer) {
+        threeDContainer = document.createElement('div');
+        threeDContainer.className = 'three-d-container';
+        imageContainer.appendChild(threeDContainer);
+        
+        // Here you would load your 3D model
+        // This is a placeholder - you'll need to implement the actual 3D loading
+        threeDContainer.innerHTML = `
+          <div class="three-d-placeholder">
+            <p>3D Model Loading...</p>
+            <p>ID: ${characterId}</p>
+          </div>
+        `;
+        
+        // Play sound if available
+        if (this.config.enableSounds && window.AudioManager) {
+          window.AudioManager.playSound('ui_special');
+        }
+      }
+    }
   }
 }
 

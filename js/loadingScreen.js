@@ -13,13 +13,11 @@ class LoadingScreen {
       progressBarSelector: '.progress-bar',
       percentageSelector: '#loading-percent',
       flavorTextSelector: '.flavor-text',
-      cockroachIconSelector: '.cockroach-icon',
-      assetIndicatorsSelector: '.asset-indicator',
       enableSounds: true,
       flavorTextInterval: 3000,
       ...options
     };
-
+    
     // Loading state
     this.progress = 0;
     this.assetsLoaded = 0;
@@ -27,53 +25,32 @@ class LoadingScreen {
     this.statusOverride = false;
     this.quarterLoaded = false;
     this.halfLoaded = false;
-    this.assetsByType = {
-      models: { loaded: 0, total: 0 },
-      textures: { loaded: 0, total: 0 },
-      audio: { loaded: 0, total: 0 }
-    };
-
-    // Tiered loading - assets organized by priority
-    this.tiers = {
-      critical: [], // Essential for game start
-      gameplay: [], // Required for gameplay
-      nonEssential: [] // Can be loaded in background
-    };
-
-    // Random flavor texts to display
+    
+    // Don't track asset types separately - simplify
+    this.assetTypes = ['critical', 'gameplay', 'nonEssential'];
+    
+    // Flavor texts to display
     this.flavorTexts = [
-      "Calibrating roach sensors...",
       "Initializing survival protocols...",
+      "Calibrating roach sensors...",
       "Activating stealth systems...",
       "Scanning for threats...",
       "Loading roach movement algorithms...",
       "Mapping urban terrain...",
-      "Calculating escape routes...",
-      "Enhancing nocturnal vision...",
-      "Processing environmental hazards..."
+      "Calculating escape routes..."
     ];
-
+    
     // Find DOM elements
     this.progressBar = document.querySelector(this.config.progressBarSelector);
     this.percentageElement = document.querySelector(this.config.percentageSelector);
     this.flavorTextElement = document.querySelector(this.config.flavorTextSelector);
-    this.cockroachIcon = document.querySelector(this.config.cockroachIconSelector);
-    this.assetIndicators = document.querySelectorAll(this.config.assetIndicatorsSelector);
-
+    
     // Timers and intervals
     this.flavorTextInterval = null;
     this.glitchTimeout = null;
-
+    
     // Initialize
     this.init();
-    
-    // Only show asset indicators when actually loading
-    setTimeout(() => {
-      const loadingScreen = document.getElementById('loading-screen');
-      if (loadingScreen) {
-        loadingScreen.classList.add('loading-started');
-      }
-    }, 1500); // Delay showing indicators to make loading seem smoother
   }
 
   /**
