@@ -1,4 +1,9 @@
 /**
+ * Character Carousel for Cockroach Run
+ * Handles character selection, navigation, and 3D model toggling
+ */
+
+/**
  * Debounce function to limit rapid clicking
  */
 function debounce(func, wait) {
@@ -100,89 +105,136 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Previous arrow
+  /**
+   * Navigate to the previous character
+   */
+  function navigateToPrev() {
+    // Remove active class from all cards
+    document.querySelectorAll('.character-card.active').forEach(c => {
+      c.classList.remove('active');
+    });
+    
+    // Calculate the previous index with wraparound
+    const prevIndex = (currentIndex - 1 + characters.length) % characters.length;
+    currentIndex = prevIndex;
+
+    // Activate the new card
+    const newCard = document.querySelector(`.character-card[data-index="${prevIndex}"]`);
+    if (newCard) {
+      newCard.classList.add('active');
+    }
+
+    // Update character information
+    updateCharacter(prevIndex);
+  }
+
+  /**
+   * Navigate to the next character
+   */
+  function navigateToNext() {
+    // Remove active class from all cards
+    document.querySelectorAll('.character-card.active').forEach(c => {
+      c.classList.remove('active');
+    });
+    
+    // Calculate the next index with wraparound
+    const nextIndex = (currentIndex + 1) % characters.length;
+    currentIndex = nextIndex;
+
+    // Activate the new card
+    const newCard = document.querySelector(`.character-card[data-index="${nextIndex}"]`);
+    if (newCard) {
+      newCard.classList.add('active');
+    }
+
+    // Update character information
+    updateCharacter(nextIndex);
+  }
+
+  // Previous arrow event listener
   if (prevArrow) {
-    prevArrow.addEventListener('click', debounce(function() {
-      const currentCard = document.querySelector('.character-card.active');
-      if (!currentCard) return;
-
-      currentCard.classList.remove('active');
-      const prevIndex = (currentIndex - 1 + characters.length) % characters.length;
-      currentIndex = prevIndex;
-
-      const newCard = document.querySelector(`.character-card[data-index="${prevIndex}"]`);
-      if (newCard) {
-        newCard.classList.add('active');
-      }
-
-      updateCharacter(prevIndex);
-    }, 500));
+    prevArrow.addEventListener('click', debounce(navigateToPrev, 500));
   }
 
-  // Next arrow
+  // Next arrow event listener
   if (nextArrow) {
-    nextArrow.addEventListener('click', debounce(function() {
-      const currentCard = document.querySelector('.character-card.active');
-      if (!currentCard) return;
-
-      currentCard.classList.remove('active');
-      const nextIndex = (currentIndex + 1) % characters.length;
-      currentIndex = nextIndex;
-
-      const newCard = document.querySelector(`.character-card[data-index="${nextIndex}"]`);
-      if (newCard) {
-        newCard.classList.add('active');
-      }
-
-      updateCharacter(nextIndex);
-    }, 500));
+    nextArrow.addEventListener('click', debounce(navigateToNext, 500));
   }
 
-  // Dot indicators
+  /**
+   * Navigate directly to a specific character
+   * @param {number} idx - The index to navigate to
+   */
+  function navigateToIndex(idx) {
+    // Remove active class from all cards
+    document.querySelectorAll('.character-card.active').forEach(c => {
+      c.classList.remove('active');
+    });
+    
+    // Update index
+    currentIndex = idx;
+
+    // Activate the new card
+    const newCard = document.querySelector(`.character-card[data-index="${idx}"]`);
+    if (newCard) {
+      newCard.classList.add('active');
+    }
+
+    // Update dot indicators
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+
+    // Update character information
+    updateCharacter(idx);
+  }
+
+  // Dot indicators event listeners
   dots.forEach(function(dot, idx) {
     dot.addEventListener('click', debounce(function() {
-      const currentCard = document.querySelector('.character-card.active');
-      if (currentCard) {
-        currentCard.classList.remove('active');
-      }
-      currentIndex = idx;
-
-      const newCard = document.querySelector(`.character-card[data-index="${idx}"]`);
-      if (newCard) {
-        newCard.classList.add('active');
-      }
-
-      updateCharacter(idx);
+      navigateToIndex(idx);
     }, 500));
   });
 
-  // 3D Toggle button
-  const toggleButton = card.querySelector('.toggle-3d-btn');
-  if (toggleButton) {
-    toggleButton.addEventListener('click', function() {
-      card.classList.toggle('show-3d');
-      if (card.classList.contains('show-3d')) {
+  /**
+   * Add 3D toggle functionality to a character card
+   * @param {HTMLElement} cardElement - The character card to add the toggle to
+   */
+  function add3DToggleListener(cardElement) {
+    const toggleBtn = cardElement.querySelector('.toggle-3d-btn');
+    if (!toggleBtn) return;
+    
+    toggleBtn.addEventListener('click', function() {
+      cardElement.classList.toggle('show-3d');
+      
+      if (cardElement.classList.contains('show-3d')) {
         // Simulate loading a 3D model
-        const container = card.querySelector('.character-3d-container');
+        const container = cardElement.querySelector('.character-3d-container');
         if (container) {
           container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
           setTimeout(() => {
-            container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-neon);">3D Model View</div>';
           }, 1000);
         }
-        toggleButton.setAttribute('title', 'Toggle 2D View');
+        toggleBtn.setAttribute('title', 'Toggle 2D View');
       } else {
-        const container = card.querySelector('.character-3d-container');
+        const container = cardElement.querySelector('.character-3d-container');
         if (container) {
           container.innerHTML = '';
         }
-        toggleButton.setAttribute('title', 'Toggle 3D View');
+        toggleBtn.setAttribute('title', 'Toggle 3D View');
       }
     });
   }
+  
+  // Add 3D toggle listener to the initial card
+  add3DToggleListener(card);
 
-  // Initialize additional character cards for the 2nd and 3rd cockroaches
-  // This will allow us to transition properly with the data-index attributes
+  /**
+   * Create a character card element
+   * @param {number} index - The index of the character in the data array
+   * @returns {HTMLElement} The created card element
+   */
   function createCharacterCard(index) {
     const charInfo = characters[index];
     const newCard = document.createElement('div');
@@ -197,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
           class="character-image"
         />
         <button class="toggle-3d-btn" title="Toggle 3D View">
-          <img src="assets/icons/3d-icon.svg" alt="3D icon" />
+          <img src="assets/icons/3d-icon.svg" alt="3D icon" onerror="this.parentNode.innerHTML='3D';"/>
         </button>
       </div>
       <div class="character-3d-container"></div>
@@ -219,7 +271,24 @@ document.addEventListener('DOMContentLoaded', function() {
   for (let i = 1; i < characters.length; i++) {
     const cardEl = createCharacterCard(i);
     wrapper.appendChild(cardEl);
+    // Add 3D toggle functionality to the newly created card
+    add3DToggleListener(cardEl);
   }
+  
+  // Handle case where 3D icon might be missing
+  function checkMissing3DIcon() {
+    document.querySelectorAll('.toggle-3d-btn img').forEach(img => {
+      img.onerror = function() {
+        // Replace with text if image fails to load
+        this.parentNode.innerHTML = '3D';
+        this.parentNode.style.fontSize = '1.5vh';
+        this.parentNode.style.fontFamily = 'var(--font-heading)';
+      };
+    });
+  }
+  
+  // Check for missing 3D icons
+  checkMissing3DIcon();
 
   // Initialize with the first character
   updateCharacter(0);
