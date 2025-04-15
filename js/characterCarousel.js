@@ -1,11 +1,9 @@
 /**
- * Character Selection Carousel for Cockroach Run
+ * Simple Character Carousel
  */
-const CharacterCarousel = {
-  currentIndex: 0,
-  
+document.addEventListener('DOMContentLoaded', function() {
   // Character data
-  characters: [
+  const characters = [
     {
       name: "AMERICAN COCKROACH",
       image: "assets/images/characters/American Cockroach with bg.png",
@@ -42,224 +40,127 @@ const CharacterCarousel = {
         burrowing: 85
       }
     }
-  ],
+  ];
   
-  /**
-   * Initialize the carousel
-   */
-  init() {
-    console.log('Initializing character carousel');
-    this.setupCarousel();
-    this.setupEvents();
-    this.showCharacter(0);
-  },
+  // Current character index
+  let currentIndex = 0;
   
-  /**
-   * Create the carousel structure
-   */
-  setupCarousel() {
-    const wrapper = document.querySelector('.carousel-wrapper');
-    if (!wrapper) return;
+  // Get elements
+  const prevArrow = document.querySelector('.carousel-prev');
+  const nextArrow = document.querySelector('.carousel-next');
+  const dots = document.querySelectorAll('.carousel-dot');
+  const card = document.querySelector('.character-card');
+  
+  // Function to update character
+  function updateCharacter(index) {
+    const character = characters[index];
     
-    // Clear existing content
-    wrapper.innerHTML = '';
+    // Update image
+    const img = card.querySelector('img');
+    img.src = character.image;
+    img.alt = character.name;
     
-    // Create all character cards
-    this.characters.forEach((character, index) => {
-      // Create the card container
-      const card = document.createElement('div');
-      card.className = 'character-card';
-      card.setAttribute('data-index', index);
+    // Update name
+    card.querySelector('.character-name').textContent = character.name;
+    
+    // Update stats
+    Object.entries(character.stats).forEach(([statName, value], i) => {
+      const statElements = card.querySelectorAll('.stat');
+      const statElement = statElements[i];
       
-      // Create image container
-      const imageContainer = document.createElement('div');
-      imageContainer.className = 'character-image-container';
-      
-      // Add character image
-      const img = document.createElement('img');
-      img.src = character.image;
-      img.alt = character.name;
-      imageContainer.appendChild(img);
-      
-      // Add 3D toggle button
-      const threeDToggle = document.createElement('button');
-      threeDToggle.className = 'three-d-toggle';
-      threeDToggle.textContent = '3D';
-      threeDToggle.addEventListener('click', () => this.toggle3DView(index, true));
-      imageContainer.appendChild(threeDToggle);
-      
-      // Add 2D toggle button (initially hidden)
-      const twoDToggle = document.createElement('button');
-      twoDToggle.className = 'three-d-toggle two-d-toggle';
-      twoDToggle.textContent = '2D';
-      twoDToggle.addEventListener('click', () => this.toggle3DView(index, false));
-      imageContainer.appendChild(twoDToggle);
-      
-      // Add 3D container (initially hidden)
-      const threeDContainer = document.createElement('div');
-      threeDContainer.className = 'three-d-container';
-      threeDContainer.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
-      
-      // Add character name
-      const name = document.createElement('h3');
-      name.className = 'character-name';
-      name.textContent = character.name;
-      
-      // Create stats container
-      const statsContainer = document.createElement('div');
-      statsContainer.className = 'character-stats';
-      
-      // Add all 6 stats
-      Object.entries(character.stats).forEach(([statName, value]) => {
-        const stat = document.createElement('div');
-        stat.className = 'stat';
-        
-        const statLabel = document.createElement('div');
-        statLabel.className = 'stat-label';
+      if (statElement) {
+        const statLabel = statElement.querySelector('.stat-label');
         statLabel.innerHTML = `${statName.toUpperCase()} <span>${value}%</span>`;
         
-        const statBar = document.createElement('div');
-        statBar.className = 'stat-bar';
-        
-        const statFill = document.createElement('div');
-        statFill.className = 'stat-fill';
+        const statFill = statElement.querySelector('.stat-fill');
         statFill.style.width = `${value}%`;
-        
-        statBar.appendChild(statFill);
-        stat.appendChild(statLabel);
-        stat.appendChild(statBar);
-        statsContainer.appendChild(stat);
-      });
-      
-      // Assemble the card
-      card.appendChild(imageContainer);
-      card.appendChild(threeDContainer);
-      card.appendChild(name);
-      card.appendChild(statsContainer);
-      
-      // Add card to wrapper
-      wrapper.appendChild(card);
+      }
     });
     
-    // Create navigation arrows
-    const prevArrow = document.createElement('div');
-    prevArrow.className = 'carousel-arrow carousel-prev';
-    prevArrow.innerHTML = '&lt;';
-    
-    const nextArrow = document.createElement('div');
-    nextArrow.className = 'carousel-arrow carousel-next';
-    nextArrow.innerHTML = '&gt;';
-    
-    wrapper.appendChild(prevArrow);
-    wrapper.appendChild(nextArrow);
-    
-    // Create indicator dots
-    const indicators = document.querySelector('.carousel-indicators');
-    if (indicators) {
-      indicators.innerHTML = '';
-      
-      this.characters.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'carousel-dot';
-        dot.setAttribute('data-index', index);
-        indicators.appendChild(dot);
-      });
-    }
-  },
-  
-  /**
-   * Set up event listeners
-   */
-  setupEvents() {
-    // Previous button
-    document.querySelector('.carousel-prev').addEventListener('click', () => {
-      this.prevCharacter();
-    });
-    
-    // Next button
-    document.querySelector('.carousel-next').addEventListener('click', () => {
-      this.nextCharacter();
-    });
-    
-    // Indicator dots
-    document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        this.showCharacter(index);
-      });
-    });
-  },
-  
-  /**
-   * Show character at specific index
-   */
-  showCharacter(index) {
-    // Hide all cards
-    document.querySelectorAll('.character-card').forEach(card => {
-      card.classList.remove('active');
-    });
-    
-    // Show selected card
-    document.querySelectorAll('.character-card')[index].classList.add('active');
-    
-    // Update indicator dots
-    document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+    // Update active dot
+    dots.forEach((dot, i) => {
       dot.classList.toggle('active', i === index);
     });
     
     // Update current index
-    this.currentIndex = index;
+    currentIndex = index;
     
-    // Update selected character in UI Manager
+    // Update selected character in UI Manager if it exists
     if (window.UIManager) {
       UIManager.selectedCharacter = `character-${index}`;
     }
-  },
-  
-  /**
-   * Navigate to previous character
-   */
-  prevCharacter() {
-    const prevIndex = (this.currentIndex - 1 + this.characters.length) % this.characters.length;
-    this.showCharacter(prevIndex);
-  },
-  
-  /**
-   * Navigate to next character
-   */
-  nextCharacter() {
-    const nextIndex = (this.currentIndex + 1) % this.characters.length;
-    this.showCharacter(nextIndex);
-  },
-  
-  /**
-   * Toggle 3D view
-   */
-  toggle3DView(index, show3D) {
-    const card = document.querySelectorAll('.character-card')[index];
-    
-    if (show3D) {
-      card.classList.add('show-3d-view');
-      this.load3DModel(index);
-    } else {
-      card.classList.remove('show-3d-view');
-    }
-  },
-  
-  /**
-   * Load 3D model
-   */
-  load3DModel(index) {
-    const container = document.querySelectorAll('.three-d-container')[index];
-    container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
-    
-    // Simulate loading a 3D model
-    setTimeout(() => {
-      container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
-    }, 1000);
   }
-};
-
-// Initialize when the DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  CharacterCarousel.init();
+  
+  // Add click event to previous arrow
+  if (prevArrow) {
+    prevArrow.addEventListener('click', function() {
+      const prevIndex = (currentIndex - 1 + characters.length) % characters.length;
+      updateCharacter(prevIndex);
+      console.log('Previous character');
+    });
+  }
+  
+  // Add click event to next arrow
+  if (nextArrow) {
+    nextArrow.addEventListener('click', function() {
+      const nextIndex = (currentIndex + 1) % characters.length;
+      updateCharacter(nextIndex);
+      console.log('Next character');
+    });
+  }
+  
+  // Add click event to indicator dots
+  dots.forEach(function(dot, index) {
+    dot.addEventListener('click', function() {
+      updateCharacter(index);
+      console.log('Switch to character', index);
+    });
+  });
+  
+  // Add event listener to 3D toggle button
+  const threeDToggle = document.querySelector('.three-d-toggle');
+  if (threeDToggle) {
+    threeDToggle.addEventListener('click', function() {
+      // Toggle 3D view
+      card.classList.toggle('show-3d-view');
+      
+      // Update button text
+      if (card.classList.contains('show-3d-view')) {
+        // Simulate loading a 3D model
+        const container = card.querySelector('.three-d-container');
+        if (container) {
+          container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
+          setTimeout(() => {
+            container.innerHTML = '<div class="model-loading">3D Model Loaded</div>';
+          }, 1000);
+        }
+        
+        // Hide 3D button, show 2D button
+        threeDToggle.style.display = 'none';
+        
+        // Create 2D button if it doesn't exist
+        let twoDToggle = document.querySelector('.two-d-toggle');
+        if (!twoDToggle) {
+          twoDToggle = document.createElement('button');
+          twoDToggle.className = 'three-d-toggle two-d-toggle';
+          twoDToggle.textContent = '2D';
+          card.querySelector('.character-image-container').appendChild(twoDToggle);
+          
+          // Add click event to 2D button
+          twoDToggle.addEventListener('click', function() {
+            card.classList.remove('show-3d-view');
+            threeDToggle.style.display = '';
+            twoDToggle.style.display = 'none';
+          });
+        } else {
+          twoDToggle.style.display = '';
+        }
+      }
+      
+      console.log('Toggle 3D view');
+    });
+  }
+  
+  // Initialize with first character
+  updateCharacter(0);
 });
