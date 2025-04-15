@@ -1,16 +1,16 @@
 /**
  * Character Carousel Component
- * Manages the character selection carousel with navigation
+ * Handles the character selection carousel functionality
  */
 const CharacterCarousel = {
   // Current character index
   currentIndex: 0,
   
-  // Character data - replace with your actual character data
+  // Character data
   characters: [
     {
       name: "AMERICAN COCKROACH",
-      image: "assets/images/characters/american_cockroach.png",
+      image: "assets/images/characters/American Cockroach with bg.png",
       stats: {
         speed: 75,
         durability: 60,
@@ -22,7 +22,7 @@ const CharacterCarousel = {
     },
     {
       name: "GERMAN COCKROACH",
-      image: "assets/images/characters/german_cockroach.png",
+      image: "assets/images/characters/German Cockroach.png",
       stats: {
         speed: 85,
         durability: 50,
@@ -34,7 +34,7 @@ const CharacterCarousel = {
     },
     {
       name: "ORIENTAL COCKROACH",
-      image: "assets/images/characters/oriental_cockroach.png",
+      image: "assets/images/characters/Oriental Cockroach.png",
       stats: {
         speed: 65,
         durability: 80,

@@ -162,7 +162,7 @@
   z-index: 5;
 }
 
-/* Ensure image fills container with no gaps */
+/* Fix for the character image to ensure it fills the container */
 .character-image-container {
   position: relative;
   width: calc(100% - 2vh);
@@ -312,15 +312,15 @@
 /* Implement proper two-column layout for stats */
 .character-stats {
   display: grid;
-  grid-template-columns: 1fr 1fr;  /* Create two equal columns */
-  gap: 1vh;  /* Add small gap between columns */
+  grid-template-columns: 1fr 1fr;  /* Make sure the stats are displayed in two columns */
+  gap: 1vh;
   width: calc(100% - 2vh);
-  margin: 0.5vh 1vh 1vh 1vh;  /* Adjust margins to remove gaps */
+  margin: 0.5vh 1vh 1vh 1vh;
   padding: 0;
 }
 
 .stat {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.75vh;
   width: 100%;
 }
 
