@@ -1,0 +1,30 @@
+/* Fix character selection screen styling to match reference image */
+
+/* Make the title smaller and centered */
+#character-selection-screen .screen-title {
+  font-size: 24px !important;
+  margin-bottom: 10px !important;
+  margin-top: 10px !important;
+  text-align: center !important;
+  width: 300px !important;
+}
+
+/* Remove black borders from the menu container */
+#character-selection-screen .menu-container {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Make indicator dots square */
+.carousel-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 0 !important;
+}
+
+/* Fix loading bar animation */
+.progress-bar {
+  transition: width 0.1s linear !important;
+}
