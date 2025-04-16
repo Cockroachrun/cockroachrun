@@ -1,0 +1,34 @@
+/* Fix the title to match reference image exactly */
+
+/* Title styling to exactly match reference */
+#character-selection-screen .screen-title {
+  font-size: 20px !important;  /* Even smaller */
+  margin: 0 auto 15px auto !important;
+  width: 300px !important;
+  color: #FF9000 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.7) !important;
+}
+
+/* Match the card styling to reference */
+.carousel-wrapper {
+  border-width: 1px !important;
+  box-shadow: 0 0 10px #FF9000 !important;
+}
+
+/* Ensure dots are small squares */
+.carousel-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 0 !important;
+  margin: 0 5px !important;
+}
+
+/* Make the buttons look exactly like reference */
+#start-game-button, #back-from-character {
+  font-size: 16px !important;
+  letter-spacing: 1px !important;
+  border: 1px solid #FF9000 !important;
+  background-color: transparent !important;
+  box-shadow: 0 0 5px rgba(255, 144, 0, 0.3) !important;
+}
