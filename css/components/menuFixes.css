@@ -1,0 +1,193 @@
+/* Comprehensive menu fixes that won't break the UI */
+
+/* ==================== GLOBAL MENU STYLING ==================== */
+.menu-button, .back-button, .save-button {
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--color-neon);
+  color: var(--color-neon);
+  padding: 10px 15px;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+
+.menu-button:hover, .back-button:hover, .save-button:hover {
+  background-color: var(--color-neon);
+  color: black;
+}
+
+/* ==================== MENU CONTAINERS ==================== */
+/* Character selection menu container */
+#character-selection-screen .menu-container {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Settings menu container */
+#settings-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* Credits menu container */
+#credits-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* Pause menu container */
+#pause-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* Game over menu container */
+#game-over-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* Mode selection menu container */
+#mode-selection-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* Start screen menu container */
+#start-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+}
+
+/* ==================== TITLE STYLING ==================== */
+/* Character selection title only */
+#character-selection-screen .screen-title {
+  font-size: 24px !important;
+  margin-bottom: 10px !important;
+  margin-top: 10px !important;
+  text-align: center !important;
+  width: 300px !important;
+}
+
+/* All other titles */
+.screen-title {
+  color: var(--color-neon) !important;
+  text-shadow: 0 0 8px rgba(255, 144, 0, 0.6) !important;
+}
+
+/* ==================== SETTINGS SCREEN FIXES ==================== */
+.settings-content {
+  padding: 10px !important;
+}
+
+.settings-section {
+  margin-bottom: 20px !important;
+}
+
+.settings-section h3 {
+  color: var(--color-neon) !important;
+  margin-bottom: 10px !important;
+}
+
+.setting-item {
+  margin-bottom: 15px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.slider-container {
+  width: 60% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.slider {
+  width: 80% !important;
+  margin-right: 10px !important;
+}
+
+.slider-value {
+  width: 40px !important;
+  text-align: right !important;
+}
+
+.toggle {
+  width: 50px !important;
+  height: 24px !important;
+  background-color: rgba(80, 80, 80, 0.3) !important;
+  border-radius: 12px !important;
+  position: relative !important;
+  cursor: pointer !important;
+}
+
+.toggle-slider {
+  position: absolute !important;
+  left: 3px !important;
+  top: 3px !important;
+  width: 18px !important;
+  height: 18px !important;
+  background-color: var(--text-color) !important;
+  border-radius: 50% !important;
+  transition: all 0.3s !important;
+}
+
+.toggle.active {
+  background-color: rgba(255, 144, 0, 0.5) !important;
+}
+
+.toggle.active .toggle-slider {
+  left: 29px !important;
+  background-color: var(--color-neon) !important;
+}
+
+.dropdown-container {
+  position: relative !important;
+  width: 60% !important;
+}
+
+.styled-dropdown {
+  width: 100% !important;
+  padding: 5px 10px !important;
+  border: 1px solid rgba(80, 80, 80, 0.8) !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  color: var(--text-color) !important;
+  appearance: none !important;
+  cursor: pointer !important;
+}
+
+.dropdown-arrow {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+}
+
+.button-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  margin-top: 20px !important;
+}
+
+/* ==================== CAROUSEL SPECIFIC FIXES ==================== */
+/* Make indicator dots square */
+.carousel-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 0 !important;
+}
+
+/* Fix loading bar animation */
+.progress-bar {
+  transition: width 0.1s linear !important;
+}
