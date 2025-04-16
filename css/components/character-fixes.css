@@ -1,0 +1,152 @@
+/* Targeted fixes for character selection screen to match reference image */
+
+/* Screen background */
+#character-selection-screen.active {
+  background: url('../../assets/images/backgrounds/sewer_bg.png') no-repeat center center;
+  background-size: cover;
+  overflow: hidden;
+}
+
+/* Make menu container dark with orange border */
+#character-selection-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* Fix the character card display */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 450px;
+  overflow: visible;
+  background-color: black;
+  border: 2px solid var(--color-neon);
+  box-shadow: 0 0 15px var(--color-neon);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+/* Fix navigation arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-neon);
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.carousel-prev {
+  left: -50px;
+}
+
+.carousel-next {
+  right: -50px;
+}
+
+/* Hide 3D toggle buttons as they aren't in reference image */
+.toggle-3d-btn, .toggle-2d-btn {
+  display: none;
+}
+
+/* Fix character card dimensions and layout */
+.character-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.character-card.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+
+/* Fix buttons to match reference image */
+#start-game-button {
+  width: 100%;
+  padding: 12px 0;
+  background-color: transparent;
+  border: 1px solid var(--color-neon);
+  color: var(--color-neon);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+}
+
+#start-game-button:hover {
+  background-color: var(--color-neon);
+  color: black;
+}
+
+#back-from-character {
+  width: 100%;
+  padding: 12px 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--color-neon);
+  color: var(--color-neon);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+/* Fix button stack dimensions */
+.button-stack {
+  width: 100%;
+  max-width: 300px;
+  margin-top: 20px;
+}
+
+/* Fix indicator dots */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+  position: relative;
+  z-index: 10;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  background-color: black;
+  border: 1px solid var(--color-neon);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  pointer-events: auto;
+}
+
+.carousel-dot.active {
+  background-color: var(--color-neon);
+}

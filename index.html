@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components/characters.css" />
+  <link rel="stylesheet" href="css/components/character-fixes.css" />
   <!-- Preload character images -->
   <link rel="preload" href="assets/images/characters/german_cockroach.png" as="image" />
   <link rel="preload" href="assets/images/characters/American Cockroach with bg.png" as="image" />
@@ -114,6 +115,29 @@
           <button id="back-from-character" class="back-button">BACK</button>
         </div>
       </div>
+    </div>
+  </div>
+  <script>
+    // Make sure we have the right number of indicator dots
+    document.addEventListener('DOMContentLoaded', function() {
+      const indicators = document.getElementById('carousel-indicators');
+      const characterCount = 3; // Based on your character count
+  
+      // Clear and rebuild indicators if needed
+      if (indicators && indicators.children.length !== characterCount) {
+        indicators.innerHTML = '';
+        for (let i = 0; i < characterCount; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+          dot.setAttribute('data-index', i);
+          dot.addEventListener('click', function() {
+            // This will be handled by your existing click handler
+          });
+          indicators.appendChild(dot);
+        }
+      }
+    });
+  </script>
     </div>
 
     <!-- Settings Screen -->
@@ -284,6 +308,7 @@
   <script src="js/loadingScreen.js"></script>
   <script src="js/characterCarousel.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/character-fixes.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
