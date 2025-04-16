@@ -22,7 +22,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: 1000;
   overflow: auto;
 }
 
@@ -40,7 +40,7 @@
 .screen-title {
   color: var(--color-neon);
   font-family: var(--font-heading);
-  font-size: 4vh;
+  font-size: 6vh;
   margin: 3vh 0;
   text-transform: uppercase;
   text-align: center;
@@ -53,7 +53,7 @@
   max-width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 2vh;
+  margin: 0 2vh 2vh 2vh;
 }
 
 /* Carousel wrapper */
@@ -61,12 +61,12 @@
   position: relative;
   width: 100%;
   max-width: 300px;
-  height: auto;
+  height: 40vh;
   overflow: visible;
-  background-color: var(--color-bg-darker);
+  background-color: black;
   border: 0.25vh solid var(--color-neon);
   box-shadow: 0 0 1vh var(--color-neon);
-  border-radius: 0;
+  border-radius: 1vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +95,6 @@
   position: relative;
   width: 90%;
   margin: 0 auto 2vh auto;
-  border: 0.15vh solid var(--color-neon);
   background-color: rgba(0, 0, 0, 0.7);
   overflow: hidden;
   display: flex;
@@ -113,37 +112,111 @@
 
 /* 3D Toggle Button */
 .toggle-3d-btn {
-    position: absolute;
-    top: 1vh;
-    right: 1vh;
-    width: 3vh;
-    height: 3vh;
-    border: 0.15vh solid #000000;
   position: absolute;
   top: 1vh;
   right: 1vh;
   width: 3vh;
   height: 3vh;
   border: 0.15vh solid var(--color-neon);
-  background-color: rgba(255, 144, 0, 0.8);
+  background-color: black;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-family: var(--font-heading);
+  color: var(--color-neon);
+  font-size: 2vh;
+  box-shadow: none;
+}
+
+/* Adjust arrow positioning */
+.carousel-prev, .carousel-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 3;
+}
+
+.carousel-prev {
+  left: 2vh;
+}
+
+.carousel-next {
+  right: 2vh;
+}
+
+/* Center and align elements */
+.menu-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding-top: 5vh;
 }
 
 .toggle-3d-btn img {
-  width: 60%;
-  height: 60%;
-  filter: invert(77%) sepia(55%) saturate(2000%) hue-rotate(80deg) brightness(119%) contrast(119%);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .toggle-3d-btn:hover {
   background-color: var(--color-neon);
 }
 
+@media (max-width: 768px) {
+    .toggle-3d-btn {
+        position: absolute;
+        top: 1vh;
+        right: 1vh;
+        width: 4vh;
+        height: 3vh;
+        border: none;
+        background: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
 .toggle-3d-btn:hover img {
   filter: none;
+}
+
+.toggle-2d-btn {
+  position: absolute;
+  top: 1vh;
+  right: 1vh;
+  width: 3vh;
+  height: 3vh;
+  border: 0.15vh solid var(--color-neon);
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  color: var(--color-neon);
+  font-size: 2vh;
+  box-shadow: none;
+}
+
+
+@media (max-width: 768px) {
+    .toggle-2d-btn {
+        position: absolute;
+        top: 1vh;
+        right: 5vh;
+        width: 4vh;
+        height: 3vh;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+    }
 }
 
 /* 3D Container */
@@ -157,8 +230,26 @@
   background-color: #000;
 }
 
-.show-3d .character-3d-container {
-  display: block;
+.character-3d-container {
+  display: none;
+}
+
+.toggle-2d-btn {
+  position: absolute;
+  top: 1vh;
+  right: 1vh;
+  width: 3vh;
+  height: 3vh;
+  border: 0.15vh solid var(--color-neon);
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  color: var(--color-neon);
+  font-size: 2vh;
+  box-shadow: none;
 }
 
 /* Character name */
@@ -173,6 +264,7 @@
 
 /* Character stats */
 .character-stats {
+  background-color: black;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5vh;
@@ -221,11 +313,11 @@
 }
 
 .carousel-prev {
-  left: -4vh;
+  left: 2vh;
 }
 
 .carousel-next {
-  right: -4vh;
+  right: 2vh;
 }
 
 /* Indicator dots */
@@ -266,7 +358,7 @@
   font-size: 2vh;
   text-transform: uppercase;
   color: var(--color-neon);
-  background-color: transparent;
+  background-color: black;
   border: 0.2vh solid var(--color-neon);
   cursor: pointer;
   box-shadow: 0 0 0.5vh var(--color-neon);
@@ -300,17 +392,14 @@
     right: 1vh;
     width: 3vh;
     height: 3vh;
-    border: 0.15vh solid #000000;
-    background-color: rgba(255, 144, 0, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-}
-    width: 3vh;
-    height: 3vh;
-    top: 1vh;
-    right: 1vh;
+  }
+
+  .toggle-3d-btn:hover img {
+    filter: none;
   }
 
   .character-name {

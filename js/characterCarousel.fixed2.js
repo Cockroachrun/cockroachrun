@@ -10,9 +10,9 @@ class CharacterCarousel {
   constructor(options = {}) {
     // Default configuration
     this.config = {
-      wrapperSelector: '#character-carousel-wrapper',
-      prevButtonSelector: '#prev-character',
-      nextButtonSelector: '#next-character',
+      wrapperSelector: '.carousel-wrapper',
+      prevButtonSelector: '.carousel-arrow.carousel-prev',
+      nextButtonSelector: '.carousel-arrow.carousel-next',
       indicatorsSelector: '#carousel-indicators',
       startButtonSelector: '#start-game-button',
       transitionDuration: 300,
@@ -63,6 +63,7 @@ class CharacterCarousel {
    * Initialize the carousel
    */
   init() {
+    console.log('CharacterCarousel.init() called');
     // Clear any existing content
     this.carouselContainer.innerHTML = '';
     this.dotsContainer.innerHTML = '';
@@ -118,20 +119,7 @@ class CharacterCarousel {
       imageEl.className = 'character-image';
       
       // Set image with reliable path format
-      let imageSrc = '';
-      switch(character.id) {
-        case 'german-roach':
-          imageSrc = 'assets/images/characters/German_Roach.png';
-          break;
-        case 'american-roach':
-          imageSrc = 'assets/images/characters/American_Roach.png';
-          break;
-        case 'oriental-roach':
-          imageSrc = 'assets/images/characters/Oriental_Roach.png';
-          break;
-        default:
-          imageSrc = 'assets/images/characters/default-roach.png';
-      }
+      let imageSrc = character.imagePath;
       
       // Set image with absolute path
       imageEl.style.backgroundImage = `url('${imageSrc}')`;
@@ -140,34 +128,34 @@ class CharacterCarousel {
       console.log(`Attempting to load image: ${imageSrc}`);
       
       // Test image loading with explicit element
-      const testImg = new Image();
-      testImg.onload = () => {
-        console.log(`Successfully loaded image: ${imageSrc}`);
-      };
-      testImg.onerror = () => {
-        console.error(`Failed to load image: ${imageSrc}`);
-        // Try alternate path format with underscores instead of spaces
-        const altSrc = character.imagePath ? character.imagePath.replace(/ /g, '_') : '';
-        console.log(`Trying alternate path: ${altSrc}`);
-        imageEl.style.backgroundImage = `url('${altSrc}')`;
-        
-        // If that also fails, use a colored placeholder
-        const finalTestImg = new Image();
-        finalTestImg.onerror = () => {
-          console.error(`Failed to load any image for ${character.name}`);
-          // Set a colored background as fallback
-          imageEl.style.backgroundImage = 'none';
-          imageEl.style.backgroundColor = '#663300';
+        //const testImg = new Image();
+        //testImg.onload = () => {
+        //  console.log(`Successfully loaded image: ${imageSrc}`);
+        //};
+        //testImg.onerror = () => {
+        //  console.error(`Failed to load image: ${imageSrc}`);
+        //  // Try alternate path format with underscores instead of spaces
+        //  const altSrc = character.imagePath ? character.imagePath.replace(/ /g, '_') : '';
+        //  console.log(`Trying alternate path: ${altSrc}`);
+        //  imageEl.style.backgroundImage = `url('${altSrc}')`;
           
-          // Add a simple cockroach SVG as content
-          imageEl.innerHTML = `
-            <svg viewBox="0 0 100 100" width="80" height="80" fill="#FF9000">
-              <path d="M50 20 L60 10 L55 25 L70 30 L55 40 L60 70 L50 60 L40 70 L45 40 L30 30 L45 25 L40 10 Z" />
-            </svg>
-          `;
-        };
-        finalTestImg.src = altSrc;
-      };
+        //  // If that also fails, use a colored placeholder
+        //  const finalTestImg = new Image();
+        //  finalTestImg.onerror = () => {
+        //    console.error(`Failed to load any image for ${character.name}`);
+        //    // Set a colored background as fallback
+        //    imageEl.style.backgroundImage = 'none';
+        //    imageEl.style.backgroundColor = '#663300';
+            
+        //    // Add a simple cockroach SVG as content
+        //    imageEl.innerHTML = `
+        //      <svg viewBox="0 0 100 100" width="80" height="80" fill="#FF9000">
+        //        <path d="M50 20 L60 10 L55 25 L70 30 L55 40 L60 70 L50 60 L40 70 L45 40 L30 30 L45 25 L40 10 Z" />
+        //      </svg>
+        //    `;
+        //  };
+        //  finalTestImg.src = altSrc;
+        //};
       testImg.src = imageSrc;
 
       // Add elements to container
@@ -256,20 +244,15 @@ class CharacterCarousel {
   addEventListeners() {
     // Previous and next buttons with sound
     this.prevButton.addEventListener('click', (e) => {
-      // Only respond if character screen is active
-      if (document.getElementById('character-selection-screen').classList.contains('active')) {
-        this.playNavigationSound();
-        this.prev();
-        e.stopPropagation(); // Prevent event bubbling
-      }
+      console.log('Previous button clicked');
+      this.playNavigationSound();
+      this.prev();
     });
     
     this.nextButton.addEventListener('click', (e) => {
-      if (document.getElementById('character-selection-screen').classList.contains('active')) {
-        this.playNavigationSound();
-        this.next();
-        e.stopPropagation();
-      }
+      console.log('Next button clicked');
+      this.playNavigationSound();
+      this.next();
     });
 
     // Keyboard navigation
@@ -293,6 +276,7 @@ class CharacterCarousel {
 
     // Start button with sound
     this.startButton.addEventListener('click', () => {
+      console.log('Start button clicked');
       if (this.config.enableSounds && window.AudioManager) {
         window.AudioManager.playSound('ui_select');
       }
@@ -346,8 +330,9 @@ class CharacterCarousel {
    * @param {number} index - Slide index
    * @param {boolean} animate - Whether to animate the transition
    */
-  goToSlide(index, animate = true) {
-    if (this.isTransitioning) return;
+ goToSlide(index, animate = true) {
+   console.log('goToSlide called, isTransitioning:', this.isTransitioning);
+   if (this.isTransitioning) return;
     if (index < 0 || index >= this.characters.length) return;
     
     if (animate) {
@@ -508,7 +493,7 @@ class CharacterCarousel {
           stealth: 80
         },
         unlocked: true,
-        imagePath: 'assets/images/characters/American Cockroach with bg.png',
+        imagePath: 'assets/images/characters/American_Cockroach_with_bg.png',
         modelPath: 'assets/models/American Cockroach.glb'
       },
       {
@@ -521,7 +506,7 @@ class CharacterCarousel {
           stealth: 90
         },
         unlocked: true,
-        imagePath: 'assets/images/characters/German Cockroach with bg.png',
+        imagePath: 'assets/images/characters/German_Cockroach_with_bg.png',
         modelPath: 'assets/models/German Cockroach.glb'
       },
       {
@@ -534,7 +519,7 @@ class CharacterCarousel {
           stealth: 65
         },
         unlocked: true,
-        imagePath: 'assets/images/characters/Oriental Cockroach with bg.png',
+        imagePath: 'assets/images/characters/Oriental_Cockroach_with_bg.png',
         modelPath: 'assets/models/Oriental Cockroach.glb'
       }
     ];

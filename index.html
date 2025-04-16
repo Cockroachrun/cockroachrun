@@ -14,10 +14,9 @@
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components/characters.css" />
   <!-- Preload character images -->
-  <link rel="preload" href="assets/images/characters/German_Roach.png" as="image">
-  <link rel="preload" href="assets/images/characters/American_Roach.png" as="image">
-  <link rel="preload" href="assets/images/characters/Oriental_Roach.png" as="image">
-  <link rel="preload" href="assets/images/characters/default-roach.png" as="image">
+  <link rel="preload" href="assets/images/characters/german_cockroach.png" as="image" />
+  <link rel="preload" href="assets/images/characters/American Cockroach with bg.png" as="image" />
+  <link rel="preload" href="assets/images/characters/Oreintal Cockroach.png" as="image" />
 </head>
 <body>
   <!-- Game Canvas Container -->
@@ -97,46 +96,6 @@
           <div class="carousel-wrapper">
             <!-- Hardcoded first character to ensure it displays properly -->
             <!-- The JavaScript will handle switching among multiple characters -->
-            <div class="character-card active" data-index="0">
-              <div class="character-image-container">
-                <img
-                  src="assets/images/characters/American Cockroach with bg.png"
-                  alt="American Cockroach"
-                  class="character-image"
-                />
-                <button class="toggle-3d-btn" title="Toggle 3D View">
-                  <img src="assets/icons/3d-icon.svg" alt="3D icon" />
-                </button>
-              </div>
-              <div class="character-3d-container"></div>
-              <h3 class="character-name">AMERICAN COCKROACH</h3>
-              <div class="character-stats">
-                <div class="stat">
-                  <div class="stat-label">SPEED</div>
-                  <div class="stat-value">75%</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-label">DURABILITY</div>
-                  <div class="stat-value">60%</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-label">STEALTH</div>
-                  <div class="stat-value">80%</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-label">CLIMBING</div>
-                  <div class="stat-value">65%</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-label">AGILITY</div>
-                  <div class="stat-value">70%</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-label">BURROWING</div>
-                  <div class="stat-value">55%</div>
-                </div>
-              </div>
-            </div>
             <!-- Navigation arrows -->
             <button class="carousel-arrow carousel-prev" title="Previous"><</button>
             <button class="carousel-arrow carousel-next" title="Next">></button>
@@ -144,10 +103,10 @@
         </div>
 
         <!-- Indicator dots -->
-        <div class="carousel-indicators">
-          <div class="carousel-dot active" data-index="0"></div>
-          <div class="carousel-dot" data-index="1"></div>
-          <div class="carousel-dot" data-index="2"></div>
+        <div id="carousel-indicators" class="carousel-indicators">
+            <div class="carousel-dot active" data-index="0"></div>
+            <div class="carousel-dot" data-index="1"></div>
+            <div class="carousel-dot" data-index="2"></div>
         </div>
 
         <div class="button-stack">

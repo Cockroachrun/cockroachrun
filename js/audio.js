@@ -16,7 +16,6 @@ const AudioManager = {
             {id: 'menu-loop', name: 'Menu Theme', path: 'assets/sounds/music/Menu_loop.mp3'},
             {id: 'world-theme', name: 'World Theme', path: 'assets/sounds/music/world_theme.mp3'},
             {id: 'cockroach-run', name: 'Cockroach Run', path: 'assets/sounds/music/Cockroach run music.mp3'},
-            {id: 'your-new-track', name: 'YOUR_NEW_TRACK', path: 'assets/sounds/music/YOUR_NEW_TRACK.mp3'}
         ],
         game: [
             // Game tracks here
@@ -56,7 +55,9 @@ const AudioManager = {
         });
         
         // Preload audio files
+        console.time('Audio Preloading');
         this.preloadAudio();
+        console.timeEnd('Audio Preloading');
         
         // Add a global click handler to initialize audio context
         document.addEventListener('click', this.initAudioContext.bind(this), { once: true });
@@ -201,290 +202,151 @@ const AudioManager = {
     },
     
     /**
-     * Preload audio files to ensure they're ready to play
+     * Preload audio files
      */
     preloadAudio() {
-        // Check if menu music files exist
+        // Preload menu music tracks
         this.musicTracks.menu.forEach(track => {
-            const audio = new Audio();
-            audio.src = track.path;
+            const audio = new Audio(track.path);
             audio.preload = 'auto';
-            audio.addEventListener('error', (e) => {
-                console.error(`Error loading audio file ${track.path}:`, e);
-            });
         });
         
-        console.log('Audio files preloaded');
+        // Preload game music tracks (if any)
+        this.musicTracks.game.forEach(track => {
+            const audio = new Audio(track.path);
+            audio.preload = 'auto';
+        });
     },
     
     /**
-     * Initialize audio context on user interaction
-     * This helps with browsers that require user interaction to start audio
+     * Initialize the audio context
      */
     initAudioContext() {
-        // Create a temporary audio context
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            const audioCtx = new AudioContext();
-            
-            // Create a silent oscillator
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.value = 0; // Silent
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            // Play for a short time
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.001);
-            
-            console.log('Audio context initialized');
+        // Create audio context if not already created
+        if (!window.audioContext) {
+            window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
+        
+        // Resume audio context if suspended
+        if (window.audioContext.state === 'suspended') {
+            window.audioContext.resume();
+        }
+        
+        // Remove the event listener after initialization
+        document.removeEventListener('click', this.initAudioContext);
     },
     
     /**
-     * Load audio settings from localStorage
+     * Load settings from localStorage
      */
     loadSettings() {
         const savedMusicVolume = localStorage.getItem('musicVolume');
         const savedSfxVolume = localStorage.getItem('sfxVolume');
-        const savedMenuTrack = localStorage.getItem('selectedMenuTrack');
-        const savedMuteState = localStorage.getItem('isMusicMuted');
+        const savedIsMusicMuted = localStorage.getItem('isMusicMuted');
         
-        if (savedMusicVolume !== null) {
-            this.musicVolume = parseFloat(savedMusicVolume);
-            document.getElementById('music-volume').value = this.musicVolume * 100;
-            document.querySelector('#music-volume + .slider-value').textContent = `${Math.round(this.musicVolume * 100)}%`;
-        }
-        
-        if (savedSfxVolume !== null) {
-            this.sfxVolume = parseFloat(savedSfxVolume);
-            document.getElementById('sfx-volume').value = this.sfxVolume * 100;
-            document.querySelector('#sfx-volume + .slider-value').textContent = `${Math.round(this.sfxVolume * 100)}%`;
-        }
-        
-        if (savedMenuTrack !== null) {
-            this.currentMenuTrackIndex = parseInt(savedMenuTrack);
-        }
-        
-        if (savedMuteState !== null) {
-            this.isMusicMuted = savedMuteState === 'true';
-        }
+        this.musicVolume = savedMusicVolume !== null ? parseFloat(savedMusicVolume) : this.musicVolume;
+        this.sfxVolume = savedSfxVolume !== null ? parseFloat(savedSfxVolume) : this.sfxVolume;
+        this.isMusicMuted = savedIsMusicMuted !== null ? (savedIsMusicMuted === 'true') : this.isMusicMuted;
     },
     
     /**
-     * Update all audio volumes based on current settings
+     * Update the music and SFX volumes
      */
     updateVolumes() {
         this.menuMusic.volume = this.musicVolume;
         this.gameMusic.volume = this.musicVolume;
-        this.buttonClick.volume = this.sfxVolume;
-        this.scatterSound.volume = this.sfxVolume;
+        // Set volume for other SFX elements here
     },
     
     /**
-     * Save audio settings to localStorage
+     * Save settings to localStorage
      */
     saveSettings() {
         localStorage.setItem('musicVolume', this.musicVolume);
         localStorage.setItem('sfxVolume', this.sfxVolume);
-        localStorage.setItem('selectedMenuTrack', this.currentMenuTrackIndex);
         localStorage.setItem('isMusicMuted', this.isMusicMuted);
     },
     
     /**
-     * Set music volume
-     * @param {number} volume - Volume level (0-1)
+     * Set the music volume
+     * @param {number} volume - The new music volume (0-1)
      */
     setMusicVolume(volume) {
         this.musicVolume = volume;
-        this.updateVolumes();
     },
     
     /**
-     * Set sound effects volume
-     * @param {number} volume - Volume level (0-1)
+     * Set the SFX volume
+     * @param {number} volume - The new SFX volume (0-1)
      */
     setSfxVolume(volume) {
         this.sfxVolume = volume;
-        this.updateVolumes();
     },
     
     /**
-     * Play menu music
+     * Play the menu music
      */
     playMenuMusic() {
-        console.log('Attempting to play menu music...');
-        this.gameMusic.pause();
-        this.gameMusic.currentTime = 0;
-
-        // Select track based on settings
-        let selectedTrack;
-        if (this.currentMenuTrackIndex === 0) {
-            // Random selection
-            const randomIndex = Math.floor(Math.random() * this.musicTracks.menu.length);
-            selectedTrack = this.musicTracks.menu[randomIndex];
+        // Select a random track if "random" is selected
+        let trackIndex = this.currentMenuTrackIndex;
+        if (trackIndex === 0) {
+            trackIndex = Math.floor(Math.random() * this.musicTracks.menu.length);
         } else {
-            // Specific track (adjust index to match array)
-            const trackIndex = this.currentMenuTrackIndex - 1;
-            selectedTrack = this.musicTracks.menu[trackIndex];
+            trackIndex--; // Adjust index to match array
         }
-
-        // Update the <source> element inside menuMusic
-        const source = this.menuMusic.querySelector('source');
-        if (source) {
-            source.src = selectedTrack.path;
-            this.menuMusic.load();
-            console.log(`Loading music track: ${selectedTrack.name}`);
-        } else {
-            console.warn('No <source> element found inside #menu-music');
-        }
-
-        // Apply mute state
-        this.menuMusic.muted = this.isMusicMuted;
-
-        // Resume audio context if it exists
-        this.resumeAudioContext();
-
-        // Set up one-time event listeners for user interaction before attempting to play
-        const events = ['click', 'touchstart', 'keydown', 'mousedown'];
-        const startMusicOnInteraction = () => {
-            // Remove all event listeners
-            events.forEach(event => {
-                document.removeEventListener(event, startMusicOnInteraction);
-            });
-            
-            // Try to play music
-            this.menuMusic.play()
-                .then(() => console.log('Menu music started successfully after user interaction'))
-                .catch(e => console.warn('Still failed to play music after interaction:', e));
-        };
         
-        // Add event listeners for common user interactions
-        events.forEach(event => {
-            document.addEventListener(event, startMusicOnInteraction, { once: true });
-        });
-
-        // Try to play the music immediately and handle autoplay restrictions
-        const playPromise = this.menuMusic.play();
-        
-        if (playPromise !== undefined) {
-            playPromise
-                .then(() => {
-                    console.log('Menu music started successfully');
-                    // Remove event listeners if music started successfully
-                    events.forEach(event => {
-                        document.removeEventListener(event, startMusicOnInteraction);
-                    });
-                })
-                .catch(error => {
-                    console.warn('Failed to play menu music (autoplay may be blocked):', error);
-                    // Event listeners will handle starting music on interaction
-                });
+        const selectedTrack = this.musicTracks.menu[trackIndex];
+        if (!selectedTrack) {
+            console.error('No menu music tracks available.');
+            return;
         }
+        
+        this.playTrack(selectedTrack.id);
     },
     
     /**
-     * Resume audio context if it exists
+     * Resume the audio context if suspended
      */
     resumeAudioContext() {
-        // Try to resume any existing audio context
-        if (window.AudioContext || window.webkitAudioContext) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            // This is a hack to access any existing audio context
-            const dummyContext = new AudioContextClass();
-            if (dummyContext.state === 'suspended') {
-                dummyContext.resume().then(() => {
-                    console.log('Audio context resumed');
-                }).catch(error => {
-                    console.warn('Failed to resume audio context:', error);
-                });
-            }
+        if (window.audioContext && window.audioContext.state === 'suspended') {
+            window.audioContext.resume()
+            .then(() => {
+                console.log('Audio context successfully resumed');
+            })
+            .catch(error => {
+                console.error('Error resuming audio context:', error);
+            });
         }
     },
     
     /**
-     * Set up a retry mechanism for playing music
+     * Setup music retry mechanism
      */
     setupMusicRetry() {
-        // Set up event listeners for user interaction to start music
         const startMusic = () => {
-            // Try to play the music again
-            this.menuMusic.play().catch(error => {
-                console.warn('Still failed to play music:', error);
-            });
+            this.playMenuMusic();
         };
         
-        // Add event listeners for common user interactions
-        const events = ['click', 'touchstart', 'keydown', 'mousedown'];
         const addEventListeners = () => {
-            events.forEach(event => {
-                document.addEventListener(event, startMusic, { once: true });
-            });
-            
-            // Also try to play on visibility change
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    startMusic();
-                }
-            }, { once: true });
+            document.addEventListener('click', startMusic, { once: true });
+            document.addEventListener('touchstart', startMusic, { once: true });
         };
         
-        // Add the event listeners
         addEventListeners();
-        
-        // Also try again after a short delay
-        setTimeout(() => {
-            this.menuMusic.play().catch(() => {
-                // If it still fails, keep the event listeners active
-                console.log('Retrying music playback...');
-            });
-        }, 1000);
     },
     
     /**
-     * Play game music
+     * Play the game music
      */
     playGameMusic() {
-        this.menuMusic.pause();
-        this.menuMusic.currentTime = 0;
+        // For now, stop all music
+        this.stopAllMusic();
         
-        // Apply mute state
-        this.gameMusic.muted = this.isMusicMuted;
+        // Select a random track
+        //const trackIndex = Math.floor(Math.random() * this.musicTracks.game.length);
+        //const selectedTrack = this.musicTracks.game[trackIndex];
         
-        // Resume audio context if it exists
-        this.resumeAudioContext();
-        
-        // Try to play the game music
-        const playPromise = this.gameMusic.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.warn('Failed to play game music (autoplay may be blocked):', error);
-                
-                // Set up a retry mechanism similar to menu music
-                const startMusic = () => {
-                    this.gameMusic.play().catch(error => {
-                        console.warn('Still failed to play game music:', error);
-                    });
-                };
-                
-                // Add event listeners for common user interactions
-                const events = ['click', 'touchstart', 'keydown', 'mousedown'];
-                events.forEach(event => {
-                    document.addEventListener(event, startMusic, { once: true });
-                });
-                
-                // Also try again after a short delay
-                setTimeout(startMusic, 1000);
-            });
-        } else {
-            // For browsers that don't return a promise
-            const startMusic = () => {
-                this.gameMusic.play();
-            };
-            document.addEventListener('click', startMusic, { once: true });
-        }
+        //this.playTrack(selectedTrack.id);
     },
     
     /**
@@ -492,83 +354,60 @@ const AudioManager = {
      */
     stopAllMusic() {
         this.menuMusic.pause();
-        this.menuMusic.currentTime = 0;
-        
         this.gameMusic.pause();
+        this.menuMusic.currentTime = 0;
         this.gameMusic.currentTime = 0;
     },
     
     /**
-     * Play button click sound
+     * Play the button click sound
      */
     playButtonClick() {
-        // Clone and play to allow for overlapping sounds
-        const sound = this.buttonClick.cloneNode();
-        sound.volume = this.sfxVolume;
-        sound.play().catch(error => {
-            console.warn('Failed to play button click sound:', error);
-        });
+        this.buttonClick.currentTime = 0;
+        this.buttonClick.play();
     },
     
     /**
-     * Play scatter sound
+     * Play the scatter sound
      */
     playScatterSound() {
-        // Clone and play to allow for overlapping sounds
-        const sound = this.scatterSound.cloneNode();
-        sound.volume = this.sfxVolume;
-        sound.play().catch(error => {
-            console.warn('Failed to play scatter sound:', error);
-        });
+        this.scatterSound.currentTime = 0;
+        this.scatterSound.play();
     },
     
     /**
-     * Play a specific track
-     * @param {string} trackId - ID of the track to play
+     * Play a specific track by ID
+     * @param {string} trackId - The ID of the track to play
      */
     playTrack(trackId) {
-        // Find the track in the music tracks
-        const track = this.musicTracks.menu.find(track => track.id === trackId);
+        // Stop all music first
+        this.stopAllMusic();
         
-        if (track) {
-            // Update the current track
-            this.currentTrack = track;
-            
-            // Update the <source> element inside menuMusic
-            const source = this.menuMusic.querySelector('source');
-            if (source) {
-                source.src = track.path;
-                this.menuMusic.load();
-            } else {
-                console.warn('No <source> element found inside #menu-music');
-            }
-            
-            // Apply mute state
-            this.menuMusic.muted = this.isMusicMuted;
-            
-            // Resume audio context if it exists
-            this.resumeAudioContext();
-            
-            // Try to play the music and handle autoplay restrictions
-            const playPromise = this.menuMusic.play();
-            
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        console.log(`Track ${track.name} started successfully`);
-                    })
-                    .catch(error => {
-                        console.warn(`Failed to play track ${track.name} (autoplay may be blocked):`, error);
-                        
-                        // Set up a more aggressive retry mechanism
-                        this.setupMusicRetry();
-                    });
-            } else {
-                // For browsers that don't return a promise
-                this.setupMusicRetry();
-            }
-        } else {
-            console.error(`Track ${trackId} not found`);
+        let trackElement;
+        
+        // Check if it's a menu track
+        const menuTrack = this.musicTracks.menu.find(track => track.id === trackId);
+        if (menuTrack) {
+            trackElement = this.menuMusic;
+            trackElement.src = menuTrack.path;
         }
+        // Check if it's a game track
+        const gameTrack = this.musicTracks.game.find(track => track.id === trackId);
+        if (gameTrack) {
+            trackElement = this.gameMusic;
+            trackElement.src = gameTrack.path;
+        }
+        
+        if (!trackElement) {
+            console.error(`Track with ID "${trackId}" not found.`);
+            return;
+        }
+        
+        trackElement.volume = this.musicVolume;
+        trackElement.loop = true;
+        
+        trackElement.addEventListener('canplaythrough', () => {
+            trackElement.play();
+        });
     }
-};
+}

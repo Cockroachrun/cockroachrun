@@ -59,21 +59,23 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentIndex = 0;
 
   // Grab essential elements
+  const carouselWrapper = document.querySelector('.carousel-wrapper');
   const prevArrow = document.querySelector('.carousel-prev');
   const nextArrow = document.querySelector('.carousel-next');
   const dots = document.querySelectorAll('.carousel-dot');
-  const card = document.querySelector('.character-card');
 
   // Update character information
   function updateCharacter(index) {
+    console.log("updateCharacter called with index:", index);
     const character = characters[index];
-
+    console.log("character:", character);
+    const card = document.querySelector(`.character-card[data-index="${index}"]`);
+    console.log("card:", card);
+    if (!card) return;
     const img = card.querySelector('.character-image');
-    img.src = character.image;
-    img.alt = character.name;
-
-    card.querySelector('.character-name').textContent = character.name.toUpperCase();
-
+    img.src = character?.image;
+    img.alt = character?.name;
+    card.querySelector('.character-name').textContent = character?.name.toUpperCase();
     // Update stats
     const statElements = card.querySelectorAll('.stat');
     const statKeys = Object.keys(character.stats);
@@ -109,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
    * Navigate to the previous character
    */
   function navigateToPrev() {
+    console.log("navigateToPrev called");
     // Remove active class from all cards
     document.querySelectorAll('.character-card.active').forEach(c => {
       c.classList.remove('active');
@@ -132,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
    * Navigate to the next character
    */
   function navigateToNext() {
+    console.log("navigateToNext called");
     // Remove active class from all cards
     document.querySelectorAll('.character-card.active').forEach(c => {
       c.classList.remove('active');
@@ -149,16 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update character information
     updateCharacter(nextIndex);
-  }
-
-  // Previous arrow event listener
-  if (prevArrow) {
-    prevArrow.addEventListener('click', debounce(navigateToPrev, 500));
-  }
-
-  // Next arrow event listener
-  if (nextArrow) {
-    nextArrow.addEventListener('click', debounce(navigateToNext, 500));
   }
 
   /**
@@ -205,30 +199,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!toggleBtn) return;
     
     toggleBtn.addEventListener('click', function() {
-      cardElement.classList.toggle('show-3d');
-      
-      if (cardElement.classList.contains('show-3d')) {
+      const container3D = cardElement.querySelector('.character-3d-container');
+      const toggleBtn2D = cardElement.querySelector('.toggle-2d-btn');
+
+      if (container3D.style.display === 'none') {
+        container3D.style.display = 'block';
+        toggleBtn2D.style.display = 'none';
         // Simulate loading a 3D model
-        const container = cardElement.querySelector('.character-3d-container');
-        if (container) {
-          container.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
+        if (container3D) {
+          container3D.innerHTML = '<div class="model-loading">Loading 3D Model...</div>';
           setTimeout(() => {
-            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-neon);">3D Model View</div>';
+            container3D.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--color-neon);">3D Model View</div>';
           }, 1000);
         }
         toggleBtn.setAttribute('title', 'Toggle 2D View');
       } else {
-        const container = cardElement.querySelector('.character-3d-container');
-        if (container) {
-          container.innerHTML = '';
+        container3D.style.display = 'none';
+        toggleBtn2D.style.display = 'flex';
+        if (container3D) {
+          container3D.innerHTML = '';
         }
         toggleBtn.setAttribute('title', 'Toggle 3D View');
       }
     });
   }
-  
-  // Add 3D toggle listener to the initial card
-  add3DToggleListener(card);
 
   /**
    * Create a character card element
@@ -249,10 +243,13 @@ document.addEventListener('DOMContentLoaded', function() {
           class="character-image"
         />
         <button class="toggle-3d-btn" title="Toggle 3D View">
-          <img src="assets/icons/3d-icon.svg" alt="3D icon" onerror="this.parentNode.innerHTML='3D';"/>
+          
         </button>
       </div>
-      <div class="character-3d-container"></div>
+      <div class="character-3d-container">
+        
+      </div>
+      <button class="toggle-2d-btn" title="Toggle 2D View"></button>
       <h3 class="character-name">${charInfo.name.toUpperCase()}</h3>
       <div class="character-stats">
         ${Object.entries(charInfo.stats).map(([statName, value]) => `
@@ -263,37 +260,74 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('')}
       </div>
     `;
+    add3DToggleListener(newCard);
     return newCard;
   }
 
   // Insert additional cards in .carousel-wrapper
   const wrapper = document.querySelector('.carousel-wrapper');
-  for (let i = 1; i < characters.length; i++) {
+  for (let i = 0; i < characters.length; i++) {
     const cardEl = createCharacterCard(i);
     wrapper.appendChild(cardEl);
-    // Add 3D toggle functionality to the newly created card
-    add3DToggleListener(cardEl);
+    if (i === 0) {
+      cardEl.classList.add('active');
+    }
   }
   
   // Handle case where 3D icon might be missing
-  function checkMissing3DIcon() {
-    document.querySelectorAll('.toggle-3d-btn img').forEach(img => {
-      img.onerror = function() {
-        // Replace with text if image fails to load
-        this.parentNode.innerHTML = '3D';
-        this.parentNode.style.fontSize = '1.5vh';
-        this.parentNode.style.fontFamily = 'var(--font-heading)';
-        this.parentNode.style.color = '#FF9000';
-        this.parentNode.style.display = 'flex';
-        this.parentNode.style.alignItems = 'center';
-        this.parentNode.style.justifyContent = 'center';
-      };
-    });
-  }
-  
-  // Check for missing 3D icons
-  checkMissing3DIcon();
+  function checkMissing3DIcon() {}
 
-  // Initialize with the first character
-  updateCharacter(0);
+  // Create character cards
+  characters.forEach((character, index) => {
+    const card = document.createElement('div');
+    card.classList.add('character-card');
+    card.dataset.index = index;
+
+    card.innerHTML = `
+      <div class="character-image-container">
+        <img src="${character.image}" alt="${character.name}" class="character-image">
+      </div>
+      <h3 class="character-name">${character.name.toUpperCase()}</h3>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Speed:</span>
+          <span class="stat-value">${character.stats.speed}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Durability:</span>
+          <span class="stat-value">${character.stats.durability}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Stealth:</span>
+          <span class="stat-value">${character.stats.stealth}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Climbing:</span>
+          <span class="stat-value">${character.stats.climbing}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Agility:</span>
+          <span class="stat-value">${character.stats.agility}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Burrowing:</span>
+          <span class="stat-value">${character.stats.burrowing}%</span>
+        </div>
+      </div>
+    `;
+
+    carouselWrapper.appendChild(card);
+  });
+
+  // Initialize carousel
+  navigateToIndex(0);
+  
+  document.querySelectorAll('.toggle-3d-btn img').forEach(img => {
+    img.onerror = function() {
+      this.parentNode.textContent = '3D';
+    };
+  });
+
+  // Check for missing 3D icons
+  // checkMissing3DIcon();
 });
