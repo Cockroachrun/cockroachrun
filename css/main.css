@@ -1,4 +1,43 @@
 /* Import Components */
+#ui-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Allow clicking through to game when appropriate */
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.menu-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 30px;
+  pointer-events: auto;
+  max-width: 600px;
+  width: 90%;
+}
 @import url('./components/forms.css');
 @import url('./components/loading-screen.css');
 @import url('./components/characters.css');
@@ -821,4 +860,3 @@ canvas {
 .menu-button:nth-child(1) { animation-delay: 0.1s; }
 .menu-button:nth-child(2) { animation-delay: 0.2s; }
 .menu-button:nth-child(3) { animation-delay: 0.3s; }
-.menu-button:nth-child(4) { animation-delay: 0.4s; }

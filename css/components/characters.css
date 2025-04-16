@@ -381,23 +381,6 @@
     font-size: 3vh;
   }
 
-  .carousel-wrapper {
-    max-width: 280px;
-    padding: 1.5vh;
-  }
-
-  .toggle-3d-btn {
-    position: absolute;
-    top: 1vh;
-    right: 1vh;
-    width: 3vh;
-    height: 3vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
   .toggle-3d-btn:hover img {
     filter: none;
   }

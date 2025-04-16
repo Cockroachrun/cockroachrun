@@ -242,14 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
           alt="${charInfo.name}"
           class="character-image"
         />
-        <button class="toggle-3d-btn" title="Toggle 3D View">
-          
-        </button>
       </div>
-      <div class="character-3d-container">
-        
-      </div>
-      <button class="toggle-2d-btn" title="Toggle 2D View"></button>
       <h3 class="character-name">${charInfo.name.toUpperCase()}</h3>
       <div class="character-stats">
         ${Object.entries(charInfo.stats).map(([statName, value]) => `
@@ -260,7 +253,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('')}
       </div>
     `;
-    add3DToggleListener(newCard);
     return newCard;
   }
 
@@ -277,47 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle case where 3D icon might be missing
   function checkMissing3DIcon() {}
 
-  // Create character cards
-  characters.forEach((character, index) => {
-    const card = document.createElement('div');
-    card.classList.add('character-card');
-    card.dataset.index = index;
-
-    card.innerHTML = `
-      <div class="character-image-container">
-        <img src="${character.image}" alt="${character.name}" class="character-image">
-      </div>
-      <h3 class="character-name">${character.name.toUpperCase()}</h3>
-      <div class="stats">
-        <div class="stat">
-          <span class="stat-label">Speed:</span>
-          <span class="stat-value">${character.stats.speed}%</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Durability:</span>
-          <span class="stat-value">${character.stats.durability}%</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Stealth:</span>
-          <span class="stat-value">${character.stats.stealth}%</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Climbing:</span>
-          <span class="stat-value">${character.stats.climbing}%</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Agility:</span>
-          <span class="stat-value">${character.stats.agility}%</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Burrowing:</span>
-          <span class="stat-value">${character.stats.burrowing}%</span>
-        </div>
-      </div>
-    `;
-
-    carouselWrapper.appendChild(card);
-  });
 
   // Initialize carousel
   navigateToIndex(0);
@@ -330,4 +281,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Check for missing 3D icons
   // checkMissing3DIcon();
+
+  function setupNavigation() {
+    const prevArrow = document.querySelector('.carousel-prev');
+    const nextArrow = document.querySelector('.carousel-next');
+    
+    prevArrow.addEventListener('click', () => {
+      AudioManager.playButtonClick();
+      navigateToPrev();
+    });
+    
+    nextArrow.addEventListener('click', () => {
+      AudioManager.playButtonClick();
+      navigateToNext();
+    });
+  }
+
+  setupNavigation();
 });

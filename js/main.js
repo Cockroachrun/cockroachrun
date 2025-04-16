@@ -1,4 +1,66 @@
 /**
+// Preload important images
+function preloadImages() {
+  const imagesToPreload = [
+    'assets/images/characters/American Cockroach with bg.png',
+    'assets/images/characters/german_cockroach.png',
+    'assets/images/characters/Oreintal Cockroach.png',
+    'assets/images/backgrounds/sewer_bg.png',
+    'assets/images/backgrounds/kitchen_bg.png',
+    'assets/images/backgrounds/bathroom_bg.png'
+  ];
+  
+  let loadedCount = 0;
+  const totalImages = imagesToPreload.length;
+  
+  return new Promise((resolve) => {
+    imagesToPreload.forEach(src => {
+      const img = new Image();
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === totalImages) {
+          resolve();
+        }
+      };
+      img.onerror = () => {
+        loadedCount++;
+        console.error(`Failed to load image: ${src}`);
+        if (loadedCount === totalImages) {
+          resolve();
+        }
+      };
+      img.src = src;
+    });
+  });
+}
+
+// Use this in your loading screen code
+function enhancedLoading() {
+  let progress = 0;
+  const progressBar = document.querySelector('.progress-bar');
+  const progressText = document.getElementById('loading-percent');
+  
+  // Start with asset loading
+  preloadImages().then(() => {
+    // Complete the loading once images are ready
+    const interval = setInterval(() => {
+      progress += 5;
+      progressBar.style.width = `${progress}%`;
+      progressText.textContent = progress;
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          UIManager.showScreen('start');
+          AudioManager.playMenuMusic();
+        }, 500);
+      }
+    }, 100);
+  });
+}
+
+// Replace the simulateLoading function in UIManager
+UIManager.simulateLoading = enhancedLoading;
  * Cockroach Run - Main Game Script
  * Initializes all game components and manages the game flow
  */
@@ -109,4 +171,41 @@ document.addEventListener('DOMContentLoaded', () => {
     
     animate(performance.now());
     console.log('Cockroach Run initialized');
+});
+
+// Function to add sound to buttons
+function addSoundToAllButtons() {
+  // Get all buttons and clickable elements
+  const buttons = document.querySelectorAll('button, .mode-card, .carousel-arrow, .carousel-dot');
+  
+  buttons.forEach(button => {
+    // Skip if already has click handler
+    if (button.getAttribute('data-has-sound') === 'true') return;
+    
+    // Save original click handler
+    const originalClick = button.onclick;
+    
+    // Add new click handler with sound
+    button.onclick = function(e) {
+      // Play sound
+      if (window.AudioManager) {
+        AudioManager.playButtonClick();
+      }
+      
+      // Call original handler if it exists
+      if (originalClick) originalClick.call(this, e);
+    };
+    
+    // Mark as processed
+    button.setAttribute('data-has-sound', 'true');
+  });
+}
+
+// Call this function after the DOM is loaded and after any dynamic buttons are created
+document.addEventListener('DOMContentLoaded', function() {
+  // First pass for static buttons
+  addSoundToAllButtons();
+  
+  // Second pass after any dynamic content is loaded
+  setTimeout(addSoundToAllButtons, 1000);
 });
