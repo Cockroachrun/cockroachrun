@@ -9,12 +9,23 @@
   width: 300px !important;
 }
 
-/* Remove black borders from the menu container */
+/* Remove black borders from the character selection menu container ONLY */
 #character-selection-screen .menu-container {
   background-color: transparent !important;
   padding: 0 !important;
   border: none !important;
   box-shadow: none !important;
+}
+
+/* IMPORTANT: Restore backgrounds for all other menus (settings, credits, etc.) */
+#credits-screen .menu-container,
+#pause-screen .menu-container,
+#game-over-screen .menu-container,
+#mode-selection-screen .menu-container,
+#start-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 30px !important;
+  border-radius: 8px !important;
 }
 
 /* Make indicator dots square */
@@ -27,4 +38,9 @@
 /* Fix loading bar animation */
 .progress-bar {
   transition: width 0.1s linear !important;
+}
+
+/* Fix character card transition to be instant (no lag, no bleed-through) */
+.character-card {
+  transition: opacity 0.05s ease, visibility 0.05s ease !important;
 }

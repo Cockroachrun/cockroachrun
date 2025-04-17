@@ -1,0 +1,77 @@
+/* Settings Screen Fix */
+
+/* Ensure .screen.active is displayed on top, clickable, and uses flex layout */
+.screen.active {
+  display: flex !important;
+  z-index: 11 !important;
+  pointer-events: auto !important;
+}
+
+/* Make sure settings content is visible */
+#settings-screen .menu-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 30px !important;
+  border-radius: 8px !important;
+  color: #FF9000 !important; /* Orange text color */
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* The main container for settings sections/controls */
+#settings-screen .settings-content,
+#settings-screen .settings-section,
+#settings-screen .setting-item {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Some settings items need flex layouts */
+#settings-screen .setting-item,
+#settings-screen .slider-container,
+#settings-screen .button-row {
+  display: flex !important;
+}
+
+/* Force buttons to appear enabled and visible */
+#settings-screen button {
+  visibility: visible !important;
+  display: inline-block !important;
+  opacity: 1 !important;
+  color: #FF9000 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid #FF9000 !important;
+}
+/* Make sure all content in settings is visible */
+#settings-screen .screen-title,
+#settings-screen .settings-content,
+#settings-screen .settings-section,
+#settings-screen h3,
+#settings-screen .setting-item,
+#settings-screen span,
+#settings-screen .slider-container,
+#settings-screen .toggle-container,
+#settings-screen .dropdown-container,
+#settings-screen .button-row {
+  visibility: visible !important;
+  display: block !important;
+  color: #FF9000 !important; /* Orange text color */
+  opacity: 1 !important;
+}
+
+/* Fix specific items that might have flex layout */
+#settings-screen .setting-item,
+#settings-screen .slider-container,
+#settings-screen .button-row {
+  display: flex !important;
+}
+
+/* Ensure buttons are visible */
+#settings-screen button {
+  visibility: visible !important;
+  display: inline-block !important;
+  opacity: 1 !important;
+  color: #FF9000 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid #FF9000 !important;
+}
