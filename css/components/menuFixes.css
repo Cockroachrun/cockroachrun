@@ -81,6 +81,13 @@
   border-radius: 8px !important;
 }
 
+/* Ensure start-screen logo section is fully transparent */
+#start-screen .menu-container .logo-container,
+#start-screen .menu-container .logo-container img {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* ==================== TITLE STYLING ==================== */
 /* Character selection title only */
 #character-selection-screen .screen-title {

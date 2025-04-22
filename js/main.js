@@ -210,4 +210,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Second pass after any dynamic content is loaded
   setTimeout(addSoundToAllButtons, 1000);
+  
+  // Add click sound to carousel arrows
+  document.querySelectorAll('.carousel-prev, .carousel-next').forEach(btn => {
+    btn.addEventListener('click', () => AudioManager.playButtonClick());
+  });
 });

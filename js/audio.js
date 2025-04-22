@@ -62,16 +62,18 @@ const AudioManager = {
   },
   
   playButtonClick() {
-    // Clone the audio to allow overlapping sounds
-    const buttonSound = this.buttonClick.cloneNode();
+    // Create a new Audio instance to play click sound
+    const source = this.buttonClick.querySelector('source');
+    const buttonSound = new Audio(source ? source.src : this.buttonClick.src);
     buttonSound.volume = this.sfxVolume;
     buttonSound.play().catch(e => console.log('Sound play prevented:', e));
   },
   
   playScatterSound() {
-    const scatterSound = this.scatterSound.cloneNode();
-    scatterSound.volume = this.sfxVolume;
-    scatterSound.play().catch(e => console.log('Sound play prevented:', e));
+    const source = this.scatterSound.querySelector('source');
+    const scatterAudio = new Audio(source ? source.src : this.scatterSound.src);
+    scatterAudio.volume = this.sfxVolume;
+    scatterAudio.play().catch(e => console.log('Sound play prevented:', e));
   }
 };
 
