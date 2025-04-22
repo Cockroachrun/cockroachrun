@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self';" />
   <title>Cockroach Run - A Cyberpunk Adventure</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,14 +13,16 @@
   />
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/components/characters.css" />
   <link rel="stylesheet" href="css/components/character-fixes.css" />
   <link rel="stylesheet" href="css/components/carouselStyle.css" />
   <link rel="stylesheet" href="css/components/settings-fix.css" />
+  <link rel="stylesheet" href="css/components/loadingFix.css" />
+  <link rel="stylesheet" href="css/components/titleFix.css" />
+  <link rel="stylesheet" href="css/components/characters.css" />
   <!-- Preload character images -->
   <link rel="preload" href="assets/images/characters/german_cockroach.png" as="image" />
   <link rel="preload" href="assets/images/characters/American Cockroach with bg.png" as="image" />
-  <link rel="preload" href="assets/images/characters/Oreintal Cockroach.png" as="image" />
+  <link rel="preload" href="assets/images/characters/Oriental Cockroach.png" as="image" />
 </head>
 <body>
   <!-- Game Canvas Container -->
@@ -100,8 +103,8 @@
             <!-- Hardcoded first character to ensure it displays properly -->
             <!-- The JavaScript will handle switching among multiple characters -->
             <!-- Navigation arrows -->
-            <button class="carousel-arrow carousel-prev" title="Previous"><</button>
-            <button class="carousel-arrow carousel-next" title="Next">></button>
+            <button class="carousel-arrow carousel-prev" title="Previous" role="button" aria-label="Previous Slide" tabindex="0">&lt;</button>
+            <button class="carousel-arrow carousel-next" title="Next" role="button" aria-label="Next Slide" tabindex="0">&gt;</button>
           </div>
         </div>
 
@@ -162,7 +165,7 @@
                 <span class="slider-value">80%</span>
               </div>
             </div>
-            <div class="setting-item">
+<div class="setting-item">
               <span>Sound Effects</span>
               <div class="slider-container">
                 <input
@@ -174,6 +177,16 @@
                   class="slider"
                 />
                 <span class="slider-value">100%</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <span>Music Track</span>
+              <div class="dropdown-container">
+                <select id="music-select" class="styled-dropdown">
+                  <option value="menu">Menu Music</option>
+                  <option value="game">Game Music</option>
+                </select>
+                <div class="dropdown-arrow">▼</div>
               </div>
             </div>
           </div>
@@ -305,14 +318,15 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.144.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
   <script src="js/soundEffects.js"></script>
   <script src="js/loadingScreen.js"></script>
   <script src="js/characterCarousel.js"></script>
-  <script src="js/ui.js"></script>
   <script src="js/character-fixes.js"></script>
-<script src="js/main.js"></script>
-<script src="js/smoothLoading.js"></script>
-<script src="js/fixCardTransition.js"></script>
-<script src="js/settingsFix.js"></script>
+  <script src="js/smoothLoading.js"></script>
+  <script src="js/fixCardTransition.js"></script>
+  <script src="js/settingsFix.js"></script>
+  <script src="js/fixEventBugs.js"></script>
 </body>
 </html>

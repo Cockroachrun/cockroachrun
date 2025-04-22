@@ -1,0 +1,30 @@
+/* Fix for loading bar appearance */
+
+/* Make loading bar smoother */
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B00, #FF9000) !important;
+  transition: width 0.1s linear !important;
+  background-size: 200% 100% !important;
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.5) !important;
+}
+
+.progress-container {
+  border: 1px solid #FF9000 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.3) !important;
+}
+
+/* Fix flavor text to match the style better */
+.flavor-text {
+  color: #FF9000 !important;
+  opacity: 0.8 !important;
+  font-style: italic !important;
+}
+
+/* Make loading title stand out more */
+.loading-title {
+  color: #FF9000 !important;
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.7) !important;
+  margin-bottom: 20px !important;
+}
