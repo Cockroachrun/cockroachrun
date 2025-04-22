@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     musicVolume: 80,
     sfxVolume: 100,
     quality: 'medium',
-    showFPS: false
+    showFPS: false,
+    musicTrack: 'menu'
   };
 
   /********************
@@ -123,6 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
         gameSettings.quality = qualitySelect.value;
       }
 
+      const musicSelectInput = document.getElementById('music-select');
+      if (musicSelectInput) {
+        gameSettings.musicTrack = musicSelectInput.value;
+      }
       console.log("Updated Settings:", gameSettings);
       hideSettingsScreen();
     }, true);
@@ -147,6 +152,16 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("Quality changed to:", gameSettings.quality);
       // (Update game logic as needed)
     }, true);
+  }
+
+  const musicSelect = document.getElementById('music-select');
+  if (musicSelect) {
+    musicSelect.value = gameSettings.musicTrack;
+    musicSelect.addEventListener('change', e => {
+      gameSettings.musicTrack = e.target.value;
+      console.log('Music track:', gameSettings.musicTrack);
+      // AudioManager.playMusicTrack(gameSettings.musicTrack);
+    });
   }
 
   // CREDITS BUTTON

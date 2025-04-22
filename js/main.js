@@ -4,7 +4,7 @@ function preloadImages() {
   const imagesToPreload = [
     'assets/images/characters/American Cockroach with bg.png',
     'assets/images/characters/german_cockroach.png',
-    'assets/images/characters/Oreintal Cockroach.png',
+    'assets/images/characters/Oriental Cockroach.png',
     'assets/images/backgrounds/sewer_bg.png',
     'assets/images/backgrounds/kitchen_bg.png',
     'assets/images/backgrounds/bathroom_bg.png'
@@ -73,6 +73,8 @@ UIManager.simulateLoading = enhancedLoading;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Initializing Cockroach Run...');
     
+    // Use global AudioManager for compatibility
+    const AudioManager = window.AudioManager;
     AudioManager.init();
     console.log('AudioManager initialized');
     UIManager.init();

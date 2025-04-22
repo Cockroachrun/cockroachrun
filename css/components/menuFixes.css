@@ -1,7 +1,7 @@
 /* Comprehensive menu fixes that won't break the UI */
 
 /* ==================== GLOBAL MENU STYLING ==================== */
-.menu-button, .back-button, .save-button {
+.menu-button, .start-button, .back-button, .save-button {
   background-color: rgba(0, 0, 0, 0.7);
   border: 1px solid var(--color-neon);
   color: var(--color-neon);
@@ -12,9 +12,22 @@
   transition: all 0.3s;
 }
 
-.menu-button:hover, .back-button:hover, .save-button:hover {
+.menu-button:hover, .save-button:hover {
   background-color: var(--color-neon);
   color: black;
+}
+
+/* Keep start & back buttons solid black with orange text on hover */
+.start-button:hover, .back-button:hover {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid var(--color-neon) !important;
+}
+
+/* Always keep start & back button text neon on hover, active, focus */
+.start-button:hover, .back-button:hover,
+.start-button:active, .back-button:active,
+.start-button:focus, .back-button:focus {
+  color: var(--color-neon) !important;
 }
 
 /* ==================== MENU CONTAINERS ==================== */
@@ -63,7 +76,7 @@
 
 /* Start screen menu container */
 #start-screen .menu-container {
-  background-color: rgba(0, 0, 0, 0.7) !important;
+  background-color: transparent !important;
   padding: 20px !important;
   border-radius: 8px !important;
 }

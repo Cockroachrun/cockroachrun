@@ -375,6 +375,35 @@
   box-shadow: 0 0 1vh var(--color-neon-lighter);
 }
 
+/* Scale down and fit card contents */
+#character-selection-screen .character-card {
+  padding: 1rem !important;
+}
+#character-selection-screen .character-image-container {
+  width: 80% !important;
+}
+#character-selection-screen .character-image {
+  width: 80% !important;
+  max-height: 30vh !important;
+  object-fit: contain !important;
+}
+#character-selection-screen .character-name {
+  font-size: 2vh !important;
+  margin-bottom: 1vh !important;
+}
+#character-selection-screen .character-stats {
+  gap: 1vh !important;
+}
+#character-selection-screen .character-stats .stat {
+  padding: 0.5vh !important;
+}
+#character-selection-screen .stat-label {
+  font-size: 1.2vh !important;
+}
+#character-selection-screen .stat-value {
+  font-size: 1vh !important;
+}
+
 /* Responsive media queries */
 @media (max-width: 768px) {
   .screen-title {

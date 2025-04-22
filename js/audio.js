@@ -76,6 +76,10 @@ const AudioManager = {
 };
 
 // Initialize audio on page load
+// Expose AudioManager globally for all scripts
+window.AudioManager = AudioManager;
+
 document.addEventListener('DOMContentLoaded', function() {
+  // AudioManager implementation
   AudioManager.init();
 });

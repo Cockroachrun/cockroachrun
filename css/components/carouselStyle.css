@@ -44,3 +44,19 @@
 .character-card {
   transition: opacity 0.05s ease, visibility 0.05s ease !important;
 }
+
+/* Position carousel arrows outside the character card border */
+#character-selection-screen .carousel-container {
+  position: relative;
+}
+#character-selection-screen .carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#character-selection-screen .carousel-prev {
+  left: -2rem;
+}
+#character-selection-screen .carousel-next {
+  right: -2rem;
+}

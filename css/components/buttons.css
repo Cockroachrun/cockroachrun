@@ -33,6 +33,12 @@
   margin-top: var(--space-lg);
 }
 
+/* Ensure start and back buttons have solid black background */
+.start-button,
+.back-button {
+  background-color: black !important;
+}
+
 @media (max-width: 480px) {
   .button {
     padding: var(--space-sm) var(--space-md);
