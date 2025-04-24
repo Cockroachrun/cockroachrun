@@ -68,22 +68,12 @@ const UIManager = {
         this.simulateLoading();
         console.log('UI Manager initialized');
 
-        // Attempt to start current intended music on first user interaction
-        const tryPlayCurrentMusic = () => {
-            if (!AudioManager.menuMusic.paused || !AudioManager.gameMusic.paused) {
-                window.removeEventListener('click', tryPlayCurrentMusic);
-                return;
-            }
-            AudioManager.menuMusic.play().catch(() => {});
-            window.removeEventListener('click', tryPlayCurrentMusic);
+        // Attempt to start music on first user interaction
+        const tryPlayMusic = () => {
+            AudioManager.playCurrentTrack();
+            window.removeEventListener('click', tryPlayMusic);
         };
-        window.addEventListener('click', tryPlayCurrentMusic);
-        // Attempt to start menu music on first user interaction
-        const tryPlayMenuMusic = () => {
-            AudioManager.menuMusic.play().catch(() => {});
-            window.removeEventListener('click', tryPlayMenuMusic);
-        };
-        window.addEventListener('click', tryPlayMenuMusic);
+        window.addEventListener('click', tryPlayMusic);
     },
     
     addEventListeners() {

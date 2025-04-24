@@ -161,12 +161,13 @@
 
 /* Style for when the dropdown is visible */
 .custom-options-list.visible {
-  max-height: 120px; /* Reduced max height */
+  max-height: 300px; /* Increased max height to show more options */
   opacity: 1;
   visibility: visible !important; /* Force visibility with !important */
   display: block;
-  transition: max-height 0.2s ease-in, opacity 0.2s ease-in, visibility 0s linear 0s;
+  transition: max-height 0.3s ease-in, opacity 0.2s ease-in, visibility 0s linear 0s;
   z-index: 1000; /* Ensure it appears on top */
+  overflow-y: auto; /* Add scrolling for many options */
 }
 
 /* Individual options */

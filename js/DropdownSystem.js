@@ -46,6 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedOptionText.textContent = this.textContent;
         optionsList.classList.remove('visible');
         trigger.setAttribute('aria-expanded', 'false');
+        
+        // Trigger change event on the select element to notify listeners
+        const changeEvent = new Event('change', { bubbles: true });
+        originalSelect.dispatchEvent(changeEvent);
+        console.log('Change event dispatched for', originalSelect.id, 'with value', value);
+        
+        // For music selection specifically
+        if (originalSelect.id === 'music-select' && window.AudioManager) {
+          console.log('Changing music track to:', value);
+          window.AudioManager.changeTrack(value);
+        }
       });
     });
 

@@ -1,29 +1,76 @@
 const AudioManager = {
-  menuMusic: null, 
-  gameMusic: null,
+  currentMusic: null,
   buttonClick: null,
   scatterSound: null,
   muteToggleElement: null, 
-
+  
+  musicTracks: {},
+  currentTrackId: 'checkpoint-chaser',
+  
   musicVolume: 0.8,
   sfxVolume: 1.0,
-  isMuted: false, 
+  isMuted: false,
+  
+  // Map of track IDs to file names
+  trackMap: {
+    'checkpoint-chaser': 'Checkpoint Chaser .mp3',
+    'cockroach-comeback': 'Cockroach Comeback .mp3',
+    'cockroach-run': 'Cockroach run music.mp3',
+    'dodge-weave-waltz': 'Dodge and Weave Waltz .mp3',
+    'egg-checkpoint-blues': 'Egg Checkpoint Blues .mp3',
+    'egg-layers-lament': 'Egg-Layer\'s Lament .mp3',
+    'evolutions-edge': 'Evolution\'s Edge .mp3',
+    'futuristic-flee': 'Futuristic Flee  .mp3',
+    'gliders-getaway': 'Glider\'s Getaway  .mp3',
+    'human-threat-harmony': 'Human Threat Harmony .mp3',
+    'neon-roach-runnin': 'Neon Roach Runnin.mp3',
+    'night-cycle-nomad': 'Night Cycle Nomad .mp3',
+    'obstacle-dodge-dance': 'Obstacle Dodge Dance .mp3',
+    'roach-on-the-run': 'Roach on the Run  .mp3',
+    'run-roach-run': 'Run, Roach, Run!.mp3',
+    'scurry-in-the-shadows': 'Scurry in the Shadows .mp3',
+    'sewer-sirens-call': 'Sewer Siren\'s Call  .mp3',
+    'sewer-survivors-sound': 'Sewer Survivor\'s Sound .mp3',
+    'skittering-skyline': 'Skittering Skyline .mp3',
+    'urban-jungle-jive': 'Urban Jungle Jive  .mp3',
+    'urban-odyssey-overture': 'Urban Odyssey Overture  .mp3'
+  },
 
   init() {
-    this.menuMusic = document.getElementById('menu-music');
-    this.gameMusic = document.getElementById('game-music');
     this.buttonClick = document.getElementById('button-click');
     this.scatterSound = document.getElementById('scatter-sound');
-    this.muteToggleElement = document.getElementById('mute-toggle'); 
-
-    if (!this.menuMusic || !this.gameMusic || !this.buttonClick || !this.scatterSound) {
+    this.muteToggleElement = document.getElementById('mute-toggle');
+    
+    if (!this.buttonClick || !this.scatterSound) {
         console.warn("AudioManager Warning: One or more audio elements not found!");
     }
     if (!this.muteToggleElement) {
         console.warn("AudioManager Warning: Mute toggle button element not found!");
     }
-
-    this.loadSettings(); 
+    
+    // Event listener for music track selection
+    const musicSelect = document.getElementById('music-select');
+    if (musicSelect) {
+        musicSelect.addEventListener('change', (e) => {
+            this.changeTrack(e.target.value);
+        });
+        
+        // Initialize with saved track or default
+        const savedTrack = localStorage.getItem('currentTrackId');
+        if (savedTrack && this.trackMap[savedTrack]) {
+            this.currentTrackId = savedTrack;
+            musicSelect.value = savedTrack;
+            
+            // Update the custom dropdown text
+            const selectedTextElement = document.getElementById('selected-music-text');
+            if (selectedTextElement) {
+                const selectedOption = musicSelect.options[musicSelect.selectedIndex];
+                selectedTextElement.textContent = selectedOption.textContent;
+            }
+        }
+    }
+    
+    this.loadSettings();
     console.log('AudioManager initialized');
   },
 
@@ -41,16 +88,26 @@ const AudioManager = {
 
     const savedMuteState = localStorage.getItem('isMuted');
     this.isMuted = savedMuteState ? JSON.parse(savedMuteState) : false;
+    
+    // Load saved track selection
+    const savedTrack = localStorage.getItem('currentTrackId');
+    if (savedTrack && this.trackMap[savedTrack]) {
+      this.currentTrackId = savedTrack;
+    }
 
     this.applyVolumeSettings(); 
     this.applyMuteState(); 
   },
 
   applyVolumeSettings() {
-      if (this.menuMusic) this.menuMusic.volume = this.musicVolume;
-      if (this.gameMusic) this.gameMusic.volume = this.musicVolume;
+      if (this.currentMusic) this.currentMusic.volume = this.musicVolume;
       if (this.buttonClick) this.buttonClick.volume = this.sfxVolume; 
       if (this.scatterSound) this.scatterSound.volume = this.sfxVolume; 
+      
+      // Update any track in the musicTracks collection
+      Object.values(this.musicTracks).forEach(track => {
+          if (track) track.volume = this.musicVolume;
+      });
 
       const musicSlider = document.getElementById('music-volume');
       const sfxSlider = document.getElementById('sfx-volume');
@@ -59,8 +116,13 @@ const AudioManager = {
   },
 
   applyMuteState() {
-    if (this.menuMusic) this.menuMusic.muted = this.isMuted;
-    if (this.gameMusic) this.gameMusic.muted = this.isMuted;
+    if (this.currentMusic) this.currentMusic.muted = this.isMuted;
+    
+    // Mute all tracks in the collection
+    Object.values(this.musicTracks).forEach(track => {
+        if (track) track.muted = this.isMuted;
+    });
+    
     if (this.muteToggleElement) {
       if (this.isMuted) {
         this.muteToggleElement.classList.add('active'); 
@@ -81,22 +143,68 @@ const AudioManager = {
     console.log("Saving settings (Volume/Mute saved on interaction now)");
   },
 
-  playMenuMusic() {
-    if (!this.menuMusic) return;
-    if (this.gameMusic) {
-        this.gameMusic.pause();
-        this.gameMusic.currentTime = 0;
+  // Get the path for a track ID
+  getTrackPath(trackId) {
+    const filename = this.trackMap[trackId];
+    if (!filename) {
+      console.error(`Track ID not found: ${trackId}`);
+      return null;
     }
-    this.menuMusic.play().catch(e => console.warn('Autoplay prevented:', e));
+    return `assets/sounds/music/${filename}`;
   },
-
-  playGameMusic() {
-    if (!this.gameMusic) return;
-    if (this.menuMusic) {
-        this.menuMusic.pause();
-        this.menuMusic.currentTime = 0;
+  
+  // Create or get an audio element for a track
+  getTrackAudio(trackId) {
+    // If we already created this track, return it
+    if (this.musicTracks[trackId]) {
+      return this.musicTracks[trackId];
     }
-    this.gameMusic.play().catch(e => console.warn('Autoplay prevented:', e));
+    
+    // Get the track path
+    const trackPath = this.getTrackPath(trackId);
+    if (!trackPath) return null;
+    
+    // Create a new audio element
+    const audio = new Audio(trackPath);
+    audio.loop = true;
+    audio.volume = this.musicVolume;
+    audio.muted = this.isMuted;
+    
+    // Store in our collection
+    this.musicTracks[trackId] = audio;
+    return audio;
+  },
+  
+  // Change to a different track
+  changeTrack(trackId) {
+    if (!this.trackMap[trackId]) {
+      console.error(`Invalid track ID: ${trackId}`);
+      return;
+    }
+    
+    // Stop current music if playing
+    if (this.currentMusic) {
+      this.currentMusic.pause();
+      this.currentMusic.currentTime = 0;
+    }
+    
+    // Store track selection
+    this.currentTrackId = trackId;
+    localStorage.setItem('currentTrackId', trackId);
+    
+    // Get the audio for this track
+    const audio = this.getTrackAudio(trackId);
+    this.currentMusic = audio;
+    
+    // Play the new track
+    if (audio) {
+      audio.play().catch(e => console.warn('Autoplay prevented:', e));
+    }
+  },
+  
+  // Play the current selected track
+  playCurrentTrack() {
+    this.changeTrack(this.currentTrackId);
   },
 
   playButtonClick() {
@@ -132,8 +240,22 @@ document.addEventListener('DOMContentLoaded', function() {
     musicVolumeSlider.addEventListener('input', function(event) {
       const newVolume = parseFloat(event.target.value) / 100;
       AudioManager.musicVolume = newVolume; 
-      if (AudioManager.menuMusic) AudioManager.menuMusic.volume = newVolume; 
-      if (AudioManager.gameMusic) AudioManager.gameMusic.volume = newVolume; 
+      
+      // Update volume for the currently playing track
+      if (AudioManager.currentMusic) {
+        AudioManager.currentMusic.volume = newVolume;
+      }
+      
+      // Update volume for all cached tracks
+      Object.values(AudioManager.musicTracks).forEach(track => {
+        if (track) track.volume = newVolume;
+      });
+      
+      // Update the text display next to the slider
+      const valueDisplay = musicVolumeSlider.parentElement.querySelector('.slider-value');
+      if (valueDisplay) {
+        valueDisplay.textContent = Math.round(newVolume * 100) + '%';
+      }
     });
 
     musicVolumeSlider.addEventListener('change', function() {

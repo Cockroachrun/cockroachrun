@@ -52,7 +52,7 @@ function enhancedLoading() {
         clearInterval(interval);
         setTimeout(() => {
           UIManager.showScreen('start');
-          AudioManager.playMenuMusic();
+          AudioManager.playCurrentTrack();
         }, 500);
       }
     }, 100);
@@ -80,12 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
     UIManager.init();
     console.log('UIManager initialized');
     
-    // Try to play menu music as soon as possible
-    AudioManager.playMenuMusic();
+    // Try to play selected music track as soon as possible
+    AudioManager.playCurrentTrack();
     
     // Add a one-time event listener for any user interaction to start music
     const startAudioOnInteraction = () => {
-        AudioManager.playMenuMusic();
+        AudioManager.playCurrentTrack();
         document.removeEventListener('click', startAudioOnInteraction);
         document.removeEventListener('keydown', startAudioOnInteraction);
         document.removeEventListener('touchstart', startAudioOnInteraction);
