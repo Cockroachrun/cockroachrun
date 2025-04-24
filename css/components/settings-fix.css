@@ -19,18 +19,19 @@
 
 /* The main container for settings sections/controls */
 #settings-screen .settings-content,
-#settings-screen .settings-section,
-#settings-screen .setting-item {
-  display: block !important;
+#settings-screen .settings-section {
+  display: block !important; /* Keep these block */
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* Some settings items need flex layouts */
+/* Specific flex layouts */
 #settings-screen .setting-item,
 #settings-screen .slider-container,
 #settings-screen .button-row {
-  display: flex !important;
+  display: flex !important; /* Use flex */
+  visibility: visible !important; /* Ensure visible too */
+  opacity: 1 !important;
 }
 
 /* Force buttons to appear enabled and visible */
@@ -42,36 +43,14 @@
   background-color: rgba(0, 0, 0, 0.7) !important;
   border: 1px solid #FF9000 !important;
 }
-/* Make sure all content in settings is visible */
+
+/* Make sure other content in settings is visible */
 #settings-screen .screen-title,
-#settings-screen .settings-content,
-#settings-screen .settings-section,
 #settings-screen h3,
-#settings-screen .setting-item,
 #settings-screen span,
-#settings-screen .slider-container,
 #settings-screen .toggle-container,
-#settings-screen .dropdown-container,
-#settings-screen .button-row {
+#settings-screen .dropdown-container {
   visibility: visible !important;
-  display: block !important;
   color: #FF9000 !important; /* Orange text color */
   opacity: 1 !important;
-}
-
-/* Fix specific items that might have flex layout */
-#settings-screen .setting-item,
-#settings-screen .slider-container,
-#settings-screen .button-row {
-  display: flex !important;
-}
-
-/* Ensure buttons are visible */
-#settings-screen button {
-  visibility: visible !important;
-  display: inline-block !important;
-  opacity: 1 !important;
-  color: #FF9000 !important;
-  background-color: rgba(0, 0, 0, 0.7) !important;
-  border: 1px solid #FF9000 !important;
 }

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dropdown Test</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #E0E0E0;
+      font-family: 'Arial', sans-serif;
+      padding: 40px;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    /* Custom dropdown styles */
+    .custom-dropdown-wrapper {
+      position: relative;
+      width: 200px;
+    }
+    
+    .custom-dropdown-trigger {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background-color: rgba(32, 32, 32, 0.85);
+      border: 1px solid #FF9000;
+      color: #FF9000;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .custom-dropdown-trigger::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #FF9000;
+    }
+    
+    .custom-options-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background-color: #121212;
+      border: 1px solid #FF9000;
+      border-top: none;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .custom-options-list.visible {
+      max-height: 200px;
+      opacity: 1;
+    }
+    
+    .custom-option {
+      padding: 10px 15px;
+      color: #FF9000;
+      cursor: pointer;
+    }
+    
+    .custom-option:hover {
+      background-color: #000000;
+    }
+    
+    /* Hide original select */
+    .original-select {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    button {
+      background-color: #222;
+      color: #FF9000;
+      border: 1px solid #FF9000;
+      padding: 8px 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dropdown Test</h1>
+    <p>This is a simplified test page for the custom dropdown component.</p>
+    
+    <div class="setting-item">
+      <span>Music Track:</span>
+      <div class="custom-dropdown-wrapper">
+        <select class="original-select">
+          <option value="menu" selected>Menu Music</option>
+          <option value="game">Game Music</option>
+        </select>
+        <div class="custom-dropdown-trigger">
+          <span class="selected-option-text">Menu Music</span>
+        </div>
+        <ul class="custom-options-list">
+          <li class="custom-option" data-value="menu">Menu Music</li>
+          <li class="custom-option" data-value="game">Game Music</li>
+        </ul>
+      </div>
+    </div>
+    
+    <button id="log-button">Log Dropdown Elements</button>
+  </div>
+  
+  <script>
+    // Simple test script
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Test page loaded');
+      
+      // Debug button
+      document.getElementById('log-button').addEventListener('click', function() {
+        const wrapper = document.querySelector('.custom-dropdown-wrapper');
+        const trigger = document.querySelector('.custom-dropdown-trigger');
+        const optionsList = document.querySelector('.custom-options-list');
+        
+        console.log('Wrapper:', wrapper);
+        console.log('Trigger:', trigger);
+        console.log('Options List:', optionsList);
+        console.log('Options List hidden?', optionsList.hasAttribute('hidden'));
+        console.log('Options List visible class?', optionsList.classList.contains('visible'));
+        console.log('Options List computed style:', getComputedStyle(optionsList));
+      });
+      
+      // Get the dropdown trigger
+      const trigger = document.querySelector('.custom-dropdown-trigger');
+      const optionsList = document.querySelector('.custom-options-list');
+      
+      // Toggle dropdown when clicked
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Trigger clicked');
+        
+        // Toggle visibility class
+        optionsList.classList.toggle('visible');
+        console.log('Toggled visible class, now:', optionsList.classList.contains('visible'));
+      });
+      
+      // Handle option selection
+      document.querySelectorAll('.custom-option').forEach(option => {
+        option.addEventListener('click', function() {
+          const value = this.getAttribute('data-value');
+          const text = this.textContent;
+          
+          // Update displayed text
+          document.querySelector('.selected-option-text').textContent = text;
+          
+          // Close dropdown
+          optionsList.classList.remove('visible');
+          
+          console.log('Option selected:', text, value);
+        });
+      });
+      
+      // Close dropdown when clicking elsewhere
+      document.addEventListener('click', function() {
+        optionsList.classList.remove('visible');
+      });
+    });
+  </script>
+</body>
+</html>

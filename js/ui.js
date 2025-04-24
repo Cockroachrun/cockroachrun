@@ -405,5 +405,88 @@ const UIManager = {
         document.getElementById('high-score').textContent = Math.max(highScore, finalScore);
         this.showScreen('gameOver');
         this.isGameRunning = false;
-    }
+    },
+    
+    initializeCustomDropdowns() {
+        const dropdownWrappers = document.querySelectorAll('.custom-dropdown-wrapper');
+
+        dropdownWrappers.forEach(wrapper => {
+            const trigger = wrapper.querySelector('.custom-dropdown-trigger');
+            const optionsList = wrapper.querySelector('.custom-options-list');
+            const options = wrapper.querySelectorAll('.custom-option');
+            const originalSelect = wrapper.querySelector('.original-select');
+            const selectedOptionText = trigger.querySelector('.selected-option-text');
+
+            // Set initial selected text
+            if (originalSelect && selectedOptionText) {
+                const selectedOption = originalSelect.options[originalSelect.selectedIndex];
+                if (selectedOption) {
+                    selectedOptionText.textContent = selectedOption.textContent;
+                }
+            }
+
+            // Toggle dropdown visibility
+            trigger.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent click outside handler from closing immediately
+                const isVisible = optionsList.classList.contains('visible');
+                // Close all other dropdowns first
+                document.querySelectorAll('.custom-options-list').forEach(list => {
+                    if (list !== optionsList) {
+                        list.classList.remove('visible');
+                        list.setAttribute('hidden', '');
+                        list.closest('.custom-dropdown-wrapper').querySelector('.custom-dropdown-trigger').setAttribute('aria-expanded', 'false');
+                    }
+                });
+                // Toggle this dropdown
+                if (isVisible) {
+                    optionsList.classList.remove('visible');
+                    optionsList.setAttribute('hidden', '');
+                } else {
+                    optionsList.classList.add('visible');
+                    optionsList.removeAttribute('hidden');
+                }
+                trigger.setAttribute('aria-expanded', !isVisible);
+            });
+
+            // Handle option selection
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.getAttribute('data-value');
+                    selectedOptionText.textContent = option.textContent; // Update visible text
+                    originalSelect.value = value; // Update hidden select value
+                    optionsList.classList.remove('visible');
+                    optionsList.setAttribute('hidden', '');
+                    trigger.setAttribute('aria-expanded', 'false');
+                    trigger.focus(); // Return focus to the trigger
+
+                    // Trigger a 'change' event on the original select if needed by other code
+                    const changeEvent = new Event('change', { bubbles: true });
+                    originalSelect.dispatchEvent(changeEvent);
+
+                    // Play sound if AudioManager exists
+                    if (window.AudioManager) {
+                         AudioManager.playButtonClick();
+                     }
+                });
+
+                // Handle keyboard navigation (Enter key)
+                option.addEventListener('keydown', (event) => {
+                     if (event.key === 'Enter') {
+                         option.click(); // Simulate a click
+                     }
+                 });
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-options-list').forEach(list => {
+                list.classList.remove('visible');
+                list.setAttribute('hidden', '');
+                list.closest('.custom-dropdown-wrapper').querySelector('.custom-dropdown-trigger').setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        console.log('Custom dropdowns initialized');
+    },
 };
