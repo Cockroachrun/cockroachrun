@@ -2,19 +2,41 @@
 
 /* ==================== GLOBAL MENU STYLING ==================== */
 .menu-button, .start-button, .back-button, .save-button {
-  background-color: rgba(0, 0, 0, 0.7);
-  border: 1px solid var(--color-neon);
-  color: var(--color-neon);
-  padding: 10px 15px;
-  font-family: var(--font-heading);
+  background: #000 !important;
+  border: 2px solid var(--orange) !important;
+  color: var(--orange) !important;
+  font-family: var(--font-heading) !important;
+  text-transform: uppercase !important;
+  font-size: 1rem !important;
+  padding: 8px 24px !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 0 1.5px var(--orange), 0 0 10px 0 rgba(255,144,0,0.25);
   cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.3s;
+  letter-spacing: 1px;
+  min-width: 120px;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  outline: none !important;
+  margin: 4px 0;
 }
 
-.menu-button:hover, .save-button:hover {
-  background-color: var(--color-neon);
-  color: black;
+.menu-button:hover {
+  background: rgba(255,144,0,0.10) !important;
+  color: var(--orange) !important;
+  box-shadow: 0 0 6px 2px var(--orange), 0 0 20px 0 rgba(255,144,0,0.35);
+}
+
+.menu-button:focus, .menu-button:active, .menu-button:focus-visible {
+  background: #000 !important;
+}
+
+.save-button:hover, .back-button:hover {
+  background: rgba(255,144,0,0.10) !important;
+  color: var(--orange) !important;
+  box-shadow: 0 0 6px 2px var(--orange), 0 0 20px 0 rgba(255,144,0,0.35);
+}
+
+.menu-button:focus, .menu-button:active, .menu-button:focus-visible {
+  background: #000 !important;
 }
 
 /* Keep start & back buttons solid black with orange text on hover */
@@ -25,9 +47,14 @@
 
 /* Always keep start & back button text neon on hover, active, focus */
 .start-button:hover, .back-button:hover,
+.menu-button:focus-visible, .back-button:focus-visible, .save-button:focus-visible {
+  box-shadow: 0 0 0 2.5px var(--orange), 0 0 12px 2px var(--orange-glow);
+  outline: none !important;
+}
+
 .start-button:active, .back-button:active,
 .start-button:focus, .back-button:focus {
-  color: var(--color-neon) !important;
+  color: var(--orange) !important;
 }
 
 /* ==================== MENU CONTAINERS ==================== */

@@ -1,0 +1,32 @@
+/* Overlay for smooth menu transitions */
+.menu-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(18,18,18,0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.menu-loading-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.menu-loading-spinner {
+  border: 6px solid #222;
+  border-top: 6px solid #00FF66;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  animation: spin 1.1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

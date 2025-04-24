@@ -1,0 +1,56 @@
+/* Dip-to-black overlay with cockroach scatter animation */
+#transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s ease-in-out;
+}
+#transition-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+#transition-overlay img.cockroach {
+  position: absolute;
+  width: 70px;
+  height: auto;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation-name: roach-crawl;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-duration: var(--dur, 2s);
+  animation-delay: var(--delay, 0s);
+}
+/* More lifelike crawl – slight jitter and body wiggle */
+@keyframes roach-crawl {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35) rotate(var(--angle));
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    transform: translate(calc(-50% + var(--tx) * 0.2), calc(-50% + var(--ty) * 0.2)) scale(0.35) rotate(calc(var(--angle) + 3deg));
+  }
+  40% {
+    transform: translate(calc(-50% + var(--tx) * 0.4), calc(-50% + var(--ty) * 0.4)) scale(0.35) rotate(calc(var(--angle) - 3deg));
+  }
+  60% {
+    transform: translate(calc(-50% + var(--tx) * 0.6), calc(-50% + var(--ty) * 0.6)) scale(0.35) rotate(calc(var(--angle) + 2deg));
+  }
+  80% {
+    transform: translate(calc(-50% + var(--tx) * 0.8), calc(-50% + var(--ty) * 0.8)) scale(0.35) rotate(calc(var(--angle) - 2deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.35) rotate(var(--angle));
+  }
+}

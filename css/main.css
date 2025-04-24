@@ -80,6 +80,7 @@
 
 :root {
     --orange: #FF9000;
+    --orange-rgb: 255, 144, 0; /* Added for rgba */
     --dark-orange: #CC7200;
     --light-orange: #FFAA33;
     --text-color: #ff8e00;
@@ -713,6 +714,56 @@ canvas {
 .toggle.active .toggle-slider {
     left: 29px;
     background-color: var(--orange);
+}
+
+/* Toggle Button Styles */
+.toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 54px;
+  height: 28px;
+  background: var(--button-bg);
+  border: 2px solid var(--orange);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  margin-left: var(--space-sm);
+  box-shadow: 0 0 0 1.5px var(--orange), 0 0 10px 0 rgba(255,144,0,0.25);
+  padding: 0;
+}
+
+.toggle-button.active {
+  background: rgba(255,144,0,0.10);
+  border-color: var(--orange);
+  box-shadow: 0 0 6px 2px var(--orange), 0 0 20px 0 rgba(255,144,0,0.35);
+}
+
+.toggle-button:focus-visible {
+  box-shadow: 0 0 0 2.5px var(--orange), 0 0 12px 2px var(--orange-glow);
+  outline: none;
+}
+
+.toggle-indicator {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--dark-bg);
+  border-radius: 0;
+  border: 2px solid var(--orange);
+  box-shadow: 0 0 6px 1px var(--orange-glow), 0 0 2px 1px #222;
+  transition: left 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
+  transform: translateY(-50%);
+}
+
+.toggle-button.active .toggle-indicator {
+  left: calc(54px - 16px - 5px);
+  background: var(--orange);
+  box-shadow: 0 0 12px 4px var(--orange), 0 0 20px 2px var(--orange-glow);
+  /* transform: translateY(-50%) is inherited from .toggle-indicator */
 }
 
 /* Credits Screen */

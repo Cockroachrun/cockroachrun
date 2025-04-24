@@ -1,0 +1,87 @@
+/* Glassmorphism Neon Button */
+.glass-neon-button {
+  background: rgba(20, 20, 20, 0.55);
+  border: 2px solid var(--orange);
+  color: var(--orange);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 1rem;
+  padding: 10px 28px;
+  border-radius: 0;
+  box-shadow: 0 0 0 2px var(--orange), 0 0 20px 2px var(--orange-glow);
+  backdrop-filter: blur(4px);
+  letter-spacing: 2px;
+  transition: 
+    background 0.2s, 
+    border-color 0.2s, 
+    box-shadow 0.2s, 
+    color 0.2s;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+.glass-neon-button:hover, .glass-neon-button:focus-visible {
+  background: rgba(255,144,0,0.10);
+  color: #fff6e0;
+  border-color: #fff6e0;
+  box-shadow: 0 0 12px 4px var(--orange), 0 0 32px 4px var(--orange-glow);
+}
+
+/* Animated Neon Border Button */
+.animated-neon-button {
+  background: #121212;
+  color: var(--orange);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 1rem;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  box-shadow: 0 0 8px 0 var(--orange-glow);
+  letter-spacing: 2px;
+  transition: color 0.2s;
+}
+.animated-neon-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-image: linear-gradient(90deg, #FF9000, #9333EA, #00FF66, #FF9000) 1;
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 2;
+  animation: neon-border 2s linear infinite;
+}
+@keyframes neon-border {
+  0% { border-image-slice: 1; }
+  100% { border-image-slice: 1; }
+}
+.animated-neon-button:hover, .animated-neon-button:focus-visible {
+  color: #fff6e0;
+  box-shadow: 0 0 16px 4px var(--orange-glow);
+}
+
+/* Cyberpunk “Cut” Button */
+.cyber-cut-button {
+  background: linear-gradient(120deg, rgba(32,32,32,0.9), rgba(0,0,0,0.8));
+  color: var(--orange);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 1rem;
+  padding: 12px 32px 12px 24px;
+  border: 2px solid var(--orange);
+  border-radius: 0;
+  box-shadow: 0 0 12px 2px var(--orange-glow);
+  letter-spacing: 2px;
+  outline: none;
+  clip-path: polygon(0 0, 95% 0, 100% 100%, 5% 100%);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.cyber-cut-button:hover, .cyber-cut-button:focus-visible {
+  background: rgba(255,144,0,0.15);
+  color: #fff6e0;
+  box-shadow: 0 0 24px 6px var(--orange-glow);
+}

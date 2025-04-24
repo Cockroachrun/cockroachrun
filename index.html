@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self';" />
   <title>Cockroach Run - A Cyberpunk Adventure</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -79,6 +79,7 @@
             <div class="mode-image">
               <div class="kitchen-environment"></div>
             </div>
+
             <h3>FREE WORLD</h3>
             <p>Explore different environments at your own pace</p>
           </div>
@@ -86,6 +87,7 @@
             <div class="mode-image">
               <div class="runner-environment"></div>
             </div>
+
             <h3>COCKROACH RUNNER</h3>
             <p>Race through endless obstacles, collect resources</p>
           </div>
@@ -165,7 +167,9 @@
                 />
                 <span class="slider-value">80%</span>
               </div>
+
             </div>
+
 <div class="setting-item">
               <span>Sound Effects</span>
               <div class="slider-container">
@@ -179,7 +183,9 @@
                 />
                 <span class="slider-value">100%</span>
               </div>
+
             </div>
+
             <div class="setting-item">
               <span>Music Track</span>
               <div class="dropdown-container">
@@ -189,7 +195,15 @@
                 </select>
                 <div class="dropdown-arrow">▼</div>
               </div>
+
             </div>
+            <div class="setting-item">
+              <label for="mute-toggle">Mute All Sound</label>
+              <button id="mute-toggle" class="toggle-button"> 
+                <span class="toggle-indicator"></span>
+              </button>
+            </div>
+
           </div>
           <div class="settings-section">
             <h3>GRAPHICS</h3>
@@ -203,21 +217,28 @@
                 </select>
                 <div class="dropdown-arrow">▼</div>
               </div>
+
             </div>
+
             <div class="setting-item">
               <span>Show FPS</span>
               <div class="toggle-container">
-                <div class="toggle" id="fps-toggle">
-                  <div class="toggle-slider"></div>
-                </div>
+                <button id="fps-toggle" class="toggle-button">
+                  <span class="toggle-indicator"></span>
+                </button>
               </div>
+
             </div>
+
+
           </div>
           <div class="settings-section">
             <h3>ABOUT</h3>
             <div class="setting-item">
               <button id="credits-button" class="menu-button">CREDITS</button>
             </div>
+
+
           </div>
           <div class="button-row">
             <button id="back-from-settings" class="back-button">BACK</button>
@@ -320,14 +341,14 @@
   <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/ui.js"></script>
+  <!-- <script src="js/loadingScreen.js"></script> -->
+  <!-- <script src="js/settingsFix.js"></script> -->
+  <script src="js/characterCarousel.js"></script>
+  <!-- <script src="js/character-fixes.js"></script> -->
   <script src="js/main.js"></script>
   <script src="js/soundEffects.js"></script>
-  <script src="js/loadingScreen.js"></script>
-  <script src="js/characterCarousel.js"></script>
-  <script src="js/character-fixes.js"></script>
   <script src="js/smoothLoading.js"></script>
   <script src="js/fixCardTransition.js"></script>
-  <script src="js/settingsFix.js"></script>
   <script src="js/fixEventBugs.js"></script>
 </body>
 </html>
