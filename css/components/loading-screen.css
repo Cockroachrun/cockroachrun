@@ -3,12 +3,12 @@
 
 /* Basic loading screen layout */
 #loading-screen {
-  background-color: #000000;
+  background-color: transparent !important;
   position: relative;
   overflow: hidden;
 }
 
-/* Make the loading container look cleaner and properly centered */
+/* Make the loading container look cleaner and properly centered - higher position */
 .loading-content {
   text-align: center;
   width: 80%;
@@ -17,9 +17,11 @@
   z-index: 2;
   background: transparent;
   margin: 0 auto; /* Ensure horizontal centering */
+  margin-top: -10vh; /* Move content higher on screen */
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateY(-5vh); /* Additional upward shift */
 }
 
 /* Keep the logo container clean and properly centered */

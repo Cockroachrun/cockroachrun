@@ -1,5 +1,14 @@
 /* Fix for loading bar appearance */
 
+/* Remove all backgrounds from loading screen */
+#loading-screen,
+#loading-screen::before,
+#loading-screen::after {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
 /* Make loading bar smoother */
 .progress-bar {
   height: 100%;

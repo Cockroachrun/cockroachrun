@@ -1,13 +1,26 @@
 /* Fix the title to match reference image exactly */
 
 /* Title styling to exactly match reference */
-#character-selection-screen .screen-title {
+#character-selection-screen .screen-title,
+body #character-selection-screen .screen-title {
   font-size: 20px !important;  /* Even smaller */
   margin: 0 auto 15px auto !important;
   width: 300px !important;
   color: #FF9000 !important;
   letter-spacing: 1px !important;
   text-shadow: 0 0 10px rgba(255, 144, 0, 0.7) !important;
+}
+
+/* Lower the settings title as requested */
+#settings-screen .screen-title {
+  margin-top: 40px !important;
+  margin-bottom: 34px !important;
+  padding-top: 50px !important;
+  position: relative !important;
+  top: 31px !important;
+  font-size: 1rem !important;
+  max-width: 102% !important;
+  overflow: visible !important;
 }
 
 /* Match the card styling to reference */

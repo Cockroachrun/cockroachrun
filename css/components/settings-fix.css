@@ -7,11 +7,13 @@
   pointer-events: auto !important;
 }
 
-/* Make sure settings content is visible */
+/* Make sure settings content is visible but without any background or borders */
 #settings-screen .menu-container {
-  background-color: rgba(0, 0, 0, 0.7) !important;
+  background-color: transparent !important;
   padding: 30px !important;
-  border-radius: 8px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
   color: #FF9000 !important; /* Orange text color */
   visibility: visible !important;
   display: block !important;

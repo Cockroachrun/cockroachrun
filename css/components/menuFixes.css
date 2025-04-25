@@ -134,6 +134,23 @@
 /* ==================== SETTINGS SCREEN FIXES ==================== */
 .settings-content {
   padding: 10px !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Override ANY container styles */
+.menu-container, 
+#settings-screen .menu-container,
+#start-screen .menu-container,
+#mode-selection-screen .menu-container,
+#character-selection-screen .menu-container {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 .settings-section {

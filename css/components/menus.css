@@ -4,9 +4,13 @@
   gap: var(--space-lg);
   margin: var(--space-lg) 0;
   flex-wrap: wrap;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .mode-card {
+  background-color: none !important;
   background-color: var(--lighter-bg);
   padding: var(--space-lg);
   border-radius: 0; /* Sharp edges for cyberpunk aesthetic */

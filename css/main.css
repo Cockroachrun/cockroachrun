@@ -2,6 +2,7 @@
 @import url('./components/forms.css');
 @import url('./components/loading-screen.css');
 @import url('./components/characters.css');
+@import url('./components/wallet.css');
 
 #ui-container {
   position: fixed;
@@ -12,8 +13,9 @@
   z-index: 10;
   pointer-events: none; /* Allow clicking through to game when appropriate */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to flex-start to position higher */
   justify-content: center;
+  padding-top: 12vh; /* Add top padding to push content higher */
 }
 
 .screen {
@@ -40,8 +42,10 @@
 }
 
 .menu-container {
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
+  background-color: transparent; /* Completely remove background */
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   padding: 30px;
   pointer-events: auto;
   max-width: 600px;
@@ -49,6 +53,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  transform: translateY(-10vh); /* Move menus higher */
   align-items: center;
   justify-content: center;
 }
@@ -241,7 +246,7 @@ canvas {
 
 /* Loading Screen */
 #loading-screen {
-    background-color: #000000;
+    background-color: transparent !important;
 }
 
 .loading-content {

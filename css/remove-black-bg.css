@@ -1,0 +1,90 @@
+/* ULTRA-AGGRESSIVE FIX: Remove ALL backgrounds/overlays from ALL screens */
+
+/* Target EVERYTHING that could possibly have any background or border */
+*, 
+*::before,
+*::after,
+div, 
+section,
+.screen, 
+.menu-container,
+#settings-screen,
+#start-screen,
+#credits-screen, 
+#game-over-screen,
+#character-selection-screen,
+#mode-selection-screen,
+.settings-content,
+.menu-buttons,
+.settings-section,
+#ui-container,
+div[class*="container"],
+div[class*="content"],
+div[class*="section"],
+div[class*="screen"],
+.overlay,
+.background-overlay {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Ensure game background is visible */
+body, html, #game-container {
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Make sure no overlay is used */
+.screen::before,
+.screen::after {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Force text to be visible against background */
+#settings-screen h2,
+#settings-screen h3,
+#settings-screen span,
+#settings-screen label,
+.screen h2,
+.screen h3,
+.screen span,
+.screen label {
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+}
+
+/* Explicitly target ANY potential menu containers */
+.menu-container,
+#settings-screen .menu-container,
+.screen .menu-container,
+div.menu-container {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 30px 20px !important;
+}
+
+/* Force the game container background to show through */
+#game-container {
+  z-index: 1 !important;
+}
+
+/* Override ALL CSS variables that might contain background colors */
+:root {
+  --overlay-bg: transparent !important;
+  --menu-bg: transparent !important;
+  --menu-container-bg: transparent !important;
+  --button-bg: rgba(32, 32, 32, 0.85) !important; /* Keep button styles */
+}

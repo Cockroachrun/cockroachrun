@@ -151,7 +151,13 @@ const UIManager = {
         const handleConnectWalletClick = () => {
             AudioManager.playButtonClick();
             console.log('Connect Wallet button clicked');
-            alert('Game exit functionality would be implemented here.');
+            // Call WalletService if available, otherwise show placeholder
+            if (window.WalletService && typeof window.WalletService.connect === 'function') {
+                window.WalletService.connect();
+            } else {
+                console.error('WalletService not loaded');
+                alert('Wallet service not loaded. Please check console for errors.');
+            }
         };
         
         connectWalletButton.addEventListener('click', handleConnectWalletClick);
