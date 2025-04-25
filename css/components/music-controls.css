@@ -1,0 +1,160 @@
+/* Cyberpunk Music Playback Controls Styling */
+
+.playback-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* Style playback mode buttons to match existing menu buttons */
+.mode-btn {
+  background-color: #000000;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0; /* Sharp edges for cyberpunk aesthetic */
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+  height: 30px;
+  min-width: 30px;
+  max-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.mode-btn:hover {
+  background-color: rgba(255, 144, 0, 0.2);
+  box-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+}
+
+.mode-btn.active {
+  background-color: var(--orange);
+  color: #000000;
+  box-shadow: 0 0 8px var(--orange);
+}
+
+.mode-btn i {
+  margin-right: 5px;
+}
+
+/* Ensure all toggle buttons are consistent with game UI */
+.toggle-button {
+  position: relative;
+  width: 35px;
+  height: 20px;
+  background-color: #000;
+  border: 1px solid var(--orange);
+  border-radius: 0; /* Sharp edges for cyberpunk aesthetic */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  overflow: hidden;
+  box-shadow: none !important;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.toggle-button .toggle-indicator {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--orange);
+  transition: transform 0.2s ease;
+  border-radius: 0; /* Sharp edges for cyberpunk aesthetic */
+  box-shadow: none !important;
+}
+
+/* Style specific to music playback controls */
+.playback-controls .mode-btn i {
+  font-size: 11px;
+  margin-right: 4px;
+}
+
+.toggle-button.active .toggle-indicator {
+  transform: translateX(17px);
+  left: 4px; /* Keep consistent position */
+}
+
+.toggle-button:hover {
+  background-color: rgba(20, 20, 20, 0.9);
+}
+
+.toggle-button.active:hover {
+  background-color: rgba(20, 20, 20, 0.9);
+}
+
+/* Override any existing toggle button styles to maintain consistency */
+#mute-toggle,
+#fps-toggle,
+#loop-mode-btn {
+  box-shadow: none !important;
+  width: 35px;
+  height: 20px;
+  border-radius: 0;
+  border: 1px solid var(--orange);
+  position: relative;
+  margin-right: 0;
+}
+
+#mute-toggle .toggle-indicator,
+#fps-toggle .toggle-indicator,
+#loop-mode-btn .toggle-indicator {
+  box-shadow: none !important;
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  transition: transform 0.2s ease;
+}
+
+#mute-toggle.active .toggle-indicator,
+#fps-toggle.active .toggle-indicator,
+#loop-mode-btn.active .toggle-indicator {
+  transform: translateX(17px);
+  left: 4px;
+}
+
+/* Ensure proper spacing in setting items */
+.setting-item {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .playback-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
+  }
+  
+  .mode-btn {
+    font-size: 0.65rem;
+    padding: 4px 6px;
+  }
+  
+  .mode-btn i {
+    margin-right: 3px;
+    font-size: 0.75rem;
+  }
+}

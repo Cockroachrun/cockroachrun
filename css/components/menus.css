@@ -9,7 +9,7 @@
 .mode-card {
   background-color: var(--lighter-bg);
   padding: var(--space-lg);
-  border-radius: 8px;
+  border-radius: 0; /* Sharp edges for cyberpunk aesthetic */
   border: 2px solid var(--neon-green);
   width: 300px;
   transition: all var(--transition-medium);

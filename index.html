@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net 'sha256-misOqHLBt3vfqlVEeWwQ/xebDpGU92qX8W7XgbaOXOU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'sha256-misOqHLBt3vfqlVEeWwQ/xebDpGU92qX8W7XgbaOXOU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self';" />
   <title>Cockroach Run - A Cyberpunk Adventure</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,6 +21,9 @@
   <link rel="stylesheet" href="css/components/titleFix.css" />
   <link rel="stylesheet" href="css/components/characters.css" />
   <link rel="stylesheet" href="css/components/menuFixes.css" />
+  <link rel="stylesheet" href="css/components/music-controls.css" />
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <!-- Preload character images -->
   <link rel="preload" href="assets/images/characters/german_cockroach.png" as="image" />
   <link rel="preload" href="assets/images/characters/American Cockroach with bg.png" as="image" />
@@ -243,6 +246,31 @@
                   <li class="custom-option" data-value="urban-jungle-jive" role="option" tabindex="-1">Urban Jungle Jive</li>
                   <li class="custom-option" data-value="urban-odyssey-overture" role="option" tabindex="-1">Urban Odyssey Overture</li>
                 </ul>
+              </div>
+            </div>
+
+            <!-- Music Playback Mode Controls -->
+            <div class="setting-item">
+              <span>Playback Mode</span>
+              <div class="playback-controls">
+                <button id="single-mode-btn" class="mode-btn active" title="Play Single Track" onclick="AudioManager.setPlaybackMode('single')">
+                  <i class="fas fa-music"></i> One
+                </button>
+                <button id="sequential-mode-btn" class="mode-btn" title="Play All Tracks Sequentially" onclick="AudioManager.setPlaybackMode('sequential')">
+                  <i class="fas fa-list"></i> All
+                </button>
+                <button id="random-mode-btn" class="mode-btn" title="Play Random Tracks" onclick="AudioManager.setPlaybackMode('random')">
+                  <i class="fas fa-random"></i> Mix
+                </button>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <span>Loop Mode</span>
+              <div class="toggle-container">
+                <button id="loop-mode-btn" class="toggle-button active" onclick="AudioManager.toggleLoopMode()" data-has-sound="true"> 
+                  <span class="toggle-indicator"></span>
+                </button>
               </div>
             </div>
 

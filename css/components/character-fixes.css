@@ -24,7 +24,7 @@
   background-color: black;
   border: 2px solid var(--color-neon);
   box-shadow: 0 0 15px var(--color-neon);
-  border-radius: 8px;
+  border-radius: 0; /* Sharp edges for cyberpunk aesthetic */
   display: flex;
   align-items: center;
   justify-content: center;
