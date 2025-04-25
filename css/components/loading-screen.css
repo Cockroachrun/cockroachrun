@@ -8,7 +8,7 @@
   overflow: hidden;
 }
 
-/* Make the loading container look cleaner */
+/* Make the loading container look cleaner and properly centered */
 .loading-content {
   text-align: center;
   width: 80%;
@@ -16,20 +16,29 @@
   position: relative;
   z-index: 2;
   background: transparent;
+  margin: 0 auto; /* Ensure horizontal centering */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Keep the logo container clean */
+/* Keep the logo container clean and properly centered */
 .logo-container {
   position: relative;
-  margin-bottom: 2rem;
+  margin: 0 auto 2rem auto;
   background: transparent;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-/* Remove background from logo */
+/* Remove background from logo and ensure proper centering */
 .game-logo {
   filter: drop-shadow(0 0 15px rgba(255, 144, 0, 0.5));
   max-width: 100%;
   background: transparent !important;
+  margin: 0 auto; /* Center horizontally */
+  display: block; /* Prevent inline quirks */
 }
 
 /* Scanner effect overlay */
