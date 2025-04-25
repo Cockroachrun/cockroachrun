@@ -310,9 +310,17 @@ canvas {
 
 .version-info {
     text-align: center;
-    opacity: 0.6;
+    opacity: 0.8; /* Increased opacity for better visibility */
     font-size: var(--text-sm);
-    margin-top: var(--space-lg);
+    margin: var(--space-lg) auto 0 auto; /* Center horizontally with auto margins */
+    width: 100%; /* Ensure full width of container */
+    display: block; /* Force block display */
+    position: relative; /* Enable positioning */
+    left: 0; /* Ensure no offset */
+    right: 0; /* Ensure no offset */
+    color: var(--orange); /* Match cyberpunk orange theme */
+    letter-spacing: 0.5px; /* Slight letter spacing for better readability */
+    font-family: var(--font-mono); /* Use monospace font for tech feel */
 }
 
 /* Screen Titles */
