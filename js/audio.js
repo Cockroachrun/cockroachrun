@@ -9,7 +9,6 @@ const AudioManager = {
   
   // New playback mode properties
   playbackMode: 'single', // 'single', 'sequential', 'random'
-  loopMode: true,         // true = loop, false = play once
   
   musicVolume: 0.8,
   sfxVolume: 1.0,
@@ -122,11 +121,6 @@ const AudioManager = {
     if (savedPlaybackMode) {
       this.playbackMode = savedPlaybackMode;
     }
-    
-    const savedLoopMode = localStorage.getItem('loopMode');
-    if (savedLoopMode !== null) {
-      this.loopMode = JSON.parse(savedLoopMode);
-    }
 
     this.applyVolumeSettings(); 
     this.applyMuteState();
@@ -200,7 +194,7 @@ const AudioManager = {
     
     // Create a new audio element
     const audio = new Audio(trackPath);
-    audio.loop = this.loopMode && this.playbackMode === 'single'; // Only loop if in single mode and loop is on
+    audio.loop = this.playbackMode === 'single'; 
     audio.volume = this.musicVolume;
     audio.muted = this.isMuted;
     
@@ -215,11 +209,7 @@ const AudioManager = {
   // Handle track ended event - play next track based on mode
   handleTrackEnded() {
     if (this.playbackMode === 'single') {
-      if (!this.loopMode) {
-        // Single track, no loop - just finished playing
-        console.log('Track finished playing');
-      }
-      // If looping, the audio.loop property will handle it
+      // Single track, loop is always on
     } else if (this.playbackMode === 'sequential') {
       // Play the next track in sequence
       this.playNextTrack();
@@ -253,44 +243,19 @@ const AudioManager = {
       
       // Update loop setting for current track
       if (this.currentMusic) {
-        this.currentMusic.loop = this.loopMode && mode === 'single';
+        this.currentMusic.loop = mode === 'single';
       }
       
       localStorage.setItem('playbackMode', mode);
       this.updatePlaybackModeIndicators();
       console.log(`Playback mode set to: ${mode}`);
-    }
-  },
-  
-  // Toggle loop mode
-  toggleLoopMode() {
-    this.loopMode = !this.loopMode;
-    
-    // Update loop setting for current track
-    if (this.currentMusic) {
-      this.currentMusic.loop = this.loopMode && this.playbackMode === 'single';
-    }
-    
-    // Manually update the toggle button state
-    const loopModeBtn = document.getElementById('loop-mode-btn');
-    if (loopModeBtn) {
-      if (this.loopMode) {
-        loopModeBtn.classList.add('active');
-      } else {
-        loopModeBtn.classList.remove('active');
+
+      // Auto-resume music if not playing (gives instant feedback on button click)
+      if (!this.currentMusic) {
+        this.playCurrentTrack();
+      } else if (this.currentMusic.paused) {
+        this.currentMusic.play().catch(e => console.warn('Autoplay prevented:', e));
       }
-    }
-    
-    localStorage.setItem('loopMode', JSON.stringify(this.loopMode));
-    this.updatePlaybackModeIndicators();
-    console.log(`Loop mode ${this.loopMode ? 'enabled' : 'disabled'}`);
-    
-    // Play button click sound if available
-    if (this.buttonClick && !this.isMuted) {
-      const source = this.buttonClick.querySelector('source');
-      const clickSound = new Audio(source ? source.src : this.buttonClick.src);
-      clickSound.volume = this.sfxVolume;
-      clickSound.play().catch(e => console.warn('Sound play prevented:', e));
     }
   },
   
@@ -312,12 +277,6 @@ const AudioManager = {
     const randomModeBtn = document.getElementById('random-mode-btn');
     if (randomModeBtn) {
       randomModeBtn.classList.toggle('active', this.playbackMode === 'random');
-    }
-    
-    // Update loop mode button
-    const loopModeBtn = document.getElementById('loop-mode-btn');
-    if (loopModeBtn) {
-      loopModeBtn.classList.toggle('active', this.loopMode);
     }
   },
   
@@ -344,7 +303,7 @@ const AudioManager = {
     
     // Ensure loop setting is correct based on current mode
     if (audio) {
-      audio.loop = this.loopMode && this.playbackMode === 'single';
+      audio.loop = this.playbackMode === 'single';
     }
     
     // Update the dropdown display text

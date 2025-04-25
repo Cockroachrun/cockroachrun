@@ -98,6 +98,11 @@
   margin-right: 4px;
 }
 
+.toggle-button.active {
+  background-color: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
+}
+
 .toggle-button.active .toggle-indicator {
   transform: translateX(17px);
   left: 4px; /* Keep consistent position */
