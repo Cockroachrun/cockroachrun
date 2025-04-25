@@ -74,6 +74,24 @@ const AudioManager = {
         }
     }
     
+    // Bind playback mode buttons programmatically to comply with CSP (remove inline handlers)
+    const modeButtonMap = {
+      'single-mode-btn': 'single',
+      'sequential-mode-btn': 'sequential',
+      'random-mode-btn': 'random'
+    };
+    Object.entries(modeButtonMap).forEach(([id, mode]) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        // Remove potential inline handler that CSP would block
+        btn.removeAttribute('onclick');
+        // Attach safe listener
+        btn.addEventListener('click', () => {
+          this.setPlaybackMode(mode);
+        });
+      }
+    });
+
     this.loadSettings();
     console.log('AudioManager initialized');
   },
