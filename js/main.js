@@ -1,4 +1,8 @@
 /**
+ * Cockroach Run - Main Game Script
+ * Initializes all game components and manages the game flow
+ */
+
 // Preload important images
 function preloadImages() {
   const imagesToPreload = [
@@ -58,12 +62,6 @@ function enhancedLoading() {
     }, 100);
   });
 }
-
-// Replace the simulateLoading function in UIManager
-UIManager.simulateLoading = enhancedLoading;
- * Cockroach Run - Main Game Script
- * Initializes all game components and manages the game flow
- */
 
 /**
  * Cockroach Run - Main Game Script
