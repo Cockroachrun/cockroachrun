@@ -9,6 +9,57 @@ const WalletService = {
   requiredIds: [
     'e3d53…a2i0' // TODO: set real inscription IDs
   ],
+  
+  // Development mode flag - set to true to allow mock connections for testing
+  devMode: true,
+  
+  // Run a diagnostic check on wallet availability
+  runDiagnostics() {
+    console.log('🔧 WALLET DIAGNOSTICS 🔧');
+    
+    // Environment checks
+    const location = window.location.toString();
+    const isLocalhost = location.includes('localhost') || location.includes('127.0.0.1');
+    const protocol = window.location.protocol;
+    const isHTTPS = protocol === 'https:';
+    
+    console.log('Environment:', {
+      url: location,
+      protocol,
+      isLocalhost,
+      isHTTPS,
+      'userAgent': navigator.userAgent
+    });
+    
+    // Provider checks
+    console.log('Providers:', {
+      'window.btc': !!window.btc,
+      'window.bitcoin': !!window.bitcoin,
+      'window.magicEden': !!window.magicEden
+    });
+    
+    // Detailed object inspection
+    if (window.btc) {
+      console.log('Xverse API methods:', Object.getOwnPropertyNames(window.btc).filter(p => typeof window.btc[p] === 'function'));
+    }
+    
+    if (window.bitcoin) {
+      console.log('Magic Eden API methods:', Object.getOwnPropertyNames(window.bitcoin).filter(p => typeof window.bitcoin[p] === 'function'));
+    }
+    
+    // Alert with summary
+    if (!isHTTPS && !isLocalhost) {
+      alert('WARNING: Wallet extensions require HTTPS or localhost to function. Your current protocol is ' + protocol);
+      return false;
+    }
+    
+    if (!window.btc && !window.bitcoin) {
+      alert('No wallet providers detected. Please ensure you have installed the Xverse or Magic Eden wallet extension and that it has permission for this site.');
+      return false;
+    }
+    
+    return true;
+  },
 
   // Connect using Xverse via direct provider API
   async connectXverse() {
@@ -96,6 +147,24 @@ const WalletService = {
       this.address = null;
       this.connected = false;
       
+      // Show diagnostics in console but don't block for dev mode
+      console.log('🔧 WALLET DIAGNOSTICS STARTING 🔧');
+      
+      // Development mode mock connection - ALWAYS offer this first
+      if (this.devMode) {
+        console.log('🔧 DEV MODE ENABLED: Offering mock wallet connection');
+        if (confirm('DEV MODE: Use mock wallet connection for testing?')) {
+          this.address = 'bc1qmock000000000000000000000000000000000';
+          this.connected = true;
+          this.updateUI();
+          console.log('🔧 Connected to mock wallet with address:', this.address);
+          return true;
+        }
+      }
+      
+      // Only run full diagnostics after dev mode check
+      this.runDiagnostics();
+      
       // Detailed environment info for troubleshooting
       const location = window.location.toString();
       const isLocalhost = location.includes('localhost') || location.includes('127.0.0.1');
@@ -158,10 +227,11 @@ const WalletService = {
       if (!hasXverse && !hasMagic) {
         // Special direct case for localhost
         if (isLocalhost && protocol === 'http:') {
-          alert('Wallet extensions may be blocked in http:// localhost. Try using https:// or install the extension if not already done.');
+          alert('Wallet extensions may be blocked in http:// localhost. You can:\n1. Try again and use the DEV MODE option\n2. Try using https:// instead\n3. Install a supported wallet extension');
         } else {
-          alert('No Bitcoin wallet detected. Please install Xverse or Magic Eden Wallet extension and refresh. If already installed, check browser extension permissions.');
+          alert('No Bitcoin wallet detected. Please:\n1. Try again and use the DEV MODE option if testing\n2. Install Xverse or Magic Eden Wallet extension');
         }
+        // Allow one more attempt in case they want to use dev mode next time
         return false;
       }
 
