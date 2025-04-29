@@ -335,10 +335,25 @@ const UIManager = {
             screen.classList.remove('active');
         });
         document.getElementById('game-hud').classList.remove('hidden');
-        AudioManager.playGameMusic();
-        AudioManager.playScatterSound();
+        
+        // Play audio if available
+        if (AudioManager && typeof AudioManager.playGameMusic === 'function') {
+            AudioManager.playGameMusic();
+        }
+        
+        if (AudioManager && typeof AudioManager.playScatterSound === 'function') {
+            AudioManager.playScatterSound();
+        }
+        
         this.isGameRunning = true;
-        this.initializeGame();
+        
+        // If we're in free-world mode, initialize the game mode in the parent window for src/ structure
+        if (this.selectedMode === 'free-world' && window.parent && window.parent.Game) {
+            console.log('Starting Free World mode via parent Game instance');
+            window.parent.Game.startGame('free-world', this.selectedCharacter);
+        } else {
+            this.initializeGame();
+        }
     },
     
     initializeGame() {

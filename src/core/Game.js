@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import CONFIG from '../config';
 import { UIManager } from './UIManager';
+import { FreeWorldMode } from '../game-modes/FreeWorldMode';
 
 export class Game {
   constructor() {
@@ -253,21 +254,12 @@ export class Game {
   initFreeWorldMode() {
     console.log('Initializing Free World mode');
     
-    // Create placeholder ground
-    const groundGeometry = new THREE.PlaneGeometry(20, 20);
-    const groundMaterial = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.8
-    });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = 0;
-    ground.receiveShadow = true;
-    this.scene.add(ground);
-    this.objects.push(ground);
+    // Clear any existing objects first
+    this.clearScene();
     
-    // Create placeholder character
-    this.createPlaceholderCharacter();
+    // Initialize the Free World mode class
+    this.activeGameMode = new FreeWorldMode(this);
+    this.activeGameMode.init();
   }
   
   initCockroachRunnerMode() {
@@ -322,11 +314,9 @@ export class Game {
     const delta = this.clock.getDelta();
     
     // Update game state if running
-    if (this.isRunning) {
-      // Update game objects
-      // Handle input
-      // Apply physics
-      // Update animations
+    if (this.isRunning && this.activeGameMode) {
+      // Update the active game mode
+      this.activeGameMode.update(delta);
     }
     
     // Render the scene

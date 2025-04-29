@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Run - Free World Test</title>
+  <!-- Load Three.js libraries from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: 'Orbitron', sans-serif;
+    }
+    
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    #instructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00FF66;
+      padding: 10px;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+      z-index: 1000;
+      pointer-events: none;
+      user-select: none;
+      max-width: 300px;
+    }
+    
+    #character-selector {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00FF66;
+      padding: 10px;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+      z-index: 1000;
+    }
+    
+    button {
+      background-color: #9333EA;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+      font-family: 'Exo 2', sans-serif;
+      margin: 5px;
+    }
+    
+    button:hover {
+      background-color: #7B2AC5;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+  
+  <div id="instructions">
+    <h3>Controls:</h3>
+    <p>W/Up Arrow - Move Forward</p>
+    <p>S/Down Arrow - Move Backward</p>
+    <p>A/Left Arrow - Rotate Left</p>
+    <p>D/Right Arrow - Rotate Right</p>
+    <p>T - Toggle Debug Camera Mode</p>
+  </div>
+  
+  <div id="character-selector">
+    <button id="american-roach">American Cockroach</button>
+    <button id="oriental-roach">Oriental Cockroach</button>
+  </div>
+    
+    // Basic game engine
+    class Game {
+      constructor() {
+        // Core properties
+        this.canvas = document.getElementById('game-canvas');
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.clock = new THREE.Clock();
+        
+        // Game state
+        this.isRunning = false;
+        this.activeGameMode = null;
+        this.selectedCharacter = 'american';
+        
+        // Setup
+        this.setupResizeHandler();
+        this.setupBasicLighting();
+      }
+      
+      setupResizeHandler() {
+        window.addEventListener('resize', () => {
+          // Update renderer
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          
+          // Update camera
+          this.camera.aspect = window.innerWidth / window.innerHeight;
+          this.camera.updateProjectionMatrix();
+        });
+      }
+      
+      setupBasicLighting() {
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambientLight);
+        
+        // Directional light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 5);
+        directionalLight.castShadow = true;
+        
+        // Configure shadow properties
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 50;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        
+        this.scene.add(directionalLight);
+      }
+      
+      startGame(mode, character) {
+        this.selectedCharacter = character;
+        this.isRunning = true;
+        
+        // Initialize Free World mode
+        if (mode === 'free-world') {
+          this.activeGameMode = new FreeWorldMode(this);
+          this.activeGameMode.init();
+          
+          // Start game loop
+          this.gameLoop();
+        }
+      }
+      
+      gameLoop() {
+        // Get delta time
+        const delta = this.clock.getDelta();
+        
+        // Update game state if running
+        if (this.isRunning && this.activeGameMode) {
+          this.activeGameMode.update(delta);
+        }
+        
+        // Render the scene
+        this.renderer.render(this.scene, this.camera);
+        
+        // Call next frame
+        requestAnimationFrame(this.gameLoop.bind(this));
+      }
+    }
+    
+    // Free World Mode
+    class FreeWorldMode {
+      constructor(game) {
+        this.game = game;
+        this.objects = [];
+        this.clock = new THREE.Clock();
+        this.cockroachModel = null;
+        this.isModelLoaded = false;
+        this.mixer = null;
+        this.animations = {};
+        
+        // Movement properties
+        this.moveSpeed = 2;
+        this.rotationSpeed = 2;
+        
+        // Input state
+        this.keys = {
+          forward: false,
+          backward: false,
+          left: false,
+          right: false,
+          jump: false
+        };
+        
+        // Camera following
+        this.cameraOffset = new THREE.Vector3(0, 2, 4);
+        this.cameraTarget = new THREE.Vector3();
+        
+        // Debugging
+        this.debugMode = true;
+      }
+    
+      init() {
+        console.log('Initializing Free World mode');
+        
+        // Basic scene setup
+        this.setupScene();
+        
+        // Create a simple environment
+        this.createEnvironment();
+        
+        // Setup input handlers
+        this.setupInputHandlers();
+        
+        // Load and create character based on the selected character
+        this.createCharacter();
+        
+        // Create camera controls for debugging
+        if (this.debugMode) {
+          this.setupDebugControls();
+        }
+        
+        return this;
+      }
+      
+      setupScene() {
+        // Get reference to Three.js components
+        this.scene = this.game.scene;
+        this.camera = this.game.camera;
+        this.renderer = this.game.renderer;
+        
+        // Set a cyberpunk background color
+        this.scene.background = new THREE.Color(0x121212);
+        
+        // Add cyberpunk accent lights
+        this.addLights();
+      }
+      
+      addLights() {
+        // Add cyberpunk-style accent lights
+        const purpleLight = new THREE.PointLight(0x9333EA, 1, 10);
+        purpleLight.position.set(-5, 1, 0);
+        this.scene.add(purpleLight);
+        
+        const greenLight = new THREE.PointLight(0x00FF66, 1, 10);
+        greenLight.position.set(5, 1, 0);
+        this.scene.add(greenLight);
+      }
+    
+      createEnvironment() {
+        // Create a simple ground plane
+        const groundGeometry = new THREE.PlaneGeometry(50, 50);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+          color: 0x333333,
+          roughness: 0.8,
+          metalness: 0.2
+        });
+        
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2; // Rotate to be horizontal
+        ground.receiveShadow = true;
+        this.scene.add(ground);
+        
+        // Add a few simple obstacles to test collision/movement
+        this.addObstacle(-5, 0.5, -5, 1, 1, 1, 0x9333EA); // Purple box
+        this.addObstacle(5, 0.5, -3, 1, 1, 1, 0x00FF66);  // Green box
+      }
+      
+      addObstacle(x, y, z, width, height, depth, color) {
+        const geometry = new THREE.BoxGeometry(width, height, depth);
+        const material = new THREE.MeshStandardMaterial({
+          color: color,
+          roughness: 0.7,
+          metalness: 0.3
+        });
+        
+        const obstacle = new THREE.Mesh(geometry, material);
+        obstacle.position.set(x, y, z);
+        obstacle.castShadow = true;
+        obstacle.receiveShadow = true;
+        
+        this.scene.add(obstacle);
+        this.objects.push(obstacle);
+        
+        return obstacle;
+      }
+    
+      createCharacter() {
+        const selectedCharacter = this.game.selectedCharacter || 'american';
+        
+        // Determine which model to load based on selection
+        const modelPath = selectedCharacter === 'american' ? 
+          './assets/models/American Cockroach.glb' : 
+          './assets/models/Oriental cockroach.glb';
+        
+        console.log(`Loading cockroach model: ${modelPath}`);
+        
+        // Create a placeholder while the model loads
+        this.createPlaceholderCockroach();
+        
+        // Load the actual model
+        const loader = new GLTFLoader();
+        loader.load(
+          modelPath,
+          (gltf) => {
+            console.log('Model loaded successfully:', gltf);
+            
+            // Remove placeholder when the real model is loaded
+            if (this.placeholder) {
+              this.scene.remove(this.placeholder);
+              this.placeholder = null;
+            }
+            
+            // Process the loaded model
+            this.cockroachModel = gltf.scene;
+            this.cockroachModel.traverse(node => {
+              if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+              }
+            });
+            
+            // Scale and position the model appropriately
+            this.cockroachModel.scale.set(0.1, 0.1, 0.1);
+            this.cockroachModel.position.set(0, 0, 0);
+            
+            // Add to scene
+            this.scene.add(this.cockroachModel);
+            
+            // Setup animations if any
+            if (gltf.animations && gltf.animations.length > 0) {
+              this.mixer = new THREE.AnimationMixer(this.cockroachModel);
+              
+              gltf.animations.forEach(clip => {
+                const name = clip.name.toLowerCase();
+                this.animations[name] = this.mixer.clipAction(clip);
+                
+                // Play idle animation by default
+                if (name.includes('idle')) {
+                  this.animations[name].play();
+                }
+              });
+            }
+            
+            this.isModelLoaded = true;
+          },
+          (xhr) => {
+            // Loading progress
+            console.log(`Loading model: ${(xhr.loaded / xhr.total) * 100}% loaded`);
+          },
+          (error) => {
+            console.error('Error loading model:', error);
+          }
+        );
+      }
+      
+      createPlaceholderCockroach() {
+        // Create a simple placeholder using basic shapes
+        const group = new THREE.Group();
+        
+        // Body
+        const bodyGeometry = new THREE.CapsuleGeometry(0.2, 0.5, 4, 8);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+          color: 0x663300,
+          roughness: 0.8
+        });
+        
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.rotation.z = Math.PI / 2;
+        body.position.y = 0.2;
+        group.add(body);
+        
+        // Add legs
+        for (let i = 0; i < 3; i++) {
+          const legGeometry = new THREE.CylinderGeometry(0.02, 0.01, 0.3);
+          const legMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+          
+          // Left leg
+          const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+          leftLeg.position.set(0.2, 0.15, 0.2 - (i * 0.2));
+          leftLeg.rotation.z = Math.PI / 4;
+          group.add(leftLeg);
+          
+          // Right leg
+          const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+          rightLeg.position.set(-0.2, 0.15, 0.2 - (i * 0.2));
+          rightLeg.rotation.z = -Math.PI / 4;
+          group.add(rightLeg);
+        }
+        
+        this.placeholder = group;
+        this.scene.add(this.placeholder);
+      }
+      
+      setupInputHandlers() {
+        // Keyboard event listeners
+        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        window.addEventListener('keyup', this.handleKeyUp.bind(this));
+      }
+      
+      handleKeyDown(event) {
+        switch(event.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            this.keys.forward = true;
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            this.keys.backward = true;
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            this.keys.left = true;
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            this.keys.right = true;
+            break;
+          case 'Space':
+            this.keys.jump = true;
+            break;
+          case 'KeyT': // Toggle debug mode
+            if (this.debugMode) {
+              this.disableDebugControls();
+              this.debugMode = false;
+            } else {
+              this.setupDebugControls();
+              this.debugMode = true;
+            }
+            break;
+        }
+      }
+      
+      handleKeyUp(event) {
+        switch(event.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            this.keys.forward = false;
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            this.keys.backward = false;
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            this.keys.left = false;
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            this.keys.right = false;
+            break;
+          case 'Space':
+            this.keys.jump = false;
+            break;
+        }
+      }
+      
+      setupDebugControls() {
+        // Create orbit controls for debugging
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        console.log('Debug controls enabled (press T to toggle)');
+      }
+      
+      disableDebugControls() {
+        if (this.controls) {
+          this.controls.dispose();
+          this.controls = null;
+          console.log('Debug controls disabled');
+        }
+      }
+    
+      update(delta) {
+        // If using the debug orbit controls
+        if (this.debugMode && this.controls) {
+          this.controls.update();
+          return;
+        }
+        
+        // Update animations
+        if (this.mixer) {
+          this.mixer.update(delta);
+        }
+        
+        // Update character movement
+        this.updateCharacterMovement(delta);
+        
+        // Update camera position to follow character
+        this.updateCamera();
+      }
+      
+      updateCharacterMovement(delta) {
+        // Only move if we have a model
+        const model = this.isModelLoaded ? this.cockroachModel : this.placeholder;
+        if (!model) return;
+        
+        const moveSpeed = this.moveSpeed * delta;
+        const rotateSpeed = this.rotationSpeed * delta;
+        
+        // Handle rotation
+        if (this.keys.left) {
+          model.rotation.y += rotateSpeed;
+        }
+        if (this.keys.right) {
+          model.rotation.y -= rotateSpeed;
+        }
+        
+        // Handle forward/backward movement
+        if (this.keys.forward || this.keys.backward) {
+          // Create movement vector
+          const direction = new THREE.Vector3(0, 0, this.keys.forward ? -1 : 1);
+          
+          // Rotate direction based on character rotation
+          direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), model.rotation.y);
+          
+          // Move character
+          model.position.x += direction.x * moveSpeed;
+          model.position.z += direction.z * moveSpeed;
+          
+          // Play walking animation if available
+          if (this.animations && this.animations.walk && !this.animations.walk.isRunning()) {
+            Object.values(this.animations).forEach(anim => anim.stop());
+            this.animations.walk.play();
+          }
+        } else {
+          // Play idle animation when not moving
+          if (this.animations && this.animations.idle && !this.animations.idle.isRunning()) {
+            Object.values(this.animations).forEach(anim => anim.stop());
+            this.animations.idle.play();
+          }
+        }
+      }
+      
+      updateCamera() {
+        if (this.debugMode) return; // Don't update camera in debug mode
+        
+        const model = this.isModelLoaded ? this.cockroachModel : this.placeholder;
+        if (!model) return;
+        
+        // Calculate camera position based on model position and offset
+        this.cameraTarget.copy(model.position);
+        
+        // Calculate camera position
+        const offset = this.cameraOffset.clone();
+        offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), model.rotation.y);
+        
+        const cameraPosition = model.position.clone().add(offset);
+        this.camera.position.copy(cameraPosition);
+        this.camera.lookAt(this.cameraTarget);
+      }
+    
+      dispose() {
+        // Clean up resources and event listeners
+        window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+        window.removeEventListener('keyup', this.handleKeyUp.bind(this));
+        
+        // Dispose of any Three.js objects
+        this.disableDebugControls();
+        
+        this.objects.forEach(obj => {
+          this.scene.remove(obj);
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) obj.material.dispose();
+        });
+        
+        // Clean up any animations/mixers
+        if (this.mixer) {
+          this.mixer.stopAllAction();
+        }
+        
+        console.log('Free World mode disposed');
+      }
+    }
+    
+    // Initialize the game
+    const game = new Game();
+    
+    // Start with American cockroach by default
+    game.startGame('free-world', 'american');
+    
+    // Add character selection buttons
+    document.getElementById('american-roach').addEventListener('click', () => {
+      // Clear scene
+      game.scene.clear();
+      game.setupBasicLighting();
+      
+      // Start with American cockroach
+      game.startGame('free-world', 'american');
+    });
+    
+    document.getElementById('oriental-roach').addEventListener('click', () => {
+      // Clear scene
+      game.scene.clear();
+      game.setupBasicLighting();
+      
+      // Start with Oriental cockroach
+      game.startGame('free-world', 'oriental');
+    });
+  </script>
+</body>
+</html>
