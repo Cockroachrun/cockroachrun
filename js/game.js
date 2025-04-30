@@ -85,6 +85,57 @@ window.Game = (function() {
                 // Append iframe to container
                 gameContainer.appendChild(gameIframe);
                 
+                // Add click handler to focus the iframe
+                gameContainer.addEventListener('click', function() {
+                    if (gameIframe) {
+                        gameIframe.focus();
+                    }
+                });
+                
+                // Show a message about focusing
+                const focusMessage = document.createElement('div');
+                focusMessage.style.position = 'absolute';
+                focusMessage.style.bottom = '10px';
+                focusMessage.style.right = '10px';
+                focusMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                focusMessage.style.color = '#00FF66';
+                focusMessage.style.padding = '10px';
+                focusMessage.style.borderRadius = '5px';
+                focusMessage.style.fontFamily = 'monospace';
+                focusMessage.style.zIndex = '1000';
+                focusMessage.textContent = 'Click in the game area to enable controls';
+                focusMessage.style.transition = 'opacity 0.5s';
+                gameContainer.appendChild(focusMessage);
+                
+                // Hide message after 5 seconds
+                setTimeout(function() {
+                    focusMessage.style.opacity = '0';
+                    // Remove after fade out
+                    setTimeout(function() {
+                        if (focusMessage.parentNode) {
+                            focusMessage.parentNode.removeChild(focusMessage);
+                        }
+                    }, 500);
+                }, 5000);
+                
+                // Focus iframe after a short delay to ensure it's rendered
+                setTimeout(function() {
+                    if (gameIframe) {
+                        gameIframe.focus();
+                        
+                        // Also try to focus via postMessage
+                        if (gameIframe.contentWindow) {
+                            gameIframe.contentWindow.postMessage({ action: 'focus' }, '*');
+                            
+                            // Force a control keypress to get focus
+                            gameIframe.contentWindow.postMessage({ 
+                                action: 'keypress',
+                                key: 'test'
+                            }, '*');
+                        }
+                    }
+                }, 1000);
+                
                 isRunning = true;
             } catch (error) {
                 console.error("Error starting game:", error);

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Run - Direct Control</title>
+  <!-- Load Three.js libraries from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: monospace;
+    }
+    
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    
+    #debug-info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 100;
+      color: #00FF66;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 300px;
+    }
+    
+    #control-display {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .row {
+      display: flex;
+      margin: 5px 0;
+    }
+    
+    .key {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #00FF66;
+      border: 2px solid #9333EA;
+      margin: 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      font-size: 18px;
+    }
+    
+    .key.active {
+      background-color: #9333EA;
+      color: white;
+    }
+    
+    #focus-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #00FF66;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 18px;
+      text-align: center;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    button {
+      margin-top: 10px;
+      background-color: #9333EA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <div id="debug-info">
+      Position: <span id="position-display">X: 0, Y: 0, Z: 0</span><br>
+      Rotation: <span id="rotation-display">0 degrees</span><br>
+      <div id="key-log">Key log:</div>
+    </div>
+    
+    <div id="control-display">
+      <div class="row">
+        <div class="key" id="key-w">W</div>
+      </div>
+      <div class="row">
+        <div class="key" id="key-a">A</div>
+        <div class="key" id="key-s">S</div>
+        <div class="key" id="key-d">D</div>
+      </div>
+      <div class="row">
+        <div class="key" id="key-space">SPACE</div>
+      </div>
+    </div>
+    
+    <div id="focus-message">
+      <p>Click the button below to start controlling the cockroach</p>
+      <p>WASD/Arrows to move, Space to jump</p>
+      <button id="focus-button">START GAME</button>
+    </div>
+  </div>
+  
+  <script>
+    // Debug elements
+    const positionDisplay = document.getElementById('position-display');
+    const rotationDisplay = document.getElementById('rotation-display');
+    const keyLog = document.getElementById('key-log');
+    const focusMessage = document.getElementById('focus-message');
+    const focusButton = document.getElementById('focus-button');
+    
+    // Key display elements
+    const keyW = document.getElementById('key-w');
+    const keyA = document.getElementById('key-a');
+    const keyS = document.getElementById('key-s');
+    const keyD = document.getElementById('key-d');
+    const keySpace = document.getElementById('key-space');
+    
+    // Game variables
+    let scene, camera, renderer, cockroach;
+    let clock = new THREE.Clock();
+    let keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      jump: false
+    };
+    
+    // Movement parameters
+    const moveSpeed = 0.1;
+    const rotateSpeed = 0.05;
+    let jumping = false;
+    let jumpHeight = 0;
+    
+    // Log a message to both console and UI
+    function log(message) {
+      console.log(message);
+      keyLog.innerHTML = message + '<br>' + keyLog.innerHTML;
+      // Limit log length
+      if (keyLog.children.length > 10) {
+        keyLog.removeChild(keyLog.lastChild);
+      }
+    }
+    
+    // Update UI displays
+    function updateDisplays() {
+      if (cockroach) {
+        positionDisplay.textContent = `X: ${cockroach.position.x.toFixed(2)}, Y: ${cockroach.position.y.toFixed(2)}, Z: ${cockroach.position.z.toFixed(2)}`;
+        rotationDisplay.textContent = `${(cockroach.rotation.y * 180 / Math.PI).toFixed(2)} degrees`;
+      }
+      
+      // Update key displays
+      keyW.classList.toggle('active', keys.forward);
+      keyS.classList.toggle('active', keys.backward);
+      keyA.classList.toggle('active', keys.left);
+      keyD.classList.toggle('active', keys.right);
+      keySpace.classList.toggle('active', keys.jump);
+    }
+    
+    // Initialize Three.js scene
+    function init() {
+      // Create renderer
+      const canvas = document.getElementById('game-canvas');
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      
+      // Create scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x121212);
+      
+      // Create camera
+      camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(0, 3, 5);
+      camera.lookAt(0, 0, 0);
+      
+      // Add lights
+      const ambientLight = new THREE.AmbientLight(0x404040, 1);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 10, 7.5);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+      
+      // Add colored cyberpunk-style lights
+      const purpleLight = new THREE.PointLight(0x9333EA, 1, 10);
+      purpleLight.position.set(3, 2, 3);
+      scene.add(purpleLight);
+      
+      const greenLight = new THREE.PointLight(0x00FF66, 1, 10);
+      greenLight.position.set(-3, 2, -3);
+      scene.add(greenLight);
+      
+      // Add grid floor
+      const gridHelper = new THREE.GridHelper(20, 20, 0x00FF66, 0x333333);
+      scene.add(gridHelper);
+      
+      // Add ground plane
+      const groundGeometry = new THREE.PlaneGeometry(20, 20);
+      const groundMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x333333,
+        roughness: 0.8,
+        metalness: 0.2 
+      });
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+      
+      // Create cockroach (simple box for now)
+      createCockroach();
+      
+      // Set up input handlers
+      setupInputHandlers();
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+      
+      // Start animation loop
+      animate();
+      
+      log('Game initialized! Click to focus and use WASD/arrows to move');
+    }
+    
+    // Create a simple cockroach model
+    function createCockroach() {
+      // Create cockroach body
+      const bodyGeometry = new THREE.BoxGeometry(0.5, 0.25, 1);
+      const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xaa5500 });
+      cockroach = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      cockroach.position.set(0, 0.125, 0);
+      cockroach.castShadow = true;
+      scene.add(cockroach);
+      
+      // Add some detail to make it look more cockroach-like
+      const headGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+      const headMaterial = new THREE.MeshStandardMaterial({ color: 0x995000 });
+      const head = new THREE.Mesh(headGeometry, headMaterial);
+      head.position.set(0, 0.05, -0.4);
+      head.scale.set(1, 0.6, 1);
+      cockroach.add(head);
+      
+      // Add legs
+      for (let i = 0; i < 3; i++) {
+        // Left legs
+        const leftLeg = createLeg();
+        leftLeg.position.set(0.3, -0.05, 0.3 - i * 0.3);
+        leftLeg.rotation.z = -Math.PI / 4;
+        cockroach.add(leftLeg);
+        
+        // Right legs
+        const rightLeg = createLeg();
+        rightLeg.position.set(-0.3, -0.05, 0.3 - i * 0.3);
+        rightLeg.rotation.z = Math.PI / 4;
+        cockroach.add(rightLeg);
+      }
+      
+      // Add antennae
+      for (let i = -1; i <= 1; i += 2) {
+        const antennaGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.3);
+        const antennaMaterial = new THREE.MeshStandardMaterial({ color: 0x995000 });
+        const antenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+        antenna.position.set(i * 0.1, 0.1, -0.5);
+        antenna.rotation.x = -Math.PI / 4;
+        cockroach.add(antenna);
+      }
+      
+      log('Cockroach created!');
+    }
+    
+    // Create a leg for the cockroach
+    function createLeg() {
+      const legGeometry = new THREE.CylinderGeometry(0.03, 0.01, 0.3);
+      const legMaterial = new THREE.MeshStandardMaterial({ color: 0x995000 });
+      const leg = new THREE.Mesh(legGeometry, legMaterial);
+      leg.rotation.x = Math.PI / 2;
+      return leg;
+    }
+    
+    // Set up input handlers
+    function setupInputHandlers() {
+      // Function to handle keydown events
+      function handleKeyDown(event) {
+        const key = event.key.toLowerCase();
+        const code = event.code;
+        
+        log(`Key down: ${key} (${code})`);
+        
+        // Handle movement keys
+        if (key === 'w' || key === 'arrowup' || code === 'KeyW' || code === 'ArrowUp') {
+          keys.forward = true;
+        } else if (key === 's' || key === 'arrowdown' || code === 'KeyS' || code === 'ArrowDown') {
+          keys.backward = true;
+        } else if (key === 'a' || key === 'arrowleft' || code === 'KeyA' || code === 'ArrowLeft') {
+          keys.left = true;
+        } else if (key === 'd' || key === 'arrowright' || code === 'KeyD' || code === 'ArrowRight') {
+          keys.right = true;
+        } else if (key === ' ' || code === 'Space') {
+          keys.jump = true;
+        }
+        
+        // Update key display
+        updateDisplays();
+      }
+      
+      // Function to handle keyup events
+      function handleKeyUp(event) {
+        const key = event.key.toLowerCase();
+        const code = event.code;
+        
+        // Handle movement keys
+        if (key === 'w' || key === 'arrowup' || code === 'KeyW' || code === 'ArrowUp') {
+          keys.forward = false;
+        } else if (key === 's' || key === 'arrowdown' || code === 'KeyS' || code === 'ArrowDown') {
+          keys.backward = false;
+        } else if (key === 'a' || key === 'arrowleft' || code === 'KeyA' || code === 'ArrowLeft') {
+          keys.left = false;
+        } else if (key === 'd' || key === 'arrowright' || code === 'KeyD' || code === 'ArrowRight') {
+          keys.right = false;
+        } else if (key === ' ' || code === 'Space') {
+          keys.jump = false;
+        }
+        
+        // Update key display
+        updateDisplays();
+      }
+      
+      // Add event listeners
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      
+      // Focus handling
+      focusButton.addEventListener('click', function() {
+        focusMessage.style.display = 'none';
+        // Force focus on document/canvas
+        document.getElementById('game-canvas').focus();
+        log('Game focused! You can now control the cockroach.');
+      });
+      
+      // Also hide focus message on any key press
+      document.addEventListener('keydown', function() {
+        focusMessage.style.display = 'none';
+      }, { once: true });
+    }
+    
+    // Update cockroach position and rotation based on inputs
+    function updateCockroach(delta) {
+      if (!cockroach) return;
+      
+      // Handle rotation (left/right)
+      if (keys.left) {
+        cockroach.rotation.y += rotateSpeed;
+        log('Rotating left');
+      }
+      if (keys.right) {
+        cockroach.rotation.y -= rotateSpeed;
+        log('Rotating right');
+      }
+      
+      // Calculate forward vector based on rotation
+      const forwardVector = new THREE.Vector3(0, 0, -1);
+      const rotationMatrix = new THREE.Matrix4();
+      rotationMatrix.makeRotationY(cockroach.rotation.y);
+      forwardVector.applyMatrix4(rotationMatrix);
+      
+      // Handle movement (forward/backward)
+      if (keys.forward) {
+        cockroach.position.x += forwardVector.x * moveSpeed;
+        cockroach.position.z += forwardVector.z * moveSpeed;
+        log('Moving forward');
+      }
+      if (keys.backward) {
+        cockroach.position.x -= forwardVector.x * moveSpeed;
+        cockroach.position.z -= forwardVector.z * moveSpeed;
+        log('Moving backward');
+      }
+      
+      // Handle jumping
+      if (keys.jump && !jumping) {
+        jumping = true;
+        log('Jumping!');
+      }
+      
+      if (jumping) {
+        // Simple parabolic jump
+        jumpHeight += 0.01;
+        if (jumpHeight >= Math.PI) {
+          jumpHeight = 0;
+          jumping = false;
+          cockroach.position.y = 0.125; // Reset to ground level
+        } else {
+          cockroach.position.y = 0.125 + Math.sin(jumpHeight) * 1.5;
+        }
+      }
+      
+      // Update the displays
+      updateDisplays();
+    }
+    
+    // Update camera position to follow cockroach
+    function updateCamera() {
+      if (!cockroach || !camera) return;
+      
+      // Calculate camera offset based on cockroach rotation
+      const offset = new THREE.Vector3(0, 2, 4);
+      const rotationMatrix = new THREE.Matrix4();
+      rotationMatrix.makeRotationY(cockroach.rotation.y);
+      offset.applyMatrix4(rotationMatrix);
+      
+      // Set camera position
+      camera.position.set(
+        cockroach.position.x + offset.x,
+        cockroach.position.y + offset.y,
+        cockroach.position.z + offset.z
+      );
+      
+      // Look at cockroach
+      camera.lookAt(
+        cockroach.position.x,
+        cockroach.position.y + 0.5, // Look slightly above cockroach
+        cockroach.position.z
+      );
+    }
+    
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Calculate delta time
+      const delta = clock.getDelta();
+      
+      // Update cockroach
+      updateCockroach(delta);
+      
+      // Update camera
+      updateCamera();
+      
+      // Render scene
+      renderer.render(scene, camera);
+    }
+    
+    // Start the game
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Simple Movement</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    
+    #game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: #121212;
+      overflow: hidden;
+    }
+    
+    .grid-line {
+      position: absolute;
+      background-color: #00FF66;
+      opacity: 0.2;
+    }
+    
+    .horizontal {
+      width: 100%;
+      height: 1px;
+    }
+    
+    .vertical {
+      height: 100%;
+      width: 1px;
+    }
+    
+    #cockroach {
+      position: absolute;
+      width: 60px;
+      height: 30px;
+      background-color: #aa5500;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transform-origin: center;
+      transition: transform 0.1s linear;
+      transform: translate(-50%, -50%) rotate(0deg);
+      left: 50%;
+      top: 50%;
+      z-index: 10;
+    }
+    
+    #cockroach::before, #cockroach::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 15px;
+      background-color: #aa5500;
+      top: -10px;
+      border-radius: 5px;
+    }
+    
+    #cockroach::before {
+      left: 15px;
+      transform: rotate(-15deg);
+    }
+    
+    #cockroach::after {
+      right: 15px;
+      transform: rotate(15deg);
+    }
+    
+    .control-btn {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 2px solid #9333EA;
+      color: #00FF66;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      z-index: 100;
+      border-radius: 10px;
+    }
+    
+    #btn-up {
+      bottom: 150px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    #btn-down {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    #btn-left {
+      bottom: 85px;
+      left: calc(50% - 65px);
+    }
+    
+    #btn-right {
+      bottom: 85px;
+      left: calc(50% + 65px);
+    }
+    
+    #position-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 100;
+    }
+    
+    .control-btn:active, .control-btn.active {
+      background-color: #9333EA;
+      color: white;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translate(-50%, -50%) rotate(var(--rotation)) translateY(0px); }
+      50% { transform: translate(-50%, -50%) rotate(var(--rotation)) translateY(-20px); }
+    }
+    
+    .jumping {
+      animation: bounce 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-area">
+    <!-- Grid will be created by JavaScript -->
+    <div id="cockroach"></div>
+    
+    <div id="position-display">
+      Position: <span id="position-x">0</span>, <span id="position-y">0</span><br>
+      Rotation: <span id="rotation">0</span>°
+    </div>
+    
+    <!-- Control buttons -->
+    <div class="control-btn" id="btn-up">↑</div>
+    <div class="control-btn" id="btn-down">↓</div>
+    <div class="control-btn" id="btn-left">←</div>
+    <div class="control-btn" id="btn-right">→</div>
+  </div>
+  
+  <script>
+    // Create grid
+    const gameArea = document.getElementById('game-area');
+    
+    function createGrid() {
+      // Horizontal grid lines
+      for (let i = 0; i < 20; i++) {
+        const hLine = document.createElement('div');
+        hLine.className = 'grid-line horizontal';
+        hLine.style.top = `${i * 50}px`;
+        gameArea.appendChild(hLine);
+      }
+      
+      // Vertical grid lines
+      for (let i = 0; i < 20; i++) {
+        const vLine = document.createElement('div');
+        vLine.className = 'grid-line vertical';
+        vLine.style.left = `${i * 50}px`;
+        gameArea.appendChild(vLine);
+      }
+    }
+    
+    // Initialize grid
+    createGrid();
+    
+    // Cockroach movement
+    const cockroach = document.getElementById('cockroach');
+    const positionX = document.getElementById('position-x');
+    const positionY = document.getElementById('position-y');
+    const rotationDisplay = document.getElementById('rotation');
+    
+    // Movement state
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let rotation = 0;
+    let moveSpeed = 5;
+    let rotateSpeed = 5;
+    
+    // Control buttons
+    const btnUp = document.getElementById('btn-up');
+    const btnDown = document.getElementById('btn-down');
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    
+    // Button states
+    let isUpPressed = false;
+    let isDownPressed = false;
+    let isLeftPressed = false;
+    let isRightPressed = false;
+    
+    // Update cockroach position and rotation
+    function updateCockroachPosition() {
+      cockroach.style.setProperty('--rotation', `${rotation}deg`);
+      cockroach.style.left = `${x}px`;
+      cockroach.style.top = `${y}px`;
+      
+      // Update display
+      positionX.textContent = Math.round(x);
+      positionY.textContent = Math.round(y);
+      rotationDisplay.textContent = Math.round(rotation);
+    }
+    
+    // Handle movement based on button states
+    function handleMovement() {
+      // Convert rotation to radians
+      const angle = rotation * Math.PI / 180;
+      
+      // Move forward
+      if (isUpPressed) {
+        x += Math.sin(angle) * moveSpeed;
+        y -= Math.cos(angle) * moveSpeed;
+      }
+      
+      // Move backward
+      if (isDownPressed) {
+        x -= Math.sin(angle) * moveSpeed;
+        y += Math.cos(angle) * moveSpeed;
+      }
+      
+      // Rotate left
+      if (isLeftPressed) {
+        rotation += rotateSpeed;
+      }
+      
+      // Rotate right
+      if (isRightPressed) {
+        rotation -= rotateSpeed;
+      }
+      
+      // Update position
+      updateCockroachPosition();
+    }
+    
+    // Set up button controls
+    function setupControls() {
+      // Up button
+      btnUp.addEventListener('mousedown', function() {
+        isUpPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnUp.addEventListener('mouseup', function() {
+        isUpPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnUp.addEventListener('mouseleave', function() {
+        isUpPressed = false;
+        this.classList.remove('active');
+      });
+      
+      // Down button
+      btnDown.addEventListener('mousedown', function() {
+        isDownPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnDown.addEventListener('mouseup', function() {
+        isDownPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnDown.addEventListener('mouseleave', function() {
+        isDownPressed = false;
+        this.classList.remove('active');
+      });
+      
+      // Left button
+      btnLeft.addEventListener('mousedown', function() {
+        isLeftPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnLeft.addEventListener('mouseup', function() {
+        isLeftPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnLeft.addEventListener('mouseleave', function() {
+        isLeftPressed = false;
+        this.classList.remove('active');
+      });
+      
+      // Right button
+      btnRight.addEventListener('mousedown', function() {
+        isRightPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnRight.addEventListener('mouseup', function() {
+        isRightPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnRight.addEventListener('mouseleave', function() {
+        isRightPressed = false;
+        this.classList.remove('active');
+      });
+      
+      // Touch events
+      btnUp.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        isUpPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnUp.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        isUpPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnDown.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        isDownPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnDown.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        isDownPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnLeft.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        isLeftPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnLeft.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        isLeftPressed = false;
+        this.classList.remove('active');
+      });
+      
+      btnRight.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        isRightPressed = true;
+        this.classList.add('active');
+      });
+      
+      btnRight.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        isRightPressed = false;
+        this.classList.remove('active');
+      });
+      
+      // Keyboard controls
+      document.addEventListener('keydown', function(e) {
+        switch(e.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            isUpPressed = true;
+            btnUp.classList.add('active');
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            isDownPressed = true;
+            btnDown.classList.add('active');
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            isLeftPressed = true;
+            btnLeft.classList.add('active');
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            isRightPressed = true;
+            btnRight.classList.add('active');
+            break;
+          case 'Space':
+            jump();
+            break;
+        }
+      });
+      
+      document.addEventListener('keyup', function(e) {
+        switch(e.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            isUpPressed = false;
+            btnUp.classList.remove('active');
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            isDownPressed = false;
+            btnDown.classList.remove('active');
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            isLeftPressed = false;
+            btnLeft.classList.remove('active');
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            isRightPressed = false;
+            btnRight.classList.remove('active');
+            break;
+        }
+      });
+    }
+    
+    // Jump animation
+    function jump() {
+      if (!cockroach.classList.contains('jumping')) {
+        cockroach.classList.add('jumping');
+        setTimeout(() => {
+          cockroach.classList.remove('jumping');
+        }, 500);
+      }
+    }
+    
+    // Initialize controls
+    setupControls();
+    
+    // Game loop
+    function gameLoop() {
+      handleMovement();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Start game loop
+    gameLoop();
+    
+    // Keyboard focus
+    document.addEventListener('click', function() {
+      document.body.focus();
+    });
+    
+    // Make sure cockroach stays within bounds
+    function keepInBounds() {
+      const margin = 30;
+      
+      if (x < margin) x = margin;
+      if (x > window.innerWidth - margin) x = window.innerWidth - margin;
+      if (y < margin) y = margin;
+      if (y > window.innerHeight - margin) y = window.innerHeight - margin;
+    }
+    
+    // Add bounds check to game loop
+    const originalHandleMovement = handleMovement;
+    handleMovement = function() {
+      originalHandleMovement();
+      keepInBounds();
+    };
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      // Keep cockroach in view when window is resized
+      if (x > window.innerWidth) x = window.innerWidth / 2;
+      if (y > window.innerHeight) y = window.innerHeight / 2;
+      updateCockroachPosition();
+    });
+    
+    // Initial position update
+    updateCockroachPosition();
+  </script>
+</body>
+</html>

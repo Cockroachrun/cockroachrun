@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Run - Controls Test</title>
+  <!-- Load Three.js libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <!-- Load Cannon.js physics engine -->
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: 'Courier New', monospace;
+    }
+    
+    #game-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+    
+    #controls-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(18, 18, 18, 0.8);
+      color: #00FF66;
+      padding: 10px;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+      z-index: 100;
+    }
+    
+    #debug-info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background-color: rgba(18, 18, 18, 0.8);
+      color: #00FF66;
+      padding: 10px;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+      z-index: 100;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    
+    #key-indicator {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background-color: rgba(18, 18, 18, 0.8);
+      color: #00FF66;
+      padding: 10px;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .key {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #9333EA;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #121212;
+    }
+    
+    .key.active {
+      background-color: #9333EA;
+      color: white;
+    }
+
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(18, 18, 18, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      color: #00FF66;
+      font-size: 24px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #loading-overlay button {
+      background-color: #9333EA;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      margin-top: 20px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+    }
+
+    #loading-overlay button:hover {
+      background-color: #7B2AC5;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <div id="controls-overlay">
+      <h3>Cockroach Controls:</h3>
+      <p>W/↑ - Move Forward</p>
+      <p>S/↓ - Move Backward</p>
+      <p>A/← - Rotate Left</p>
+      <p>D/→ - Rotate Right</p>
+      <p>Space - Jump</p>
+    </div>
+    
+    <div id="debug-info">Initializing...</div>
+    
+    <div id="key-indicator">
+      <div class="key" id="key-up">W</div>
+      <div class="key" id="key-left">A</div>
+      <div class="key" id="key-down">S</div>
+      <div class="key" id="key-right">D</div>
+      <div class="key" id="key-space">␣</div>
+    </div>
+  </div>
+
+  <div id="loading-overlay">
+    <h2>Cockroach Run - 3D Game</h2>
+    <p>Click the button below to start the game<br>and enable keyboard controls</p>
+    <button id="start-button">START GAME</button>
+  </div>
+
+  <script>
+    // ========== GAME INITIALIZATION ==========
+    // Debug logging
+    const debugInfo = document.getElementById('debug-info');
+    
+    function log(message) {
+      console.log(message);
+      if (debugInfo) {
+        const now = new Date();
+        const timeStr = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        debugInfo.innerHTML += `[${timeStr}] ${message}<br>`;
+        
+        // Keep only recent messages
+        const lines = debugInfo.innerHTML.split('<br>');
+        if (lines.length > 10) {
+          debugInfo.innerHTML = lines.slice(lines.length - 10).join('<br>');
+        }
+        
+        // Auto-scroll to bottom
+        debugInfo.scrollTop = debugInfo.scrollHeight;
+      }
+    }
+    
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedCharacter = urlParams.get('character') || 'american';
+    
+    // Game variables
+    let scene, camera, renderer;
+    let clock;
+    let physicsWorld;
+    let cockroachModel, cockroachBody;
+    let isRunning = false;
+    let gameStarted = false;
+    
+    // Input state
+    const keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      jump: false
+    };
+    
+    // Start button
+    const startButton = document.getElementById('start-button');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    startButton.addEventListener('click', function() {
+      // Hide overlay
+      loadingOverlay.style.display = 'none';
+      
+      // Focus on canvas
+      const canvas = document.getElementById('game-canvas');
+      if (canvas) {
+        canvas.focus();
+      }
+      
+      // Start game if not already started
+      if (!gameStarted) {
+        initGame();
+        gameStarted = true;
+      }
+      
+      // Start running
+      isRunning = true;
+      
+      // Log for debugging
+      log('Game started with keyboard controls enabled');
+    });
+    
+    // ========== GAME INITIALIZATION ==========
+    function initGame() {
+      log('Initializing game...');
+      
+      try {
+        // Get canvas
+        const canvas = document.getElementById('game-canvas');
+        if (!canvas) {
+          log('ERROR: Canvas not found!');
+          return false;
+        }
+        
+        // Initialize Three.js
+        initThreeJS(canvas);
+        
+        // Initialize physics
+        initPhysics();
+        
+        // Create environment
+        createEnvironment();
+        
+        // Create cockroach
+        createCockroach();
+        
+        // Setup input handlers
+        setupInputHandlers();
+        
+        // Create clock
+        clock = new THREE.Clock();
+        
+        // Start animation loop
+        animate();
+        
+        log('Game initialized successfully!');
+        return true;
+      } catch (error) {
+        log(`ERROR: ${error.message}`);
+        return false;
+      }
+    }
+    
+    // Initialize Three.js
+    function initThreeJS(canvas) {
+      log('Setting up Three.js...');
+      
+      // Create renderer
+      renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      
+      // Create scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x121212);
+      
+      // Create camera
+      camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(0, 5, 10);
+      camera.lookAt(0, 0, 0);
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    // Initialize physics
+    function initPhysics() {
+      log('Initializing physics...');
+      
+      physicsWorld = new CANNON.World();
+      physicsWorld.gravity.set(0, -9.82, 0); // Earth gravity
+      physicsWorld.broadphase = new CANNON.NaiveBroadphase();
+      physicsWorld.solver.iterations = 10;
+      
+      // Create ground plane - physics
+      const groundShape = new CANNON.Plane();
+      const groundBody = new CANNON.Body({ mass: 0 });
+      groundBody.addShape(groundShape);
+      groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+      physicsWorld.addBody(groundBody);
+    }
+    
+    // Create environment
+    function createEnvironment() {
+      log('Creating environment...');
+      
+      // Add lights
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 20, 15);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+      
+      // Add cyberpunk accent lights
+      const purpleLight = new THREE.PointLight(0x9333EA, 1, 50);
+      purpleLight.position.set(5, 5, 5);
+      scene.add(purpleLight);
+      
+      const greenLight = new THREE.PointLight(0x00FF66, 1, 50);
+      greenLight.position.set(-5, 3, -5);
+      scene.add(greenLight);
+      
+      // Ground plane - visual
+      const groundGeometry = new THREE.PlaneGeometry(100, 100);
+      const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        roughness: 0.8,
+        metalness: 0.2
+      });
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+      
+      // Grid helper for cyberpunk aesthetic
+      const gridHelper = new THREE.GridHelper(100, 100, 0x00FF66, 0x444444);
+      scene.add(gridHelper);
+      
+      // Add some obstacles
+      createObstacle(5, 1, 5, 0x9333EA);
+      createObstacle(-5, 1, -5, 0x00FF66);
+      createObstacle(5, 1, -5, 0x9333EA);
+      createObstacle(-5, 1, 5, 0x00FF66);
+    }
+    
+    // Create an obstacle
+    function createObstacle(x, y, z, color) {
+      // Visual box
+      const geometry = new THREE.BoxGeometry(2, 2, 2);
+      const material = new THREE.MeshStandardMaterial({ color: color });
+      const obstacle = new THREE.Mesh(geometry, material);
+      obstacle.position.set(x, y, z);
+      obstacle.castShadow = true;
+      scene.add(obstacle);
+      
+      // Physics body
+      const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1));
+      const body = new CANNON.Body({ mass: 0 });
+      body.addShape(shape);
+      body.position.set(x, y, z);
+      physicsWorld.addBody(body);
+    }
+    
+    // Create cockroach
+    function createCockroach() {
+      log(`Creating cockroach character: ${selectedCharacter}`);
+      
+      // Create placeholder box
+      const geometry = new THREE.BoxGeometry(1, 0.5, 2);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: selectedCharacter === 'american' ? 0xaa5500 : 0x442200
+      });
+      cockroachModel = new THREE.Mesh(geometry, material);
+      cockroachModel.position.set(0, 1, 0);
+      cockroachModel.castShadow = true;
+      scene.add(cockroachModel);
+      
+      // Create physics body
+      const shape = new CANNON.Box(new CANNON.Vec3(0.5, 0.25, 1));
+      cockroachBody = new CANNON.Body({ mass: 1 });
+      cockroachBody.addShape(shape);
+      cockroachBody.position.set(0, 1, 0);
+      physicsWorld.addBody(cockroachBody);
+      
+      // Try to load model
+      loadCockroachModel();
+    }
+    
+    // Load cockroach model
+    function loadCockroachModel() {
+      if (typeof THREE.GLTFLoader === 'undefined') {
+        log('WARNING: GLTFLoader not available, using placeholder box');
+        return;
+      }
+      
+      const loader = new THREE.GLTFLoader();
+      
+      // Try multiple paths - direct from what we know about file names
+      const paths = [
+        'assets/models/American Cockroach.glb',
+        'models/American Cockroach.glb',
+        'assets/models/Oriental cockroach.glb',
+        'models/Oriental cockroach.glb'
+      ];
+      
+      // Choose the appropriate path based on the selected character
+      let modelPath;
+      if (selectedCharacter === 'american') {
+        modelPath = paths[0];
+      } else {
+        modelPath = paths[2];
+      }
+      
+      log(`Loading cockroach model from: ${modelPath}`);
+      
+      loader.load(
+        modelPath,
+        function(gltf) {
+          log('Cockroach model loaded successfully!');
+          scene.remove(cockroachModel);
+          cockroachModel = gltf.scene;
+          cockroachModel.scale.set(0.5, 0.5, 0.5);
+          cockroachModel.castShadow = true;
+          scene.add(cockroachModel);
+        },
+        function(xhr) {
+          const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+          log(`Loading model: ${percent}%`);
+        },
+        function(error) {
+          log(`Error loading model: ${error.message}`);
+          log('Using placeholder as fallback');
+        }
+      );
+    }
+    
+    // ========== INPUT HANDLING ==========
+    function setupInputHandlers() {
+      log('Setting up input handlers...');
+      
+      // Key indicators
+      const keyUp = document.getElementById('key-up');
+      const keyDown = document.getElementById('key-down');
+      const keyLeft = document.getElementById('key-left');
+      const keyRight = document.getElementById('key-right');
+      const keySpace = document.getElementById('key-space');
+      
+      // Keyboard down
+      window.addEventListener('keydown', function(e) {
+        // Log key presses
+        log(`Key down: ${e.code || e.key || e.keyCode}`);
+        
+        // Handle input
+        switch(e.code || e.key || e.keyCode) {
+          case 'KeyW':
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+          case 38: // Up arrow keyCode
+            keys.forward = true;
+            keyUp.classList.add('active');
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+          case 40: // Down arrow keyCode
+            keys.backward = true;
+            keyDown.classList.add('active');
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+          case 37: // Left arrow keyCode
+            keys.left = true;
+            keyLeft.classList.add('active');
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+          case 39: // Right arrow keyCode
+            keys.right = true;
+            keyRight.classList.add('active');
+            break;
+          case 'Space':
+          case ' ':
+          case 32: // Space keyCode
+            keys.jump = true;
+            keySpace.classList.add('active');
+            break;
+        }
+        
+        // Prevent default to avoid scrolling the page
+        if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+          e.preventDefault();
+        }
+      });
+      
+      // Keyboard up
+      window.addEventListener('keyup', function(e) {
+        switch(e.code || e.key || e.keyCode) {
+          case 'KeyW':
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+          case 38: // Up arrow keyCode
+            keys.forward = false;
+            keyUp.classList.remove('active');
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+          case 40: // Down arrow keyCode
+            keys.backward = false;
+            keyDown.classList.remove('active');
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+          case 37: // Left arrow keyCode
+            keys.left = false;
+            keyLeft.classList.remove('active');
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+          case 39: // Right arrow keyCode
+            keys.right = false;
+            keyRight.classList.remove('active');
+            break;
+          case 'Space':
+          case ' ':
+          case 32: // Space keyCode
+            keys.jump = false;
+            keySpace.classList.remove('active');
+            break;
+        }
+        
+        // Prevent default to avoid scrolling the page
+        if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+          e.preventDefault();
+        }
+      });
+      
+      // Click anywhere to focus
+      document.addEventListener('click', function() {
+        const canvas = document.getElementById('game-canvas');
+        if (canvas) {
+          canvas.focus();
+          log('Canvas focused');
+        }
+      });
+    }
+    
+    // ========== GAME LOOP ==========
+    // Update cockroach movement
+    function updateCockroach() {
+      if (!cockroachBody || !cockroachModel) return;
+      
+      // Visual indicator of active controls
+      if (keys.forward || keys.backward || keys.left || keys.right || keys.jump) {
+        const activeKeys = [];
+        if (keys.forward) activeKeys.push('W');
+        if (keys.backward) activeKeys.push('S');
+        if (keys.left) activeKeys.push('A');
+        if (keys.right) activeKeys.push('D');
+        if (keys.jump) activeKeys.push('Space');
+        
+        // Only log active keys when they change
+        log(`Active keys: ${activeKeys.join(', ')}`);
+      }
+      
+      // Movement parameters
+      const force = 10;
+      const torque = 5;
+      
+      // Apply forces based on input
+      if (keys.forward) {
+        cockroachBody.applyLocalForce(new CANNON.Vec3(0, 0, -force), new CANNON.Vec3(0, 0, 0));
+      }
+      if (keys.backward) {
+        cockroachBody.applyLocalForce(new CANNON.Vec3(0, 0, force), new CANNON.Vec3(0, 0, 0));
+      }
+      if (keys.left) {
+        cockroachBody.applyTorque(new CANNON.Vec3(0, torque, 0));
+      }
+      if (keys.right) {
+        cockroachBody.applyTorque(new CANNON.Vec3(0, -torque, 0));
+      }
+      if (keys.jump && cockroachBody.position.y < 1.1) {
+        cockroachBody.applyImpulse(new CANNON.Vec3(0, 5, 0), cockroachBody.position);
+      }
+      
+      // Update visual model position to match physics body
+      cockroachModel.position.copy(cockroachBody.position);
+      cockroachModel.quaternion.copy(cockroachBody.quaternion);
+    }
+    
+    // Update camera to follow cockroach
+    function updateCamera() {
+      if (!cockroachModel || !camera) return;
+      
+      // Third-person camera offset
+      const offset = new THREE.Vector3(0, 3, 6);
+      offset.applyQuaternion(cockroachModel.quaternion);
+      
+      // Position camera
+      const targetPosition = new THREE.Vector3()
+        .copy(cockroachModel.position)
+        .add(offset);
+      
+      camera.position.copy(targetPosition);
+      camera.lookAt(cockroachModel.position);
+    }
+    
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (!isRunning) return;
+      
+      // Get delta time
+      const delta = clock ? clock.getDelta() : 0.016;
+      
+      // Update physics
+      if (physicsWorld) {
+        physicsWorld.step(1/60, delta, 3);
+      }
+      
+      // Update cockroach
+      updateCockroach();
+      
+      // Update camera
+      updateCamera();
+      
+      // Render scene
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }
+  </script>
+</body>
+</html>

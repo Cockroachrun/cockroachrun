@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: monospace;
+      background-color: #121212;
+      color: #00FF66;
+      text-align: center;
+    }
+    
+    .key-container {
+      display: flex;
+      justify-content: center;
+      margin: 50px auto;
+    }
+    
+    .key {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #9333EA;
+      margin: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border-radius: 5px;
+      background-color: #1a1a1a;
+    }
+    
+    .key.active {
+      background-color: #9333EA;
+      color: white;
+    }
+    
+    #log {
+      width: 80%;
+      height: 200px;
+      margin: 20px auto;
+      padding: 10px;
+      border: 1px solid #9333EA;
+      text-align: left;
+      overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    button {
+      background-color: #9333EA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Keyboard Input Test</h1>
+  <p>Press any key to see if it's detected. Click the button first to ensure focus.</p>
+  
+  <button id="focus-button">CLICK HERE FIRST</button>
+  
+  <div class="key-container">
+    <div class="key" id="key-w">W</div>
+    <div class="key" id="key-a">A</div>
+    <div class="key" id="key-s">S</div>
+    <div class="key" id="key-d">D</div>
+  </div>
+  
+  <div id="log"></div>
+  
+  <script>
+    // Key elements
+    const keyW = document.getElementById('key-w');
+    const keyA = document.getElementById('key-a');
+    const keyS = document.getElementById('key-s');
+    const keyD = document.getElementById('key-d');
+    const logElement = document.getElementById('log');
+    const focusButton = document.getElementById('focus-button');
+    
+    // Focus button
+    focusButton.addEventListener('click', function() {
+      document.body.focus();
+      logMessage('Page focused');
+      this.innerHTML = 'FOCUSED - Try keys now';
+      this.style.backgroundColor = '#00FF66';
+    });
+    
+    // Log a message
+    function logMessage(message) {
+      const now = new Date();
+      const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+      logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    // Initial log
+    logMessage('Page loaded. Click the button to focus.');
+    
+    // Different ways to handle keyboard events
+    
+    // Method 1: keydown event
+    document.addEventListener('keydown', function(event) {
+      logMessage(`Keydown event: ${event.key} (code: ${event.code}, keyCode: ${event.keyCode})`);
+      
+      // Handle key visualization
+      switch(event.key.toLowerCase()) {
+        case 'w':
+          keyW.classList.add('active');
+          break;
+        case 'a':
+          keyA.classList.add('active');
+          break;
+        case 's':
+          keyS.classList.add('active');
+          break;
+        case 'd':
+          keyD.classList.add('active');
+          break;
+      }
+      
+      // Prevent default for arrow keys and space to avoid page scrolling
+      if ([32, 37, 38, 39, 40].includes(event.keyCode)) {
+        event.preventDefault();
+      }
+    });
+    
+    // Method 2: keyup event
+    document.addEventListener('keyup', function(event) {
+      logMessage(`Keyup event: ${event.key} (code: ${event.code}, keyCode: ${event.keyCode})`);
+      
+      // Handle key visualization
+      switch(event.key.toLowerCase()) {
+        case 'w':
+          keyW.classList.remove('active');
+          break;
+        case 'a':
+          keyA.classList.remove('active');
+          break;
+        case 's':
+          keyS.classList.remove('active');
+          break;
+        case 'd':
+          keyD.classList.remove('active');
+          break;
+      }
+      
+      // Prevent default for arrow keys and space
+      if ([32, 37, 38, 39, 40].includes(event.keyCode)) {
+        event.preventDefault();
+      }
+    });
+    
+    // Method 3: Direct window keydown/keyup
+    window.onkeydown = function(e) {
+      logMessage(`Window.onkeydown: ${e.key}`);
+    };
+    
+    window.onkeyup = function(e) {
+      logMessage(`Window.onkeyup: ${e.key}`);
+    };
+    
+    // Method 4: KeyboardEvent
+    document.body.addEventListener('keypress', function(e) {
+      logMessage(`Keypress event: ${e.key}`);
+    });
+    
+    // Add test message on load
+    setTimeout(function() {
+      logMessage('Page has been active for 2 seconds. If you don\'t see any key events after pressing keys, try clicking the focus button again.');
+    }, 2000);
+  </script>
+</body>
+</html>

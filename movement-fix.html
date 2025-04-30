@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Movement Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    
+    #game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-color: #121212;
+      overflow: hidden;
+    }
+    
+    #cockroach {
+      position: absolute;
+      width: 50px;
+      height: 30px;
+      background-color: #aa5500;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transform-origin: center;
+      transition: transform 0.1s linear;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    
+    #cockroach::before, #cockroach::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 15px;
+      background-color: #aa5500;
+      top: -10px;
+      border-radius: 5px;
+    }
+    
+    #cockroach::before {
+      left: 15px;
+      transform: rotate(-15deg);
+    }
+    
+    #cockroach::after {
+      right: 15px;
+      transform: rotate(15deg);
+    }
+    
+    .grid-line {
+      position: absolute;
+      background-color: #00FF66;
+      opacity: 0.3;
+    }
+    
+    .horizontal {
+      width: 100%;
+      height: 1px;
+    }
+    
+    .vertical {
+      height: 100%;
+      width: 1px;
+    }
+    
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 100;
+    }
+    
+    #debug {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      width: 300px;
+      z-index: 100;
+    }
+    
+    #key-indicators {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+      z-index: 100;
+    }
+    
+    .key-indicator {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00FF66;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #00FF66;
+      border-radius: 5px;
+    }
+    
+    .key-indicator.active {
+      background-color: #9333EA;
+      color: white;
+    }
+    
+    button {
+      background-color: #9333EA;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: block;
+    }
+  </style>
+</head>
+<body tabindex="0">
+  <div id="game-area">
+    <!-- Grid lines will be added by JavaScript -->
+    <div id="cockroach"></div>
+    
+    <div id="controls">
+      <h3>Controls:</h3>
+      <p>W / ↑ - Move Forward</p>
+      <p>S / ↓ - Move Backward</p>
+      <p>A / ← - Rotate Left</p>
+      <p>D / → - Rotate Right</p>
+      <p>Space - Jump</p>
+      <button id="focus-button">Click to Focus</button>
+      <button id="test-movement">Test Auto Movement</button>
+    </div>
+    
+    <div id="debug">Click the "Click to Focus" button, then try WASD controls</div>
+    
+    <div id="key-indicators">
+      <div class="key-indicator" id="key-w">W</div>
+      <div class="key-indicator" id="key-a">A</div>
+      <div class="key-indicator" id="key-s">S</div>
+      <div class="key-indicator" id="key-d">D</div>
+      <div class="key-indicator" id="key-space">SPACE</div>
+    </div>
+  </div>
+  
+  <script>
+    // DOM elements
+    const gameArea = document.getElementById('game-area');
+    const cockroach = document.getElementById('cockroach');
+    const debug = document.getElementById('debug');
+    const focusButton = document.getElementById('focus-button');
+    const testMovementButton = document.getElementById('test-movement');
+    
+    // Key indicators
+    const keyW = document.getElementById('key-w');
+    const keyA = document.getElementById('key-a');
+    const keyS = document.getElementById('key-s');
+    const keyD = document.getElementById('key-d');
+    const keySpace = document.getElementById('key-space');
+    
+    // Cockroach position and rotation
+    let posX = window.innerWidth / 2;
+    let posY = window.innerHeight / 2;
+    let rotation = 0;
+    let jumping = false;
+    let jumpHeight = 0;
+    
+    // Create grid
+    function createGrid() {
+      // Create grid lines
+      for (let i = 0; i < 20; i++) {
+        // Horizontal lines
+        const hLine = document.createElement('div');
+        hLine.className = 'grid-line horizontal';
+        hLine.style.top = `${i * 50}px`;
+        gameArea.appendChild(hLine);
+        
+        // Vertical lines
+        const vLine = document.createElement('div');
+        vLine.className = 'grid-line vertical';
+        vLine.style.left = `${i * 50}px`;
+        gameArea.appendChild(vLine);
+      }
+    }
+    
+    // Log function
+    function log(message) {
+      console.log(message);
+      const now = new Date();
+      const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+      debug.innerHTML += `[${timestamp}] ${message}<br>`;
+      debug.scrollTop = debug.scrollHeight;
+    }
+    
+    // Initialize
+    function init() {
+      createGrid();
+      updateCockroachPosition();
+      
+      // Focus the game area
+      gameArea.focus();
+      
+      log('Game initialized. Try using WASD to move.');
+    }
+    
+    // Update cockroach position and rotation
+    function updateCockroachPosition() {
+      // Apply jumping effect
+      let yOffset = 0;
+      if (jumping) {
+        yOffset = -Math.sin(jumpHeight * Math.PI) * 50;
+        jumpHeight += 0.05;
+        
+        if (jumpHeight >= 1) {
+          jumping = false;
+          jumpHeight = 0;
+        }
+      }
+      
+      // Apply position and rotation
+      cockroach.style.transform = `translate(${posX}px, ${posY + yOffset}px) rotate(${rotation}deg)`;
+    }
+    
+    // Input state
+    const keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      jump: false
+    };
+    
+    // Functions to handle movement
+    function moveForward() {
+      const radians = rotation * Math.PI / 180;
+      posX += Math.sin(radians) * 5;
+      posY -= Math.cos(radians) * 5;
+      log('Moving forward');
+    }
+    
+    function moveBackward() {
+      const radians = rotation * Math.PI / 180;
+      posX -= Math.sin(radians) * 5;
+      posY += Math.cos(radians) * 5;
+      log('Moving backward');
+    }
+    
+    function rotateLeft() {
+      rotation += 5;
+      log('Rotating left');
+    }
+    
+    function rotateRight() {
+      rotation -= 5;
+      log('Rotating right');
+    }
+    
+    function jump() {
+      if (!jumping) {
+        jumping = true;
+        jumpHeight = 0;
+        log('Jumping');
+      }
+    }
+    
+    // Test automatic movement
+    testMovementButton.addEventListener('click', function() {
+      log('Testing automatic movement...');
+      
+      // Move forward
+      setTimeout(() => {
+        log('AUTO: Moving forward');
+        moveForward();
+        updateCockroachPosition();
+        keyW.classList.add('active');
+        
+        setTimeout(() => {
+          keyW.classList.remove('active');
+          
+          // Rotate right
+          setTimeout(() => {
+            log('AUTO: Rotating right');
+            rotateRight();
+            updateCockroachPosition();
+            keyD.classList.add('active');
+            
+            setTimeout(() => {
+              keyD.classList.remove('active');
+              
+              // Move backward
+              setTimeout(() => {
+                log('AUTO: Moving backward');
+                moveBackward();
+                updateCockroachPosition();
+                keyS.classList.add('active');
+                
+                setTimeout(() => {
+                  keyS.classList.remove('active');
+                  
+                  // Rotate left
+                  setTimeout(() => {
+                    log('AUTO: Rotating left');
+                    rotateLeft();
+                    updateCockroachPosition();
+                    keyA.classList.add('active');
+                    
+                    setTimeout(() => {
+                      keyA.classList.remove('active');
+                      
+                      // Jump
+                      setTimeout(() => {
+                        log('AUTO: Jumping');
+                        jump();
+                        keySpace.classList.add('active');
+                        
+                        setTimeout(() => {
+                          keySpace.classList.remove('active');
+                        }, 500);
+                      }, 500);
+                    }, 500);
+                  }, 500);
+                }, 500);
+              }, 500);
+            }, 500);
+          }, 500);
+        }, 500);
+      }, 500);
+    });
+    
+    // Update loop
+    function gameLoop() {
+      // Apply movement based on keys
+      if (keys.forward) moveForward();
+      if (keys.backward) moveBackward();
+      if (keys.left) rotateLeft();
+      if (keys.right) rotateRight();
+      if (keys.jump) jump();
+      
+      // Update position
+      updateCockroachPosition();
+      
+      // Request next frame
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Start game loop
+    gameLoop();
+    
+    // Focus handling
+    focusButton.addEventListener('click', function() {
+      document.body.focus();
+      log('Page focused. Try WASD controls now.');
+    });
+    
+    document.body.addEventListener('click', function() {
+      document.body.focus();
+    });
+    
+    // ===== KEYBOARD INPUT HANDLING =====
+    // We'll try multiple approaches to catch keyboard input
+    
+    // Approach 1: document keydown/keyup
+    document.addEventListener('keydown', function(e) {
+      log(`Key down: ${e.key} (code: ${e.code}, keyCode: ${e.keyCode})`);
+      handleKeyDown(e);
+    });
+    
+    document.addEventListener('keyup', function(e) {
+      handleKeyUp(e);
+    });
+    
+    // Approach 2: window keydown/keyup
+    window.addEventListener('keydown', function(e) {
+      handleKeyDown(e);
+    });
+    
+    window.addEventListener('keyup', function(e) {
+      handleKeyUp(e);
+    });
+    
+    // Approach 3: direct body events
+    document.body.addEventListener('keydown', function(e) {
+      handleKeyDown(e);
+    });
+    
+    document.body.addEventListener('keyup', function(e) {
+      handleKeyUp(e);
+    });
+    
+    // Key handling functions
+    function handleKeyDown(e) {
+      const key = e.key ? e.key.toLowerCase() : '';
+      const code = e.code;
+      const keyCode = e.keyCode;
+      
+      // Update key state
+      if (key === 'w' || code === 'KeyW' || code === 'ArrowUp' || keyCode === 38) {
+        keys.forward = true;
+        keyW.classList.add('active');
+      }
+      else if (key === 's' || code === 'KeyS' || code === 'ArrowDown' || keyCode === 40) {
+        keys.backward = true;
+        keyS.classList.add('active');
+      }
+      else if (key === 'a' || code === 'KeyA' || code === 'ArrowLeft' || keyCode === 37) {
+        keys.left = true;
+        keyA.classList.add('active');
+      }
+      else if (key === 'd' || code === 'KeyD' || code === 'ArrowRight' || keyCode === 39) {
+        keys.right = true;
+        keyD.classList.add('active');
+      }
+      else if (key === ' ' || code === 'Space' || keyCode === 32) {
+        keys.jump = true;
+        keySpace.classList.add('active');
+      }
+      
+      // Prevent default for arrow keys and space
+      if ([32, 37, 38, 39, 40].includes(keyCode)) {
+        e.preventDefault();
+      }
+    }
+    
+    function handleKeyUp(e) {
+      const key = e.key ? e.key.toLowerCase() : '';
+      const code = e.code;
+      const keyCode = e.keyCode;
+      
+      // Update key state
+      if (key === 'w' || code === 'KeyW' || code === 'ArrowUp' || keyCode === 38) {
+        keys.forward = false;
+        keyW.classList.remove('active');
+      }
+      else if (key === 's' || code === 'KeyS' || code === 'ArrowDown' || keyCode === 40) {
+        keys.backward = false;
+        keyS.classList.remove('active');
+      }
+      else if (key === 'a' || code === 'KeyA' || code === 'ArrowLeft' || keyCode === 37) {
+        keys.left = false;
+        keyA.classList.remove('active');
+      }
+      else if (key === 'd' || code === 'KeyD' || code === 'ArrowRight' || keyCode === 39) {
+        keys.right = false;
+        keyD.classList.remove('active');
+      }
+      else if (key === ' ' || code === 'Space' || keyCode === 32) {
+        keys.jump = false;
+        keySpace.classList.remove('active');
+      }
+      
+      // Prevent default for arrow keys and space
+      if ([32, 37, 38, 39, 40].includes(keyCode)) {
+        e.preventDefault();
+      }
+    }
+    
+    // Initialize the game
+    init();
+  </script>
+</body>
+</html>

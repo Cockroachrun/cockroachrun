@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Absolutely Minimal Movement Test</title>
+  <style>
+    body {
+      background: #121212;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #00FF66;
+    }
+    
+    #container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      border: 5px solid #9333EA;
+      overflow: hidden;
+    }
+    
+    #cockroach {
+      position: absolute;
+      width: 50px;
+      height: 25px;
+      background-color: #00FF66;
+      left: 225px;
+      top: 225px;
+      transition: transform 0.1s;
+    }
+    
+    #key-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border: 1px solid #00FF66;
+    }
+    
+    .controls {
+      margin-top: 20px;
+    }
+    
+    button {
+      background: #9333EA;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    
+    #instructions {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border: 1px solid #00FF66;
+    }
+  </style>
+</head>
+<body>
+  <div id="container" tabindex="0">
+    <div id="cockroach"></div>
+    <div id="key-display">No keys pressed</div>
+    <div id="instructions">
+      Use WASD or Arrow Keys to move<br>
+      Click buttons below for alternative control
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button id="btn-up">▲ UP</button>
+    <button id="btn-left">◀ LEFT</button>
+    <button id="btn-down">▼ DOWN</button>
+    <button id="btn-right">▶ RIGHT</button>
+  </div>
+  
+  <script>
+    // Get DOM elements
+    const container = document.getElementById('container');
+    const cockroach = document.getElementById('cockroach');
+    const keyDisplay = document.getElementById('key-display');
+    
+    // Movement state
+    const keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+    
+    // Position tracking
+    let posX = 225;
+    let posY = 225;
+    let rotation = 0;
+    
+    // Movement parameters
+    const moveSpeed = 5;
+    
+    // Focus the container when page loads
+    window.onload = () => {
+      container.focus();
+      console.log('Container focused on load');
+    };
+    
+    // Click handler for container
+    container.addEventListener('click', () => {
+      container.focus();
+      console.log('Container clicked and focused');
+    });
+    
+    // Button controls
+    document.getElementById('btn-up').addEventListener('mousedown', () => { keys.up = true; updateMovement(); });
+    document.getElementById('btn-up').addEventListener('mouseup', () => { keys.up = false; });
+    document.getElementById('btn-left').addEventListener('mousedown', () => { keys.left = true; updateMovement(); });
+    document.getElementById('btn-left').addEventListener('mouseup', () => { keys.left = false; });
+    document.getElementById('btn-down').addEventListener('mousedown', () => { keys.down = true; updateMovement(); });
+    document.getElementById('btn-down').addEventListener('mouseup', () => { keys.down = false; });
+    document.getElementById('btn-right').addEventListener('mousedown', () => { keys.right = true; updateMovement(); });
+    document.getElementById('btn-right').addEventListener('mouseup', () => { keys.right = false; });
+    
+    // Keyboard handlers - deliberately simplified
+    container.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      console.log('Key pressed:', e.key, e.code);
+      
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = true;
+      }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = true;
+      }
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        keys.left = true;
+      }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        keys.right = true;
+      }
+      
+      updateKeyDisplay();
+    });
+    
+    container.addEventListener('keyup', (e) => {
+      e.preventDefault();
+      
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = false;
+      }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = false;
+      }
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        keys.left = false;
+      }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        keys.right = false;
+      }
+      
+      updateKeyDisplay();
+    });
+    
+    // Also attach to document for fallback
+    document.addEventListener('keydown', (e) => {
+      // Only handle if container has focus
+      if (document.activeElement === container) {
+        return;
+      }
+      
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = true;
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = true;
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        keys.left = true;
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        keys.right = true;
+        e.preventDefault();
+      }
+      
+      updateKeyDisplay();
+    });
+    
+    document.addEventListener('keyup', (e) => {
+      if (document.activeElement === container) {
+        return;
+      }
+      
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = false;
+      }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = false;
+      }
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        keys.left = false;
+      }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        keys.right = false;
+      }
+      
+      updateKeyDisplay();
+    });
+    
+    // Update key display
+    function updateKeyDisplay() {
+      let activeKeys = [];
+      if (keys.up) activeKeys.push('UP');
+      if (keys.down) activeKeys.push('DOWN');
+      if (keys.left) activeKeys.push('LEFT');
+      if (keys.right) activeKeys.push('RIGHT');
+      
+      keyDisplay.textContent = activeKeys.length > 0 ? 
+                              'Keys pressed: ' + activeKeys.join(', ') : 
+                              'No keys pressed';
+    }
+    
+    // Main game loop
+    function gameLoop() {
+      updateMovement();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Handle movement
+    function updateMovement() {
+      let moved = false;
+      
+      if (keys.up) {
+        posY -= moveSpeed;
+        moved = true;
+      }
+      if (keys.down) {
+        posY += moveSpeed;
+        moved = true;
+      }
+      if (keys.left) {
+        posX -= moveSpeed;
+        rotation = -30;
+        moved = true;
+      }
+      if (keys.right) {
+        posX += moveSpeed;
+        rotation = 30;
+        moved = true;
+      }
+      
+      // Reset rotation if not moving left/right
+      if (!keys.left && !keys.right) {
+        rotation = 0;
+      }
+      
+      // Keep cockroach within bounds
+      posX = Math.max(0, Math.min(posX, 450));
+      posY = Math.max(0, Math.min(posY, 475));
+      
+      // Apply new position
+      cockroach.style.left = posX + 'px';
+      cockroach.style.top = posY + 'px';
+      cockroach.style.transform = `rotate(${rotation}deg)`;
+      
+      if (moved) {
+        console.log(`Moved to: x=${posX}, y=${posY}, rotation=${rotation}`);
+      }
+    }
+    
+    // Start game loop
+    gameLoop();
+    
+    // Auto-focus the container
+    container.focus();
+  </script>
+</body>
+</html>

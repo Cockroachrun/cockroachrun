@@ -4,6 +4,10 @@ const AudioManager = {
   scatterSound: null,
   muteToggleElement: null, 
   
+  // Direct audio elements
+  menuMusic: null,
+  gameMusic: null,
+  
   musicTracks: {},
   currentTrackId: 'checkpoint-chaser',
   
@@ -42,10 +46,18 @@ const AudioManager = {
   init() {
     this.buttonClick = document.getElementById('button-click');
     this.scatterSound = document.getElementById('scatter-sound');
+    this.menuMusic = document.getElementById('menu-music');
+    this.gameMusic = document.getElementById('game-music');
     this.muteToggleElement = document.getElementById('mute-toggle');
     
     if (!this.buttonClick || !this.scatterSound) {
         console.warn("AudioManager Warning: One or more audio elements not found!");
+    }
+    if (!this.menuMusic) {
+        console.warn("AudioManager Warning: Menu music element not found!");
+    }
+    if (!this.gameMusic) {
+        console.warn("AudioManager Warning: Game music element not found!");
     }
     if (!this.muteToggleElement) {
         console.warn("AudioManager Warning: Mute toggle button element not found!");
@@ -130,7 +142,11 @@ const AudioManager = {
   applyVolumeSettings() {
       if (this.currentMusic) this.currentMusic.volume = this.musicVolume;
       if (this.buttonClick) this.buttonClick.volume = this.sfxVolume; 
-      if (this.scatterSound) this.scatterSound.volume = this.sfxVolume; 
+      if (this.scatterSound) this.scatterSound.volume = this.sfxVolume;
+      
+      // Apply volume to direct audio elements
+      if (this.menuMusic) this.menuMusic.volume = this.musicVolume;
+      if (this.gameMusic) this.gameMusic.volume = this.musicVolume;
       
       // Update any track in the musicTracks collection
       Object.values(this.musicTracks).forEach(track => {
@@ -144,7 +160,12 @@ const AudioManager = {
   },
 
   applyMuteState() {
+    // Mute current music
     if (this.currentMusic) this.currentMusic.muted = this.isMuted;
+    
+    // Mute direct audio elements
+    if (this.menuMusic) this.menuMusic.muted = this.isMuted;
+    if (this.gameMusic) this.gameMusic.muted = this.isMuted;
     
     // Mute all tracks in the collection
     Object.values(this.musicTracks).forEach(track => {

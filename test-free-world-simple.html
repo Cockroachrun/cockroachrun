@@ -20,6 +20,21 @@
       font-family: 'Orbitron', sans-serif;
     }
     
+    /* Key indicator for visual feedback */
+    #key-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      grid-template-areas:
+        ". up ."
+        "left down right";
+      grid-gap: 5px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    
     #game-container {
       position: absolute;
       top: 0;
@@ -29,6 +44,26 @@
       box-sizing: border-box;
       border: 3px dashed #9333EA;
       z-index: 10;
+      outline: none; /* Remove outline when focused */
+      cursor: pointer; /* Show pointer cursor */
+    }
+    
+    #focus-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00FF66;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      cursor: pointer;
+      font-size: 24px;
+      text-shadow: 0 0 10px #9333EA;
     }
     #game-canvas {
       width: 100%;
@@ -81,8 +116,25 @@
   </style>
 </head>
 <body>
-  <div id="game-container">
+  <div id="game-container" tabindex="0">
     <canvas id="game-canvas"></canvas>
+    <div id="focus-overlay">
+      <h2>CLICK TO START</h2>
+      <p>Click anywhere to gain focus and enable keyboard controls</p>
+      <div style="margin-top: 20px; border: 2px solid #00FF66; padding: 10px; max-width: 80%; text-align: center;">
+        <p style="margin: 5px 0;">Use WASD or ARROW KEYS to move</p>
+        <p style="margin: 5px 0;">SPACE to jump</p>
+        <p style="margin: 5px 0;">Movement is a bit slow but should definitely work!</p>
+      </div>
+    </div>
+    
+    <!-- Visual key indicators -->
+    <div id="key-indicator" style="display: none;">
+      <div id="key-up" style="grid-area: up; width: 50px; height: 50px; background-color: rgba(0,255,102,0.2); border: 2px solid #00FF66; text-align: center; line-height: 50px;">W</div>
+      <div id="key-left" style="grid-area: left; width: 50px; height: 50px; background-color: rgba(0,255,102,0.2); border: 2px solid #00FF66; text-align: center; line-height: 50px;">A</div>
+      <div id="key-down" style="grid-area: down; width: 50px; height: 50px; background-color: rgba(0,255,102,0.2); border: 2px solid #00FF66; text-align: center; line-height: 50px;">S</div>
+      <div id="key-right" style="grid-area: right; width: 50px; height: 50px; background-color: rgba(0,255,102,0.2); border: 2px solid #00FF66; text-align: center; line-height: 50px;">D</div>
+    </div>
   </div>
   
   <div id="instructions">
@@ -92,6 +144,9 @@
     <p>A/Left Arrow - Rotate Left</p>
     <p>D/Right Arrow - Rotate Right</p>
     <p>T - Toggle Debug Camera Mode</p>
+    <div id="position-display" style="margin-top: 10px; background: rgba(0,0,0,0.7); padding: 5px; color: #00FF66;">
+      Position: waiting for movement...
+    </div>
   </div>
   
   <div id="character-selector">
@@ -100,6 +155,9 @@
   </div>
 
   <script>
+    // For direct movement (no physics)
+    let lastUpdateTime = 0;
+    
     // Basic game engine
     class Game {
       constructor() {
@@ -290,25 +348,24 @@
       init() {
         console.log('Initializing Free World mode');
         
-        // Basic scene setup
+        // Create scene, lights, and initial setup
         this.setupScene();
         
-        // Create a simple environment
-        this.createEnvironment();
+        // Create cockroach character
+        this.createCharacter();
         
-        // Add helpers for debugging
-        this.addHelpers();
+        // Create environment
+        this.createEnvironment();
         
         // Setup input handlers
         this.setupInputHandlers();
         
-        // Load and create character based on the selected character
-        this.createCharacter();
+        // For debugging
+        this.addHelpers();
         
-        // Create camera controls for debugging
-        if (this.debugMode) {
-          this.setupDebugControls();
-        }
+        // Add direct movement variables
+        this.isJumping = false;
+        this.jumpTime = 0;
         
         return this;
       }
@@ -382,28 +439,49 @@
       createCharacter() {
         const selectedCharacter = this.game.selectedCharacter || 'american';
         
-        // Determine which model to load based on selection
-        const modelPath = selectedCharacter === 'american' ? 
-          'assets/models/American Cockroach.glb' : 
-          'assets/models/Oriental cockroach.glb';
+        // Try both model paths with fallbacks
+        const modelPaths = [
+          'assets/models/cockroach.glb',
+          'assets/models/American Cockroach.glb',
+          'assets/models/Oriental cockroach.glb',
+          'assets/models/default-roach.glb',
+          // Add variations with different casing
+          'assets/models/Cockroach.glb',
+          'assets/models/american_cockroach.glb', 
+          'assets/models/oriental_cockroach.glb'
+        ];
         
-        console.log(`Loading cockroach model: ${modelPath}`);
+        console.log(`Trying to load cockroach model from multiple paths...`);
         
         // Create a placeholder while the model loads
         this.createPlaceholderCockroach();
-// Ensure placeholder is used as cockroachModel so physics and controls work
-this.cockroachModel = this.placeholder;
-// Always create physics body for placeholder
-this.createPhysicsBody();
+        // Ensure placeholder is used as cockroachModel so controls work
+        this.cockroachModel = this.placeholder;
         
         // Load the actual model if GLTFLoader is available
         if (typeof THREE.GLTFLoader !== 'undefined') {
-          console.log('GLTFLoader is available, loading model...');
+          console.log('GLTFLoader is available, trying models...');
           const loader = new THREE.GLTFLoader();
           
-          // Add loading progress tracking
-          loader.load(
-            modelPath,
+          // Try loading models in sequence
+          this.tryLoadModels(loader, modelPaths, 0);
+        } else {
+          console.warn('THREE.GLTFLoader is not available. Using placeholder cockroach only.');
+        }
+      },
+      
+      // Try loading models sequentially with fallbacks
+      tryLoadModels(loader, paths, index) {
+        if (index >= paths.length) {
+          console.warn('Failed to load any cockroach model. Using placeholder.');
+          return;
+        }
+        
+        const modelPath = paths[index];
+        console.log(`Trying model path ${index+1}/${paths.length}: ${modelPath}`);
+        
+        loader.load(
+          modelPath,
             (gltf) => {
               console.log('Model loaded successfully:', gltf);
               
@@ -412,6 +490,13 @@ this.createPhysicsBody();
                 this.scene.remove(this.placeholder);
                 this.placeholder = null;
               }
+              
+              // Model loaded! Remove placeholder
+              if (this.placeholder) {
+                this.scene.remove(this.placeholder);
+              }
+              
+              console.log('Successfully loaded model from:', modelPath);
               
               // Process the loaded model
               this.cockroachModel = gltf.scene;
@@ -424,7 +509,16 @@ this.createPhysicsBody();
               
               // Scale and position the model appropriately
               this.cockroachModel.scale.set(0.1, 0.1, 0.1);
-              this.cockroachModel.position.set(0, 0.1, 0); // Slight elevation to avoid ground clipping
+              
+              // Keep track of the current placeholder position
+              if (this.placeholder) {
+                // Copy position from placeholder
+                this.cockroachModel.position.copy(this.placeholder.position);
+                this.cockroachModel.rotation.copy(this.placeholder.rotation);
+              } else {
+                // Default position
+                this.cockroachModel.position.set(0, 0.2, 0);
+              }
               
               // Log position for debugging
               console.log('Cockroach model positioned at:', this.cockroachModel.position);
@@ -432,8 +526,7 @@ this.createPhysicsBody();
               // Add to scene
               this.scene.add(this.cockroachModel);
               
-              // Create physics body for the cockroach
-              this.createPhysicsBody();
+              // Do NOT create physics body - direct control only
               
               // Setup animations if any
               if (gltf.animations && gltf.animations.length > 0) {
@@ -456,7 +549,9 @@ this.createPhysicsBody();
               console.log(`Loading model: ${(xhr.loaded / (xhr.total || 1)) * 100}% loaded`);
             },
             (error) => {
-              console.error('Error loading model:', error);
+              console.log(`Failed to load model from path: ${modelPath}`, error);
+              // Try next model path
+              this.tryLoadModels(loader, paths, index + 1);
             }
           );
         } else {
@@ -563,69 +658,188 @@ this.createPhysicsBody();
       }
       
       setupInputHandlers() {
-        // Keyboard event listeners
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleKeyUp = this.handleKeyUp.bind(this);
+        // Setup keyboard input with expanded support for different key formats
+        this.keys = {
+          forward: false,
+          backward: false,
+          left: false,
+          right: false,
+          jump: false,
+          debug: false
+        };
         
-        window.addEventListener('keydown', this.handleKeyDown);
-        window.addEventListener('keyup', this.handleKeyUp);
-      }
-      
-      handleKeyDown(event) {
-        switch(event.code) {
-          case 'KeyW':
-          case 'ArrowUp':
-            this.keys.forward = true;
-            break;
-          case 'KeyS':
-          case 'ArrowDown':
-            this.keys.backward = true;
-            break;
-          case 'KeyA':
-          case 'ArrowLeft':
-            this.keys.left = true;
-            break;
-          case 'KeyD':
-          case 'ArrowRight':
-            this.keys.right = true;
-            break;
-          case 'Space':
-            this.keys.jump = true;
-            break;
-          case 'KeyT': // Toggle debug mode
-            if (this.debugMode) {
-              this.disableDebugControls();
-              this.debugMode = false;
-            } else {
-              this.setupDebugControls();
-              this.debugMode = true;
+        // Simplified key detection - focus only on the critical keys for movement
+        this.handleKeyDown = (event) => {
+          // Always prevent default browser behavior for navigation keys
+          event.preventDefault();
+          
+          // Log every keydown for debugging
+          console.log('Key pressed:', event.key, 'Code:', event.code);
+          
+          // Simple direct mapping without complex conditions
+          switch(event.code) {
+            case 'KeyW':
+            case 'ArrowUp':
+              this.keys.forward = true;
+              console.log('FORWARD activated');
+              break;
+            case 'KeyS':
+            case 'ArrowDown':
+              this.keys.backward = true;
+              console.log('BACKWARD activated');
+              break;
+            case 'KeyA':
+            case 'ArrowLeft':
+              this.keys.left = true;
+              console.log('LEFT activated');
+              break;
+            case 'KeyD':
+            case 'ArrowRight':
+              this.keys.right = true;
+              console.log('RIGHT activated');
+              break;
+            case 'Space':
+              this.keys.jump = true;
+              console.log('JUMP activated');
+              break;
+            case 'KeyT':
+              this.keys.debug = !this.keys.debug;
+              if (this.keys.debug) {
+                this.setupDebugControls();
+              } else {
+                this.disableDebugControls();
+              }
+              break;
+          }
+          
+          // Update visual key indicators
+          this.updateKeyIndicators();
+          
+          // Log the current input state
+          console.log(`Inputs: F=${this.keys.forward}, B=${this.keys.backward}, L=${this.keys.left}, R=${this.keys.right}, J=${this.keys.jump}`);
+        };
+        
+        // Simplified key up handler
+        this.handleKeyUp = (event) => {
+          // Always prevent default browser behavior for navigation keys
+          event.preventDefault();
+          
+          // Simple direct mapping without complex conditions
+          switch(event.code) {
+            case 'KeyW':
+            case 'ArrowUp':
+              this.keys.forward = false;
+              break;
+            case 'KeyS':
+            case 'ArrowDown':
+              this.keys.backward = false;
+              break;
+            case 'KeyA':
+            case 'ArrowLeft':
+              this.keys.left = false;
+              break;
+            case 'KeyD':
+            case 'ArrowRight':
+              this.keys.right = false;
+              break;
+            case 'Space':
+              this.keys.jump = false;
+              break;
+          }
+          
+          // Update visual key indicators
+          this.updateKeyIndicators();
+          
+          // Log the current input state after key up
+          console.log(`Inputs: F=${this.keys.forward}, B=${this.keys.backward}, L=${this.keys.left}, R=${this.keys.right}, J=${this.keys.jump}`);
+        };
+        
+        // SPECIAL KEY TEST: Add a mechanism to test key events without relying on standard keyboard events
+        // This is a backup control method in case of any browser/keyboard issues
+        window.activateKeyTest = (key) => {
+          // Reset all keys first for clean test
+          this.keys.forward = this.keys.backward = this.keys.left = this.keys.right = this.keys.jump = false;
+          
+          // Set the specific key
+          switch(key) {
+            case 'up': this.keys.forward = true; break;
+            case 'down': this.keys.backward = true; break;
+            case 'left': this.keys.left = true; break;
+            case 'right': this.keys.right = true; break;
+            case 'jump': this.keys.jump = true; break;
+          }
+          
+          console.log(`TEST KEY ACTIVATED: ${key}`);
+          console.log(`Inputs: F=${this.keys.forward}, B=${this.keys.backward}, L=${this.keys.left}, R=${this.keys.right}, J=${this.keys.jump}`);
+          
+          // Update visual indicators
+          this.updateKeyIndicators();
+          
+          // Clear the key after 500ms
+          setTimeout(() => {
+            this.keys[key === 'up' ? 'forward' : 
+                     key === 'down' ? 'backward' : 
+                     key === 'jump' ? 'jump' : key] = false;
+            this.updateKeyIndicators();
+          }, 500);
+        };
+        
+        // Add event listeners to the game container and document as fallback
+        const gameContainer = document.getElementById('game-container');
+        if (gameContainer) {
+          // Direct event listeners
+          gameContainer.addEventListener('keydown', this.handleKeyDown);
+          gameContainer.addEventListener('keyup', this.handleKeyUp);
+          document.addEventListener('keydown', this.handleKeyDown);
+          document.addEventListener('keyup', this.handleKeyUp);
+          
+          // Handle focus overlay
+          const focusOverlay = document.getElementById('focus-overlay');
+          if (focusOverlay) {
+            focusOverlay.addEventListener('click', () => {
+              focusOverlay.style.display = 'none';
+              // Show key indicator for visual feedback
+              const keyIndicator = document.getElementById('key-indicator');
+              if (keyIndicator) keyIndicator.style.display = 'grid';
+              
+              // Focus the game container
+              gameContainer.focus();
+              console.log('Game container focused via overlay click');
+              
+              // Add test buttons to overlay for direct control testing
+              const testControls = document.createElement('div');
+              testControls.innerHTML = `
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000;">
+                  <button onclick="window.activateKeyTest('up')" style="background: #00FF66; color: black; padding: 10px 15px; margin: 5px; border: none;">⬆️ UP</button>
+                  <button onclick="window.activateKeyTest('down')" style="background: #00FF66; color: black; padding: 10px 15px; margin: 5px; border: none;">⬇️ DOWN</button>
+                  <button onclick="window.activateKeyTest('left')" style="background: #00FF66; color: black; padding: 10px 15px; margin: 5px; border: none;">⬅️ LEFT</button>
+                  <button onclick="window.activateKeyTest('right')" style="background: #00FF66; color: black; padding: 10px 15px; margin: 5px; border: none;">➡️ RIGHT</button>
+                  <button onclick="window.activateKeyTest('jump')" style="background: #00FF66; color: black; padding: 10px 15px; margin: 5px; border: none;">↑ JUMP</button>
+                </div>
+              `;
+              document.body.appendChild(testControls);
+            });
+          }
+          
+          // Add click handler to ensure focus
+          gameContainer.addEventListener('click', () => {
+            // Hide focus overlay if it exists
+            if (focusOverlay) {
+              focusOverlay.style.display = 'none';
             }
-            break;
+            
+            gameContainer.focus();
+            console.log('Game area clicked, ensuring focus');
+          });
+          
+          // Focus the game container on load
+          setTimeout(() => {
+            gameContainer.focus();
+            console.log('Auto-focused game container after timeout');
+          }, 500);
         }
-      }
-      
-      handleKeyUp(event) {
-        switch(event.code) {
-          case 'KeyW':
-          case 'ArrowUp':
-            this.keys.forward = false;
-            break;
-          case 'KeyS':
-          case 'ArrowDown':
-            this.keys.backward = false;
-            break;
-          case 'KeyA':
-          case 'ArrowLeft':
-            this.keys.left = false;
-            break;
-          case 'KeyD':
-          case 'ArrowRight':
-            this.keys.right = false;
-            break;
-          case 'Space':
-            this.keys.jump = false;
-            break;
-        }
+        
+        console.log('Enhanced input handlers set up with focus management and visual feedback');
       }
       
       setupDebugControls() {
@@ -704,99 +918,130 @@ this.createPhysicsBody();
         }
       }
       
-      // Handle keyboard input
+      // Handle keyboard input - USING SUPER DIRECT MOVEMENT 
       handleInput() {
-        // Only apply forces if we have a physics body
-        if (!this.cockroachBody) return;
+        // Visual key indicator update
+        this.updateKeyIndicators();
+        
+        // Get the target object (either the model or placeholder)
+        const target = this.cockroachModel || this.placeholder;
+        if (!target) {
+          console.error('No target model found for movement!');
+          return;
+        }
 
-        // Force/torque magnitudes
-        const moveForce = 2; // Force magnitude for movement
-        const rotateTorque = 0.5; // Torque magnitude for rotation
-        
-        // Calculate movement force (in local cockroach coordinates)
-        let forceZ = 0;
-        if (this.keys.forward && !this.keys.backward) {
-          forceZ = -moveForce; // Forward is negative Z in model space
-        } else if (this.keys.backward && !this.keys.forward) {
-          forceZ = moveForce; // Backward is positive Z
+        // INSANELY INCREASED MOVEMENT SPEED for guaranteed visibility
+        const moveSpeed = 3.0; // Units per frame - insanely fast for testing
+        const rotateSpeed = 0.5; // Radians per frame - very fast rotation
+
+        // Store initial position for comparison
+        const initialPosition = target.position.clone();
+        let moved = false;
+        let targetPosition = target.position.clone();
+
+        // SIMPLE DIRECT MOVEMENT - no direction vectors, just direct coordinate changes
+        if (this.keys.forward) {
+          console.log('APPLYING FORWARD MOVEMENT');
+          targetPosition.z -= moveSpeed; // Forward is negative Z
+          moved = true;
         }
-        
-        if (forceZ !== 0) {
-          // Create a local force vector
-          const localForce = new CANNON.Vec3(0, 0, forceZ);
-          
-          // Convert to world space manually (different approach for standard Cannon.js)
-          // Create a world force vector
-          const worldForce = new CANNON.Vec3();
-          // Apply body's rotation to the local force vector
-          this.cockroachBody.quaternion.vmult(localForce, worldForce);
-          
-          // Apply force to physics body
-          this.cockroachBody.applyForce(worldForce, this.cockroachBody.position);
-          console.log('Applied force:', worldForce);
+        if (this.keys.backward) {
+          console.log('APPLYING BACKWARD MOVEMENT');
+          targetPosition.z += moveSpeed; // Backward is positive Z
+          moved = true;
         }
-        
-        // Calculate rotation torque
-        let torqueY = 0;
-        if (this.keys.left && !this.keys.right) {
-          torqueY = rotateTorque; // Positive Y torque for left rotation
-        } else if (this.keys.right && !this.keys.left) {
-          torqueY = -rotateTorque; // Negative Y torque for right rotation
+        if (this.keys.left) {
+          console.log('APPLYING LEFT MOVEMENT/ROTATION');
+          // Direct X movement for clearer feedback
+          targetPosition.x -= moveSpeed;
+          target.rotation.y += rotateSpeed;
+          moved = true;
         }
-        
-        if (torqueY !== 0) {
-          // Apply torque around Y axis
-          const torque = new CANNON.Vec3(0, torqueY, 0);
-          this.cockroachBody.applyTorque(torque);
-          console.log('Applied torque:', torque);
+        if (this.keys.right) {
+          console.log('APPLYING RIGHT MOVEMENT/ROTATION');
+          // Direct X movement for clearer feedback
+          targetPosition.x += moveSpeed;
+          target.rotation.y -= rotateSpeed;
+          moved = true;
         }
-        
-        // Apply jumping force if jump key is pressed
-        if (this.keys.jump) {
-          const jumpForce = new CANNON.Vec3(0, 5, 0); // Upward force
-          const impulse = new CANNON.Vec3();
-          jumpForce.copy(impulse); // Copy values to new vector
+
+        // Handle jumping - super high jump
+        if (this.keys.jump && !this.isJumping) {
+          console.log('JUMP INITIATED');
+          this.isJumping = true;
+          this.jumpTime = 0;
+          this.jumpHeight = target.position.y;
+          moved = true;
+        }
+        if (this.isJumping) {
+          this.jumpTime += 0.2; // Faster jump
+          targetPosition.y = this.jumpHeight + Math.sin(this.jumpTime) * 5.0; // Much higher jump
+          moved = true;
           
-          // Standard Cannon.js uses applyImpulse with relative point
-          const relativePoint = new CANNON.Vec3();
-          this.cockroachBody.applyImpulse(impulse, relativePoint);
+          if (this.jumpTime >= Math.PI) {
+            this.isJumping = false;
+            targetPosition.y = this.jumpHeight;
+            this.keys.jump = false;
+          }
+        }
+
+        // Directly set position - no physics, no smoothing
+        if (moved) {
+          // FORCE the position change
+          target.position.copy(targetPosition);
           
-          console.log('Applied jump force');
-          this.keys.jump = false; // Reset jump key to prevent continuous jumping
+          const posInfo = `COCKROACH MOVED to: x=${target.position.x.toFixed(2)}, y=${target.position.y.toFixed(2)}, z=${target.position.z.toFixed(2)}, rot=${target.rotation.y.toFixed(2)}`;
+          console.log(posInfo);
+          
+          // Update position display in UI with bright highlighting
+          const posDisplay = document.getElementById('position-display');
+          if (posDisplay) {
+            posDisplay.innerHTML = `<strong>Position: x=${target.position.x.toFixed(1)}, y=${target.position.y.toFixed(1)}, z=${target.position.z.toFixed(1)}</strong><br>Rotation: ${(target.rotation.y * 57.3).toFixed(0)}°`;
+            posDisplay.style.backgroundColor = 'rgba(255,0,0,0.5)';
+            posDisplay.style.color = 'white';
+            setTimeout(() => {
+              posDisplay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+              posDisplay.style.color = '#00FF66';
+            }, 300);
+          }
+          
+          // Force matrix update
+          target.updateMatrix();
         }
       }
       
-      // Update movement physics, animations, etc.
-      updateMovement(delta) {
-        // Sync visual model to physics body
-        if (this.cockroachModel && this.cockroachBody) {
-          // Copy position from physics body to visual model
-          this.cockroachModel.position.set(
-            this.cockroachBody.position.x,
-            this.cockroachBody.position.y,
-            this.cockroachBody.position.z
-          );
-          
-          // Copy rotation (quaternion) from physics body to visual model
-          this.cockroachModel.quaternion.set(
-            this.cockroachBody.quaternion.x,
-            this.cockroachBody.quaternion.y,
-            this.cockroachBody.quaternion.z,
-            this.cockroachBody.quaternion.w
-          );
-        }
+      // Update visual key indicators
+      updateKeyIndicators() {
+        const keyIndicator = document.getElementById('key-indicator');
+        if (!keyIndicator) return;
         
+        // Show indicator if any key is pressed
+        const anyKeyPressed = this.keys.forward || this.keys.backward || this.keys.left || this.keys.right || this.keys.jump;
+        keyIndicator.style.display = anyKeyPressed ? 'grid' : 'none';
+        
+        // Update individual keys
+        const keyUp = document.getElementById('key-up');
+        const keyDown = document.getElementById('key-down');
+        const keyLeft = document.getElementById('key-left');
+        const keyRight = document.getElementById('key-right');
+        
+        if (keyUp) keyUp.style.backgroundColor = this.keys.forward ? 'rgba(0,255,102,0.8)' : 'rgba(0,255,102,0.2)';
+        if (keyDown) keyDown.style.backgroundColor = this.keys.backward ? 'rgba(0,255,102,0.8)' : 'rgba(0,255,102,0.2)';
+        if (keyLeft) keyLeft.style.backgroundColor = this.keys.left ? 'rgba(0,255,102,0.8)' : 'rgba(0,255,102,0.2)';
+        if (keyRight) keyRight.style.backgroundColor = this.keys.right ? 'rgba(0,255,102,0.8)' : 'rgba(0,255,102,0.2)';
+      }
+      
+      // Update animations based on movement state
+      updateMovement(delta) {
+        // Skip physics-based updates - we're using direct position control now
         // Handle animations based on movement state
         if (this.mixer && this.animations) {
-          // Determine if the cockroach is moving based on velocity
-          let isMoving = false;
-          if (this.cockroachBody) {
-            const velocityThreshold = 0.1;
-            isMoving = this.cockroachBody.velocity.lengthSquared() > velocityThreshold * velocityThreshold;
-          }
+          // Determine if the cockroach is moving based on key presses
+          const isMoving = this.keys.forward || this.keys.backward || this.keys.left || this.keys.right;
           
           // Play appropriate animation
           if (isMoving && this.animations.walk && !this.animations.walk.isRunning()) {
+            console.log('Playing WALK animation');
             // Transition to walk animation
             Object.values(this.animations).forEach(anim => {
               if (anim && anim.isRunning()) {
@@ -805,6 +1050,7 @@ this.createPhysicsBody();
             });
             this.animations.walk.reset().fadeIn(0.2).play();
           } else if (!isMoving && this.animations.idle && !this.animations.idle.isRunning()) {
+            console.log('Playing IDLE animation');
             // Transition to idle animation
             Object.values(this.animations).forEach(anim => {
               if (anim && anim.isRunning()) {
@@ -813,6 +1059,11 @@ this.createPhysicsBody();
             });
             this.animations.idle.reset().fadeIn(0.2).play();
           }
+        }
+        
+        // Log cockroach position occasionally
+        if (this.cockroachModel && Math.random() < 0.05) {
+          console.log('Cockroach direct position:', this.cockroachModel.position);
         }
       }
       
@@ -856,6 +1107,24 @@ this.createPhysicsBody();
     
     // Start with American cockroach by default
     game.startGame('free-world', 'american');
+    
+    // Force focus on game container when page loads
+    window.addEventListener('load', () => {
+      const gameContainer = document.getElementById('game-container');
+      if (gameContainer) {
+        // Show focus overlay
+        const focusOverlay = document.getElementById('focus-overlay');
+        if (focusOverlay) {
+          focusOverlay.style.display = 'flex';
+        }
+        
+        // Set a timeout to attempt focus
+        setTimeout(() => {
+          gameContainer.focus();
+          console.log('Game container focused on page load');
+        }, 200);
+      }
+    });
     
     // Add character selection buttons
     document.getElementById('american-roach').addEventListener('click', () => {
