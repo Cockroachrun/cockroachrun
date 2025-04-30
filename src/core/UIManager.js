@@ -117,7 +117,24 @@ export class UIManager {
   showHUD() {
     if (this.elements['game-hud']) {
       this.elements['game-hud'].classList.remove('hidden');
+      console.log('Game HUD shown');
     }
+    
+    // Important: Make sure game canvas is fully visible when gameplay starts
+    const gameCanvas = document.getElementById('game-canvas');
+    if (gameCanvas) {
+      gameCanvas.style.display = 'block';
+      gameCanvas.style.visibility = 'visible';
+      gameCanvas.style.zIndex = '10';
+      console.log('Game canvas display set to visible, z-index 10');
+    } else {
+      console.error('Game canvas element not found');
+    }
+    
+    // Ensure any background elements don't overlap the canvas
+    document.querySelectorAll('.bg-container').forEach(bg => {
+      bg.style.zIndex = '1';
+    });
   }
   
   hideHUD() {
@@ -159,6 +176,46 @@ export class UIManager {
   on(event, callback) {
     if (this.callbacks[event] !== undefined) {
       this.callbacks[event] = callback;
+    }
+  }
+  
+  emit(event, data) {
+    console.log('UIManager emitting event:', event, data);
+    
+    // Special case for startGame to ensure it's properly called
+    if (event === 'startGame') {
+      console.log('DIRECT START GAME EVENT TRIGGERED');
+      // Force the canvas and container to be visible
+      const gameContainer = document.getElementById('game-container');
+      const gameCanvas = document.getElementById('game-canvas');
+      
+      if (gameContainer) {
+        gameContainer.style.display = 'block';
+        gameContainer.style.position = 'fixed';
+        gameContainer.style.top = '0';
+        gameContainer.style.left = '0';
+        gameContainer.style.width = '100vw';
+        gameContainer.style.height = '100vh';
+        gameContainer.style.zIndex = '100000';
+        console.log('Game container forced visible');
+      }
+      
+      if (gameCanvas) {
+        gameCanvas.style.display = 'block';
+        gameCanvas.style.width = '100%';
+        gameCanvas.style.height = '100%';
+        console.log('Game canvas forced visible');
+      }
+      
+      // Make sure the callback is properly called
+      if (this.callbacks.onStartGame) {
+        console.log('Directly calling startGame callback');
+        this.callbacks.onStartGame();
+      } else {
+        console.error('No startGame callback registered!');
+      }
+    } else if (this.callbacks[event]) {
+      this.callbacks[event](data);
     }
   }
 }

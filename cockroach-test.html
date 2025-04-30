@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cockroach Physics Test</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #121212;
+      font-family: 'Courier New', monospace;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100vh;
+    }
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #121212;
+      color: #00FF66;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #loading h1 {
+      color: #00FF66;
+      text-shadow: 0 0 5px #00FF66;
+      margin-bottom: 20px;
+    }
+    #loading .progress {
+      width: 300px;
+      height: 10px;
+      background: #333;
+      border: 2px solid #9333EA;
+      position: relative;
+    }
+    #loading .progress-bar {
+      height: 100%;
+      background: #00FF66;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    #controls {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #00FF66;
+      padding: 15px;
+      border: 1px solid #9333EA;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <h1>COCKROACH RUN</h1>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p id="loading-text">Loading Cockroach Model...</p>
+  </div>
+  
+  <div id="controls">
+    <h3>Controls:</h3>
+    <p>W/↑ - Move Forward</p>
+    <p>S/↓ - Move Backward</p>
+    <p>A/← - Turn Left</p>
+    <p>D/→ - Turn Right</p>
+    <p>Space - Jump</p>
+  </div>
+  
+  <!-- Load libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  
+  <script>
+    // Global variables
+    let scene, camera, renderer, clock;
+    let cockroachModel, cockroachBody;
+    let physicsWorld;
+    let groundBody;
+    let progressBar = document.getElementById('progress-bar');
+    let loadingText = document.getElementById('loading-text');
+    
+    // Input state
+    const keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      jump: false
+    };
+    
+    // Main initialization function
+    function init() {
+      console.log('Initializing cockroach test...');
+      
+      // Set up scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x121212);
+      
+      // Set up camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 3, 5);
+      camera.lookAt(0, 0, 0);
+      
+      // Set up renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+      
+      // Add lighting
+      addLights();
+      
+      // Add ground and environment
+      createEnvironment();
+      
+      // Initialize physics world
+      initPhysics();
+      
+      // Set up input handlers
+      setupInputHandlers();
+      
+      // Load cockroach model
+      loadCockroachModel();
+      
+      // Set up clock for animation
+      clock = new THREE.Clock();
+      
+      // Handle window resize
+      window.addEventListener('resize', onWindowResize);
+    }
+    
+    function addLights() {
+      // Ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+      
+      // Directional light (sun)
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(5, 10, 7.5);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      scene.add(dirLight);
+      
+      // Cyberpunk accent lights
+      const greenLight = new THREE.PointLight(0x00FF66, 1, 10);
+      greenLight.position.set(3, 2, 3);
+      scene.add(greenLight);
+      
+      const purpleLight = new THREE.PointLight(0x9333EA, 1, 10);
+      purpleLight.position.set(-3, 2, -3);
+      scene.add(purpleLight);
+    }
+    
+    function createEnvironment() {
+      // Ground plane - visual
+      const groundGeometry = new THREE.PlaneGeometry(50, 50);
+      const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        roughness: 0.8,
+        metalness: 0.2
+      });
+      const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+      groundMesh.rotation.x = -Math.PI / 2;
+      groundMesh.receiveShadow = true;
+      scene.add(groundMesh);
+      
+      // Grid helper
+      const gridHelper = new THREE.GridHelper(50, 50, 0x00FF66, 0x9333EA);
+      scene.add(gridHelper);
+      
+      // Add some cyberpunk-themed obstacles
+      addObstacle(5, 0.5, 5, 1, 1, 1, 0x00FF66); // Green box
+      addObstacle(-5, 0.5, -5, 1, 1, 1, 0x9333EA); // Purple box
+      addObstacle(0, 0.5, -8, 3, 1, 1, 0x9333EA); // Purple box
+    }
+    
+    function addObstacle(x, y, z, width, height, depth, color) {
+      // Visual representation
+      const geometry = new THREE.BoxGeometry(width, height, depth);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: color,
+        roughness: 0.3,
+        metalness: 0.7
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      
+      // Physics representation
+      const shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2));
+      const body = new CANNON.Body({
+        mass: 0, // Static object
+        position: new CANNON.Vec3(x, y, z),
+        shape: shape
+      });
+      physicsWorld.addBody(body);
+    }
+    
+    function initPhysics() {
+      console.log('Initializing physics...');
+      physicsWorld = new CANNON.World();
+      physicsWorld.gravity.set(0, -9.82, 0); // Earth gravity
+      physicsWorld.broadphase = new CANNON.NaiveBroadphase();
+      physicsWorld.solver.iterations = 10;
+      
+      // Create ground plane - physics
+      const groundShape = new CANNON.Plane();
+      groundBody = new CANNON.Body({
+        mass: 0, // Static object
+        shape: groundShape
+      });
+      groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+      physicsWorld.addBody(groundBody);
+    }
+    
+    function loadCockroachModel() {
+      console.log('Loading cockroach model...');
+      
+      // First create a placeholder just in case
+      createPlaceholderCockroach();
+      
+      // Reset loading bar
+      updateLoadingProgress(10, 'Loading model files...');
+      
+      // Use the actual cockroach model path
+      const modelPath = './assets/models/American Cockroach.glb';
+      
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        modelPath,
+        function(gltf) {
+          updateLoadingProgress(90, 'Processing model...');
+          console.log('Model loaded successfully:', gltf);
+          
+          // Remove placeholder
+          if (window.placeholder) {
+            scene.remove(window.placeholder);
+            window.placeholder = null;
+          }
+          
+          // Process the loaded model
+          cockroachModel = gltf.scene;
+          cockroachModel.traverse(function(child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          
+          // Scale, position and rotate appropriately
+          cockroachModel.scale.set(0.1, 0.1, 0.1);
+          cockroachModel.position.set(0, 0.5, 0);
+          
+          // Add to scene
+          scene.add(cockroachModel);
+          
+          // Create physics body for the model
+          createCockroachPhysics();
+          
+          // Start animation loop
+          updateLoadingProgress(100, 'Starting game...');
+          setTimeout(function() {
+            document.getElementById('loading').style.display = 'none';
+            animate();
+          }, 500);
+        },
+        function(xhr) {
+          // Loading progress
+          const progress = Math.floor((xhr.loaded / xhr.total) * 80) + 10;
+          updateLoadingProgress(progress, `Loading model: ${progress}%`);
+        },
+        function(error) {
+          console.error('Error loading model:', error);
+          updateLoadingProgress(100, 'Using placeholder model...');
+          
+          // If model fails, use the placeholder permanently
+          createCockroachPhysics();
+          
+          // Start animation loop
+          setTimeout(function() {
+            document.getElementById('loading').style.display = 'none';
+            animate();
+          }, 500);
+        }
+      );
+    }
+    
+    function createPlaceholderCockroach() {
+      console.log('Creating placeholder cockroach...');
+      
+      // Create a group for the cockroach parts
+      const group = new THREE.Group();
+      
+      // Body (using cylinder for compatibility)
+      const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 8);
+      const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0x663300,
+        roughness: 0.8
+      });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      body.rotation.z = Math.PI / 2;
+      body.castShadow = true;
+      group.add(body);
+      
+      // Add legs
+      for (let i = 0; i < 3; i++) {
+        const legGeometry = new THREE.CylinderGeometry(0.02, 0.01, 0.3);
+        const legMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        
+        // Left leg
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(0.2, 0, 0.2 - (i * 0.2));
+        leftLeg.rotation.z = Math.PI / 4;
+        leftLeg.castShadow = true;
+        group.add(leftLeg);
+        
+        // Right leg
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(-0.2, 0, 0.2 - (i * 0.2));
+        rightLeg.rotation.z = -Math.PI / 4;
+        rightLeg.castShadow = true;
+        group.add(rightLeg);
+      }
+      
+      // Position the group
+      group.position.set(0, 0.5, 0);
+      scene.add(group);
+      
+      // Store the placeholder reference
+      window.placeholder = group;
+      cockroachModel = group; // Use placeholder as model if real model fails to load
+    }
+    
+    function createCockroachPhysics() {
+      console.log('Creating cockroach physics body...');
+      
+      // Create a sphere shape for simple physics
+      const radius = 0.2;
+      const physicsShape = new CANNON.Sphere(radius);
+      
+      // Create the body with mass
+      cockroachBody = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 0.5, 0),
+        shape: physicsShape,
+        linearDamping: 0.9,  // Add damping to prevent excessive sliding
+        angularDamping: 0.9  // Add angular damping to prevent excessive rotation
+      });
+      
+      // Add the body to the physics world
+      physicsWorld.addBody(cockroachBody);
+    }
+    
+    function setupInputHandlers() {
+      console.log('Setting up input handlers...');
+      
+      // Keyboard controls
+      window.addEventListener('keydown', function(event) {
+        switch (event.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            keys.forward = true;
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            keys.backward = true;
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            keys.left = true;
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            keys.right = true;
+            break;
+          case 'Space':
+            keys.jump = true;
+            handleJump();
+            break;
+        }
+      });
+      
+      window.addEventListener('keyup', function(event) {
+        switch (event.code) {
+          case 'KeyW':
+          case 'ArrowUp':
+            keys.forward = false;
+            break;
+          case 'KeyS':
+          case 'ArrowDown':
+            keys.backward = false;
+            break;
+          case 'KeyA':
+          case 'ArrowLeft':
+            keys.left = false;
+            break;
+          case 'KeyD':
+          case 'ArrowRight':
+            keys.right = false;
+            break;
+          case 'Space':
+            keys.jump = false;
+            break;
+        }
+      });
+    }
+    
+    function handleJump() {
+      if (cockroachBody) {
+        // Check if cockroach is on ground (y position close to 0.5)
+        if (cockroachBody.position.y < 0.7) {
+          // Apply upward impulse
+          cockroachBody.applyImpulse(new CANNON.Vec3(0, 5, 0), cockroachBody.position);
+        }
+      }
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      const delta = clock.getDelta();
+      
+      // Update physics world
+      physicsWorld.step(1/60, delta, 3);
+      
+      // Update cockroach movement based on input
+      updateCockroachMovement(delta);
+      
+      // Update camera to follow cockroach
+      updateCamera();
+      
+      // Render the scene
+      renderer.render(scene, camera);
+    }
+    
+    function updateCockroachMovement(delta) {
+      if (cockroachModel && cockroachBody) {
+        // Apply movement forces based on input
+        const moveForce = 5;
+        const rotateTorque = 1;
+        
+        // Forward/backward
+        let localForceZ = 0;
+        if (keys.forward && !keys.backward) {
+          localForceZ = -moveForce; // Forward is -Z
+        } else if (keys.backward && !keys.forward) {
+          localForceZ = moveForce;  // Backward is +Z
+        }
+        
+        // Left/right rotation
+        let torqueY = 0;
+        if (keys.left && !keys.right) {
+          torqueY = rotateTorque; // Positive Y torque for left rotation
+        } else if (keys.right && !keys.left) {
+          torqueY = -rotateTorque; // Negative Y torque for right rotation
+        }
+        
+        // Apply forward/backward force in local coordinates
+        if (localForceZ !== 0) {
+          const worldForce = new CANNON.Vec3();
+          const localForce = new CANNON.Vec3(0, 0, localForceZ);
+          
+          // Convert local force to world coordinates
+          cockroachBody.quaternion.vmult(localForce, worldForce);
+          cockroachBody.applyForce(worldForce, cockroachBody.position);
+        }
+        
+        // Apply rotation torque
+        if (torqueY !== 0) {
+          const torque = new CANNON.Vec3(0, torqueY, 0);
+          cockroachBody.applyTorque(torque);
+        }
+        
+        // Update visual model position and rotation from physics body
+        cockroachModel.position.copy(cockroachBody.position);
+        cockroachModel.quaternion.copy(cockroachBody.quaternion);
+      }
+    }
+    
+    function updateCamera() {
+      if (cockroachModel) {
+        // Calculate camera position based on cockroach position (follow from behind and above)
+        const offset = new THREE.Vector3(0, 2, 5);
+        
+        // Apply cockroach rotation to offset to follow from behind
+        offset.applyQuaternion(cockroachModel.quaternion);
+        
+        // Calculate camera position
+        const cameraPosition = cockroachModel.position.clone().add(offset);
+        camera.position.copy(cameraPosition);
+        
+        // Look at cockroach
+        camera.lookAt(cockroachModel.position);
+      }
+    }
+    
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    function updateLoadingProgress(progress, text) {
+      if (progressBar) {
+        progressBar.style.width = progress + '%';
+      }
+      if (loadingText) {
+        loadingText.textContent = text;
+      }
+    }
+    
+    // Initialize everything when page loads
+    window.onload = init;
+  </script>
+</body>
+</html>

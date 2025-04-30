@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const ui = new UIManager();
   ui.init();
   
+  // Add direct test button functionality
+  initDirectTestButton();
+  
   // Simulate asset loading with progress updates
   simulateLoading(ui);
   
@@ -40,6 +43,75 @@ function simulateLoading(ui) {
     messageIndex = (messageIndex + 1) % CONFIG.UI.LOADING_MESSAGES.length;
     ui.updateLoadingMessage(CONFIG.UI.LOADING_MESSAGES[messageIndex]);
   }, 3000);
+}
+
+/**
+ * Initialize the direct test button that bypasses all UI and goes straight to FreeWorldMode
+ */
+function initDirectTestButton() {
+  const directButton = document.getElementById('direct-free-world-button');
+  if (!directButton) {
+    console.error('Direct test button not found!');
+    return;
+  }
+  
+  directButton.addEventListener('click', () => {
+    console.log('TEST BUTTON CLICKED: Launching FreeWorldMode directly...');
+    
+    // Hide all UI elements
+    document.querySelectorAll('.screen, #ui-container').forEach(el => {
+      el.style.display = 'none';
+    });
+    
+    // Make canvas fully visible
+    const canvas = document.getElementById('game-canvas');
+    if (canvas) {
+      canvas.style.display = 'block';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.zIndex = '1000';
+    }
+    
+    // Make the container visible
+    const container = document.getElementById('game-container');
+    if (container) {
+      container.style.display = 'block';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.position = 'absolute';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.zIndex = '999';
+      container.style.border = '3px solid #00FF66';
+    }
+    
+    // Import and start the game with FreeWorldMode
+    import('./core/Game.js').then(module => {
+      const Game = module.Game || module.default;
+      const game = new Game();
+      
+      // Set the UI container to block
+      document.getElementById('ui-container').style.display = 'none';
+      
+      // Initialize the game
+      game.init();
+      
+      // Force Free World mode
+      game.activeGameMode = 'free-world';
+      
+      // Start the game directly
+      game.startGame();
+      
+      console.log('FreeWorldMode started directly via test button');
+    }).catch(err => {
+      console.error('Failed to load Game module:', err);
+    });
+  });
+  
+  console.log('Direct test button initialized');
 }
 
 /**

@@ -12,6 +12,7 @@
     "remove-logo-glow": "node scripts/remove_logo_glow.cjs"
   },
   "dependencies": {
+    "cannon-es": "^0.20.0",
     "gsap": "^3.12.1",
     "howler": "^2.2.3",
     "sharp": "^0.34.1",

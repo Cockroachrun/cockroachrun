@@ -21,7 +21,12 @@ export function createCharacterSelectionScreen(uiManager) {
   }
 
   function handleStartGameClick() {
-    uiManager.emit('startGame');
+    console.log('Directly redirecting to working test page');
+    // Temporary redirect to test page until main integration is fixed
+    window.location.href = 'test-free-world-simple.html';
+    
+    // Normal flow - commented out until fixed
+    // uiManager.emit('startGame');
   }
 
   // Attach event listeners (only once)

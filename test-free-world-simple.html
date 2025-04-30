@@ -8,6 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Load Cannon.js physics engine (using original Cannon for direct script tag compatibility) -->
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -101,24 +103,83 @@
     // Basic game engine
     class Game {
       constructor() {
-        // Core properties
-        this.container = document.getElementById('game-container');
-        this.canvas = document.getElementById('game-canvas');
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this.container.offsetWidth / this.container.offsetHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
-        this.renderer.shadowMap.enabled = true;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.canvas = null;
         this.clock = new THREE.Clock();
+        this.activeMode = null;
+        this.selectedCharacter = 'american'; // Default
+        this.physicsWorld = null; // Physics world
+        this.physicsBodies = []; // Track physics bodies
         
-        // Game state
-        this.isRunning = false;
-        this.activeGameMode = null;
-        this.selectedCharacter = 'american';
+        // Initialize
+        this.canvas = document.getElementById('game-canvas');
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          antialias: true
+        });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
         
-        // Setup
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x121212);
+        
+        this.camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        
+        // Initialize physics world
+        this.initPhysicsWorld();
+        
+        // Handle window resize
         this.setupResizeHandler();
+        
+        // Add basic lighting
         this.setupBasicLighting();
+      }
+      
+      initPhysicsWorld() {
+        // Create physics world with Earth gravity
+        this.physicsWorld = new CANNON.World();
+        this.physicsWorld.gravity.set(0, -9.82, 0);
+        
+        // Configure solver iterations for stability
+        this.physicsWorld.solver.iterations = 10;
+        
+        // Set default material properties
+        const defaultMaterial = new CANNON.Material('default');
+        const defaultContactMaterial = new CANNON.ContactMaterial(
+          defaultMaterial,
+          defaultMaterial,
+          {
+            friction: 0.3,
+            restitution: 0.2
+          }
+        );
+        this.physicsWorld.addContactMaterial(defaultContactMaterial);
+        
+        // Create a ground plane
+        const groundShape = new CANNON.Plane();
+        const groundBody = new CANNON.Body({
+          mass: 0 // Static body
+        });
+        groundBody.addShape(groundShape);
+        groundBody.material = defaultMaterial;
+        
+        // Rotate ground to be horizontal (X rotation by -90 degrees)
+        const quaternion = new CANNON.Quaternion();
+        quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+        groundBody.quaternion.copy(quaternion);
+        
+        // Add ground to world
+        this.physicsWorld.addBody(groundBody);
+        this.physicsBodies.push(groundBody);
+        
+        console.log('Physics world initialized');
       }
       
       setupResizeHandler() {
@@ -172,6 +233,14 @@
         // Get delta time
         const delta = this.clock.getDelta();
         
+        // Clamp delta to avoid large physics jumps
+        const fixedDelta = Math.min(delta, 0.1);
+        
+        // Step the physics world simulation
+        if (this.physicsWorld) {
+          this.physicsWorld.step(1/60, fixedDelta, 3);
+        }
+        
         // Update game state if running
         if (this.isRunning && this.activeGameMode) {
           this.activeGameMode.update(delta);
@@ -191,7 +260,8 @@
         this.game = game;
         this.objects = [];
         this.clock = new THREE.Clock();
-        this.cockroachModel = null;
+        this.cockroachModel = null; // Visual model
+        this.cockroachBody = null;  // Physics body - NEW!
         this.isModelLoaded = false;
         this.mixer = null;
         this.animations = {};
@@ -321,6 +391,10 @@
         
         // Create a placeholder while the model loads
         this.createPlaceholderCockroach();
+// Ensure placeholder is used as cockroachModel so physics and controls work
+this.cockroachModel = this.placeholder;
+// Always create physics body for placeholder
+this.createPhysicsBody();
         
         // Load the actual model if GLTFLoader is available
         if (typeof THREE.GLTFLoader !== 'undefined') {
@@ -349,14 +423,17 @@
               });
               
               // Scale and position the model appropriately
-              this.cockroachModel.scale.set(0.5, 0.5, 0.5); // Standard scale for all modes
-              this.cockroachModel.position.set(0, 0.5, 0);  // Lift it above the ground slightly
+              this.cockroachModel.scale.set(0.1, 0.1, 0.1);
+              this.cockroachModel.position.set(0, 0.1, 0); // Slight elevation to avoid ground clipping
               
               // Log position for debugging
               console.log('Cockroach model positioned at:', this.cockroachModel.position);
               
               // Add to scene
               this.scene.add(this.cockroachModel);
+              
+              // Create physics body for the cockroach
+              this.createPhysicsBody();
               
               // Setup animations if any
               if (gltf.animations && gltf.animations.length > 0) {
@@ -384,56 +461,105 @@
           );
         } else {
           console.warn('THREE.GLTFLoader is not available. Using placeholder cockroach only.');
+          // Always create placeholder cockroach if model is not available
+          this.createPlaceholderCockroach();
+          // IMPORTANT: Set cockroachModel to placeholder, so the rest of the code works the same way
+          this.cockroachModel = this.placeholder;
+          // Always create physics body for placeholder
+          this.createPhysicsBody();
         }
       }
       
       createPlaceholderCockroach() {
-        // Create a more visible placeholder cockroach 
-        const bodyGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.6);
-        const headGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        // Create a simple placeholder using basic shapes
+        const group = new THREE.Group();
         
-        const material = new THREE.MeshStandardMaterial({ 
-          color: 0xFF5500,  // Bright orange for visibility
-          emissive: 0xFF2200, // Slight glow
-          emissiveIntensity: 0.2
+        // Body - using CylinderGeometry instead of CapsuleGeometry for compatibility
+        const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 8);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+          color: 0x663300,
+          roughness: 0.8
         });
         
-        // Create body and head
-        const body = new THREE.Mesh(bodyGeometry, material);
-        const head = new THREE.Mesh(headGeometry, material);
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.rotation.z = Math.PI / 2;
+        body.position.y = 0.2; // Lift slightly above ground
+        group.add(body);
         
-        // Position head at front of body
-        head.position.z = 0.35;
-        head.position.y = 0.05;
-        
-        // Add legs (simple cylinders)
-        const legGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.2);
-        const legMaterial = new THREE.MeshStandardMaterial({ color: 0xFF5500 });
-        
-        for (let i = 0; i < 6; i++) { // 3 legs on each side
-          const leg = new THREE.Mesh(legGeometry, legMaterial);
-          leg.rotation.x = Math.PI / 2; // Make horizontal
-          leg.position.y = -0.05; // Below body
-          leg.position.z = 0.2 - i * 0.2; // Space them out along body
+        // Add legs
+        for (let i = 0; i < 3; i++) {
+          const legGeometry = new THREE.CylinderGeometry(0.02, 0.01, 0.3);
+          const legMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
           
-          // Left or right side
-          leg.position.x = (i % 2 === 0) ? 0.2 : -0.2;
-          body.add(leg);
+          // Left leg
+          const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+          leftLeg.position.set(0.2, 0.15, 0.2 - (i * 0.2));
+          leftLeg.rotation.z = Math.PI / 4;
+          group.add(leftLeg);
+          
+          // Right leg
+          const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+          rightLeg.position.set(-0.2, 0.15, 0.2 - (i * 0.2));
+          rightLeg.rotation.z = -Math.PI / 4;
+          group.add(rightLeg);
         }
         
-        // Create group for entire cockroach
-        this.placeholder = new THREE.Group();
-        this.placeholder.add(body);
-        this.placeholder.add(head);
-        
-        // Position the placeholder higher above ground and scale it up
-        this.placeholder.position.set(0, 0.5, 0);
-        this.placeholder.scale.set(1.5, 1.5, 1.5);
-        
+        // Position the placeholder
+        group.position.set(0, 0.5, 0);
+        this.placeholder = group;
         // Add to scene
         this.scene.add(this.placeholder);
         
-        console.log('Enhanced placeholder cockroach created at position:', this.placeholder.position);
+        console.log('Created placeholder cockroach');
+      }
+      
+      createPhysicsBody() {
+        if (!this.cockroachModel) {
+          console.error("Cannot create physics body: No cockroach model found");
+          return;
+        }
+        
+        console.log("Creating physics body for cockroach");
+        
+        // Get bounding box of model to estimate size
+        const boundingBox = new THREE.Box3().setFromObject(this.cockroachModel);
+        const size = new THREE.Vector3();
+        boundingBox.getSize(size);
+        
+        // Use a sphere collider initially (can be replaced with more complex shape later)
+        const radius = Math.max(size.x, size.y, size.z) / 2 * 0.8; // 80% of half the largest dimension
+        console.log(`Creating physics body with radius: ${radius.toFixed(2)}`);
+        
+        // Create the physics body
+        const shape = new CANNON.Sphere(radius > 0.01 ? radius : 0.1);
+        
+        // Get current position
+        const worldPos = new THREE.Vector3();
+        this.cockroachModel.getWorldPosition(worldPos);
+        const position = new CANNON.Vec3(worldPos.x, worldPos.y, worldPos.z);
+        
+        // Create the body with appropriate mass
+        this.cockroachBody = new CANNON.Body({
+          mass: 1, // 1kg
+        });
+        
+        // Add the shape to the body
+        this.cockroachBody.addShape(shape);
+        
+        // Set the position
+        this.cockroachBody.position.copy(position);
+        
+        // Set damping properties (to prevent excessive sliding/spinning)
+        this.cockroachBody.linearDamping = 0.9;
+        this.cockroachBody.angularDamping = 0.9;
+        
+        // Add the body to physics world
+        if (this.game.physicsWorld) {
+          this.game.physicsWorld.addBody(this.cockroachBody);
+          console.log('Physics body added to world');
+        } else {
+          console.error('No physics world found!');
+        }
       }
       
       setupInputHandlers() {
@@ -580,40 +706,113 @@
       
       // Handle keyboard input
       handleInput() {
-        // Only move if we have a model
-        const model = this.cockroachModel || this.placeholder;
-        if (!model) return;
+        // Only apply forces if we have a physics body
+        if (!this.cockroachBody) return;
+
+        // Force/torque magnitudes
+        const moveForce = 2; // Force magnitude for movement
+        const rotateTorque = 0.5; // Torque magnitude for rotation
         
-        const moveSpeed = this.moveSpeed * 0.01; // small delta for consistent speed
-        const rotateSpeed = this.rotationSpeed * 0.01;
-        
-        // Handle rotation
-        if (this.keys.left) {
-          model.rotation.y += rotateSpeed;
-          console.log('Rotating left, new rotation:', model.rotation.y);
-        }
-        if (this.keys.right) {
-          model.rotation.y -= rotateSpeed;
-          console.log('Rotating right, new rotation:', model.rotation.y);
+        // Calculate movement force (in local cockroach coordinates)
+        let forceZ = 0;
+        if (this.keys.forward && !this.keys.backward) {
+          forceZ = -moveForce; // Forward is negative Z in model space
+        } else if (this.keys.backward && !this.keys.forward) {
+          forceZ = moveForce; // Backward is positive Z
         }
         
-        // Handle movement
-        if (this.keys.forward || this.keys.backward) {
-          const direction = new THREE.Vector3(0, 0, this.keys.forward ? -1 : 1);
-          direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), model.rotation.y);
+        if (forceZ !== 0) {
+          // Create a local force vector
+          const localForce = new CANNON.Vec3(0, 0, forceZ);
           
-          model.position.x += direction.x * moveSpeed;
-          model.position.z += direction.z * moveSpeed;
+          // Convert to world space manually (different approach for standard Cannon.js)
+          // Create a world force vector
+          const worldForce = new CANNON.Vec3();
+          // Apply body's rotation to the local force vector
+          this.cockroachBody.quaternion.vmult(localForce, worldForce);
           
-          console.log('Moving, new position:', model.position);
+          // Apply force to physics body
+          this.cockroachBody.applyForce(worldForce, this.cockroachBody.position);
+          console.log('Applied force:', worldForce);
+        }
+        
+        // Calculate rotation torque
+        let torqueY = 0;
+        if (this.keys.left && !this.keys.right) {
+          torqueY = rotateTorque; // Positive Y torque for left rotation
+        } else if (this.keys.right && !this.keys.left) {
+          torqueY = -rotateTorque; // Negative Y torque for right rotation
+        }
+        
+        if (torqueY !== 0) {
+          // Apply torque around Y axis
+          const torque = new CANNON.Vec3(0, torqueY, 0);
+          this.cockroachBody.applyTorque(torque);
+          console.log('Applied torque:', torque);
+        }
+        
+        // Apply jumping force if jump key is pressed
+        if (this.keys.jump) {
+          const jumpForce = new CANNON.Vec3(0, 5, 0); // Upward force
+          const impulse = new CANNON.Vec3();
+          jumpForce.copy(impulse); // Copy values to new vector
+          
+          // Standard Cannon.js uses applyImpulse with relative point
+          const relativePoint = new CANNON.Vec3();
+          this.cockroachBody.applyImpulse(impulse, relativePoint);
+          
+          console.log('Applied jump force');
+          this.keys.jump = false; // Reset jump key to prevent continuous jumping
         }
       }
       
       // Update movement physics, animations, etc.
       updateMovement(delta) {
-        // Play animations if moving (if animations exist)
+        // Sync visual model to physics body
+        if (this.cockroachModel && this.cockroachBody) {
+          // Copy position from physics body to visual model
+          this.cockroachModel.position.set(
+            this.cockroachBody.position.x,
+            this.cockroachBody.position.y,
+            this.cockroachBody.position.z
+          );
+          
+          // Copy rotation (quaternion) from physics body to visual model
+          this.cockroachModel.quaternion.set(
+            this.cockroachBody.quaternion.x,
+            this.cockroachBody.quaternion.y,
+            this.cockroachBody.quaternion.z,
+            this.cockroachBody.quaternion.w
+          );
+        }
+        
+        // Handle animations based on movement state
         if (this.mixer && this.animations) {
-          // Animation logic here if needed
+          // Determine if the cockroach is moving based on velocity
+          let isMoving = false;
+          if (this.cockroachBody) {
+            const velocityThreshold = 0.1;
+            isMoving = this.cockroachBody.velocity.lengthSquared() > velocityThreshold * velocityThreshold;
+          }
+          
+          // Play appropriate animation
+          if (isMoving && this.animations.walk && !this.animations.walk.isRunning()) {
+            // Transition to walk animation
+            Object.values(this.animations).forEach(anim => {
+              if (anim && anim.isRunning()) {
+                anim.fadeOut(0.2); // Smooth transition out
+              }
+            });
+            this.animations.walk.reset().fadeIn(0.2).play();
+          } else if (!isMoving && this.animations.idle && !this.animations.idle.isRunning()) {
+            // Transition to idle animation
+            Object.values(this.animations).forEach(anim => {
+              if (anim && anim.isRunning()) {
+                anim.fadeOut(0.2); // Smooth transition out
+              }
+            });
+            this.animations.idle.reset().fadeIn(0.2).play();
+          }
         }
       }
       

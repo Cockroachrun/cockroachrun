@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0;url=direct-test.html">
+    <title>Redirecting to Physics Demo</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #00FF66;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            border: 3px solid #9333EA;
+            padding: 2rem;
+            max-width: 600px;
+        }
+        h1 {
+            color: #00FF66;
+        }
+        a {
+            color: #9333EA;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            border: 2px solid #9333EA;
+            padding: 10px 20px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        a:hover {
+            background-color: #9333EA;
+            color: #121212;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cockroach Physics Demo</h1>
+        <p>Redirecting to the physics demo page automatically...</p>
+        <p>If you are not redirected automatically, click the link below:</p>
+        <a href="direct-test.html">Go to Physics Demo</a>
+    </div>
+    
+    <script>
+        // Ensure we go to the demo page
+        window.location.href = "direct-test.html";
+    </script>
+</body>
+</html>

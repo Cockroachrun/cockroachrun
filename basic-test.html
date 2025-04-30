@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Three.js Cube Test</title>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden;
+      background-color: #121212;
+      color: #00FF66;
+      font-family: sans-serif;
+    }
+    canvas { display: block; }
+    #info {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      z-index: 100;
+      color: #00FF66;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Super Simple Rotating Cube Test - If this works, 3D rendering is functional</div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  
+  <script>
+    // Basic Three.js setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
+    // Create renderer with clear logs showing it's created
+    let renderer;
+    try {
+      console.log("Creating WebGL renderer...");
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      console.log("WebGL renderer created successfully");
+    } catch (e) {
+      console.error("Failed to create renderer:", e);
+      document.body.innerHTML = `<div style="color: red; text-align: center; margin-top: 100px;">
+        <h1>WebGL Error</h1>
+        <p>Failed to create WebGL renderer. Your browser might not support WebGL.</p>
+        <p>Error: ${e.message}</p>
+      </div>`;
+    }
+    
+    // Create a simple cube
+    try {
+      console.log("Creating cube...");
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      
+      // Two materials with your cyberpunk colors
+      const material1 = new THREE.MeshBasicMaterial({ color: 0x00FF66 }); // Neon green
+      const material2 = new THREE.MeshBasicMaterial({ color: 0x9333EA }); // Purple
+      
+      // Create a cube with different colors for different faces
+      const materials = [
+        material1, // right side
+        material1, // left side
+        material2, // top side
+        material2, // bottom side
+        material1, // front side
+        material1  // back side
+      ];
+      
+      const cube = new THREE.Mesh(geometry, materials);
+      scene.add(cube);
+      console.log("Cube created and added to scene");
+      
+      // Position camera
+      camera.position.z = 5;
+      
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        // Rotate the cube
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        
+        // Render the scene
+        renderer.render(scene, camera);
+      }
+      
+      console.log("Starting animation loop...");
+      animate();
+      console.log("Animation started");
+      
+    } catch (e) {
+      console.error("Error in 3D setup:", e);
+      document.body.innerHTML += `<div style="color: red; text-align: center; margin-top: 150px;">
+        <h2>3D Setup Error</h2>
+        <p>Failed to create or animate 3D content.</p>
+        <p>Error: ${e.message}</p>
+      </div>`;
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

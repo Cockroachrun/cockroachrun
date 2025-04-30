@@ -331,10 +331,27 @@ const UIManager = {
             return;
         }
         console.log(`Starting game with mode: ${this.selectedMode}, character: ${this.selectedCharacter}`);
+        
+        // Hide all UI screens
         Object.values(this.screens).forEach(screen => {
             screen.classList.remove('active');
         });
+        
+        // Show game HUD
         document.getElementById('game-hud').classList.remove('hidden');
+        
+        // Make game canvas container visible
+        const gameContainer = document.getElementById('game-container');
+        if (gameContainer) {
+            gameContainer.style.display = 'block';
+            gameContainer.style.position = 'fixed';
+            gameContainer.style.top = '0';
+            gameContainer.style.left = '0';
+            gameContainer.style.width = '100vw';
+            gameContainer.style.height = '100vh';
+            gameContainer.style.zIndex = '100';
+            console.log('Game container made visible');
+        }
         
         // Play audio if available
         if (AudioManager && typeof AudioManager.playGameMusic === 'function') {
@@ -347,11 +364,15 @@ const UIManager = {
         
         this.isGameRunning = true;
         
-        // If we're in free-world mode, initialize the game mode in the parent window for src/ structure
-        if (this.selectedMode === 'free-world' && window.parent && window.parent.Game) {
+        // Start the game using our new Game engine
+        if (window.Game && typeof window.Game.startGame === 'function') {
+            console.log('Starting game with Game.startGame');
+            window.Game.startGame(this.selectedMode, this.selectedCharacter);
+        } else if (this.selectedMode === 'free-world' && window.parent && window.parent.Game) {
             console.log('Starting Free World mode via parent Game instance');
             window.parent.Game.startGame('free-world', this.selectedCharacter);
         } else {
+            console.warn('Game engine not found, falling back to placeholder');
             this.initializeGame();
         }
     },
