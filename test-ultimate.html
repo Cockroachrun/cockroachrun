@@ -17,17 +17,13 @@
       padding: 0;
     }
     
-    html, body {
+    body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background-color: #303030;
-      color: #ffffff;
       font-family: Arial, sans-serif;
-      position: fixed; /* Prevent bounce on mobile */
-      touch-action: manipulation; /* Improve touch response */
+      background-color: #1a1a1a;
+      color: #ffffff;
     }
     
     #game-container {
@@ -36,90 +32,225 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 10;
+      background-color: #000000;
     }
     
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      #debug-info {
-        font-size: 10px;
-        max-height: 25%;
-      }
-      
-      #touch-controls {
-        bottom: 10px;
-      }
-    }
-    
-    #game-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: #121212;
-    }
-    
-    #instructions {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: rgba(18, 18, 18, 0.8);
-      color: #00FF66;
-      padding: 10px;
-      border: 1px solid #00FF66;
-      border-radius: 5px;
-      z-index: 1000;
-    }
-    
+    /* Debug panel - hidden by default */
     #debug-info {
       position: absolute;
       bottom: 10px;
       left: 10px;
-      background-color: rgba(18, 18, 18, 0.8);
-      color: #00FF66;
-      padding: 10px;
-      border: 1px solid #00FF66;
-      border-radius: 5px;
-      z-index: 1000;
-      font-size: 12px;
-      max-height: 200px;
+      width: 600px;
+      max-width: calc(100% - 20px);
+      height: 150px;
+      max-height: 25vh;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00ff00;
+      border: 1px solid #00ff00;
       overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 5px;
+      z-index: 100;
+      display: none; /* Hidden by default */
     }
     
-    button {
-      background-color: #9333EA;
+    #position-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #ffffff;
+      padding: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 100;
+      display: none; /* Hidden by default */
+    }
+    
+    /* Orange controls toggle button */
+    #controls-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      background-color: #FF8000;
       color: white;
-      border: none;
-      padding: 5px 10px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       cursor: pointer;
-      border-radius: 3px;
-      margin: 5px;
+      z-index: 1000;
+      font-size: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      border: none;
     }
     
-    button:hover {
-      background-color: #7B2AC5;
+    /* Controls panel - hidden by default */
+    #controls-info {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 14px;
+      z-index: 100;
+      display: none;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      max-width: 300px;
+    }
+    
+    /* Settings menu */
+    #settings-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.9);
+      color: white;
+      border: 1px solid #00ff00;
+      padding: 20px;
+      z-index: 2000;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      align-items: center;
+    }
+    
+    .settings-row button, 
+    #settings-menu button {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .settings-row button:hover,
+    #settings-menu button:hover {
+      background-color: #444;
+    }
+    
+    #loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      font-family: sans-serif;
+      z-index: 1000;
+    }
+    
+    /* Touch controls style - hidden by default */
+    #touch-controls {
+      display: none;
+    }
+    
+    #touch-controls button {
+      font-size: 24px;
+      min-width: 60px;
+      height: 60px;
+      margin: 5px;
+      padding: 10px;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: rgba(80, 80, 80, 0.5);
+      color: white;
+      border: 1px solid #555;
+      border-radius: 5px;
+    }
+    
+    /* More visible focus for keyboard navigation */
+    #game-container:focus {
+      outline: 3px solid #00ff00;
+    }
+    
+    @media (max-width: 768px) {
+      #debug-info {
+        width: 90%;
+        font-size: 10px;
+      }
+      
+      #controls-info {
+        font-size: 12px;
+      }
+      
+      #touch-controls button {
+        font-size: 20px;
+        min-width: 50px;
+        height: 50px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="game-canvas"></canvas>
-  </div>
+  <div id="game-container" tabindex="0"><!-- Three.js will render here --></div>
+  <div id="debug-info"></div>
+  <div id="position-display"></div>
   
-  <div id="instructions">
-    <h3>Controls:</h3>
+  <!-- Controls toggle button (orange icon) -->
+  <button id="controls-toggle">?</button>
+  
+  <!-- Controls info panel -->
+  <div id="controls-info">
+    <h3 style="margin-top: 0; color: #FF8000;">Controls:</h3>
     <p>W/Up Arrow - Move Forward</p>
     <p>S/Down Arrow - Move Backward</p>
     <p>A/Left Arrow - Rotate Left</p>
     <p>D/Right Arrow - Rotate Right</p>
     <p>Space - Jump</p>
+    <p>ESC - Settings Menu</p>
     <p>T - Toggle Debug Camera</p>
   </div>
   
-  <div id="debug-info">
-    <div style="font-weight: bold;">COCKROACH RUN</div>
-    <div>Loading game...</div>
+  <!-- Settings menu (appears when ESC is pressed) -->
+  <div id="settings-menu">
+    <h2 style="text-align: center; margin-top: 0; color: #FF8000;">Settings</h2>
+    
+    <div class="settings-row">
+      <label for="touch-controls-toggle">Touch Controls:</label>
+      <button id="touch-controls-toggle">Show</button>
+    </div>
+    
+    <div class="settings-row">
+      <label for="debug-toggle">Debug Info:</label>
+      <button id="debug-toggle">Show</button>
+    </div>
+    
+    <div class="settings-row">
+      <label for="music-toggle">Music:</label>
+      <button id="music-toggle">On</button>
+    </div>
+    
+    <div class="settings-row">
+      <label for="sfx-toggle">Sound Effects:</label>
+      <button id="sfx-toggle">On</button>
+    </div>
+    
+    <div class="settings-row" style="justify-content: center; margin-top: 20px;">
+      <button id="close-settings">Close</button>
+    </div>
   </div>
-
+  
+  <div id="loading-indicator" style="display: none;"></div>
+  
   <script>
     // Immediately executing function to avoid global namespace pollution
     (function() {
@@ -190,11 +321,121 @@
         jump: false
       };
       
-      // Initialize the game
+      // Initialize the game and set up UI controls
       function init() {
         log('========================================', 'info');
         log('COCKROACH RUN - GAME INITIALIZING', 'info');
         log('========================================', 'info');
+        
+        // Hide loading indicator, we don't need it
+        document.getElementById('loading-indicator').style.display = 'none';
+        
+        // Set up controls toggle button
+        document.getElementById('controls-toggle').addEventListener('click', function() {
+          const controlsPanel = document.getElementById('controls-info');
+          controlsPanel.style.display = controlsPanel.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Set up settings menu and ESC key handling
+        const settingsMenu = document.getElementById('settings-menu');
+        const closeSettings = document.getElementById('close-settings');
+        
+        // ESC key to open/close settings
+        window.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' || e.keyCode === 27) {
+            if (settingsMenu.style.display === 'block') {
+              settingsMenu.style.display = 'none';
+              resumeGame();
+            } else {
+              settingsMenu.style.display = 'block';
+              pauseGame();
+            }
+          }
+        });
+        
+        // Close button for settings
+        closeSettings.addEventListener('click', function() {
+          settingsMenu.style.display = 'none';
+          resumeGame();
+        });
+        
+        // Debug toggle button
+        document.getElementById('debug-toggle').addEventListener('click', function() {
+          const debugInfo = document.getElementById('debug-info');
+          const currentDisplay = debugInfo.style.display === 'block';
+          
+          debugInfo.style.display = currentDisplay ? 'none' : 'block';
+          this.textContent = currentDisplay ? 'Show' : 'Hide';
+        });
+        
+        // Music toggle button
+        document.getElementById('music-toggle').addEventListener('click', function() {
+          // Try to access parent window's audio manager
+          try {
+            const audioManager = window.parent.AudioManager;
+            if (audioManager) {
+              if (audioManager.isMuted) {
+                audioManager.unmute();
+                this.textContent = 'On';
+              } else {
+                audioManager.mute();
+                this.textContent = 'Off';
+              }
+            } else {
+              log('AudioManager not found in parent window', 'warn');
+            }
+          } catch (e) {
+            log('Cannot access parent audio: ' + e.message, 'error');
+          }
+        });
+        
+        // Sound effects toggle (same as music for now)
+        document.getElementById('sfx-toggle').addEventListener('click', function() {
+          const musicToggle = document.getElementById('music-toggle');
+          musicToggle.click(); // Reuse music toggle functionality
+          this.textContent = musicToggle.textContent;
+        });
+        
+        // Game state variables
+        let gamePaused = false;
+        
+        // Function to pause game
+        function pauseGame() {
+          gamePaused = true;
+          log('Game paused', 'info');
+        }
+        
+        // Function to resume game
+        function resumeGame() {
+          gamePaused = false;
+          log('Game resumed', 'info');
+        }
+        
+        // Setup initial UI states
+        document.getElementById('debug-info').style.display = 'none';
+        document.getElementById('debug-toggle').textContent = 'Show';
+        
+        // Start music
+        try {
+          if (window.parent.AudioManager) {
+            window.parent.AudioManager.unmute();
+            if (window.parent.AudioManager.gameMusic) {
+              window.parent.AudioManager.gameMusic.play();
+              log('Game music started', 'info');
+            }
+          }
+        } catch (e) {
+          log('Error initializing audio: ' + e.message, 'warn');
+        }
+        
+        // Setup touch controls based on device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          const touchControlsToggle = document.getElementById('touch-controls-toggle');
+          if (touchControlsToggle) {
+            touchControlsToggle.textContent = 'Hide';
+          }
+        }
         
         try {
           // Log character and mode selection
@@ -216,6 +457,8 @@
           isJumping = false;
           jumpTime = 0;
           jumpHeight = 0;
+          jumpPressed = false;
+          canJump = true;
           
           // Other initialization variables
           debugMode = false;
@@ -238,37 +481,77 @@
               camera.aspect = width / height;
               camera.updateProjectionMatrix();
               renderer.setSize(width, height, true); // true for updateStyle
-              
-              // Log resize for debugging
-              log(`Viewport resized: ${width}x${height}`, 'info');
             }
           }
           window.addEventListener('resize', onWindowResize, false);
           
-          renderer = new THREE.WebGLRenderer({ antialias: true });
-          renderer.setSize(window.innerWidth, window.innerHeight);
-          renderer.shadowMap.enabled = true;
-          gameContainer.appendChild(renderer.domElement);
+          // Create and configure renderer
+          try {
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            gameContainer.appendChild(renderer.domElement);
+            log('Renderer created successfully', 'info');
+          } catch (e) {
+            log('ERROR creating renderer: ' + e.message, 'error');
+            console.error('Renderer error:', e);
+          }
           
-          // Create scene
-          scene = new THREE.Scene();
-          scene.background = new THREE.Color(0x505050); // Simple grey background       
-          // Create camera
-          camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-          camera.position.set(0, 5, 10);
-          
-          // Create basic scene elements
-          createSceneElements();
-          
-          // Setup debug controls if needed
-          if (debugMode) {
+          // Setup scene with the simplest possible environment
+          function setupScene() {
+            log('Setting up scene...', 'info');
+            
             try {
-              orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-              log('Debug controls enabled', 'info');
+              scene = new THREE.Scene();
+              scene.background = new THREE.Color(0x333333); // Medium grey background
+              
+              // Create camera
+              camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+              camera.position.set(0, 3, 5); // Positioned behind cockroach
+              
+              // Add lights
+              const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+              scene.add(ambientLight);
+              
+              const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+              directionalLight.position.set(5, 10, 7.5);
+              directionalLight.castShadow = true;
+              scene.add(directionalLight);
+              
+              // Set up shadow properties
+              directionalLight.shadow.mapSize.width = 1024;
+              directionalLight.shadow.mapSize.height = 1024;
+              directionalLight.shadow.camera.near = 0.5;
+              directionalLight.shadow.camera.far = 50;
+              directionalLight.shadow.bias = -0.001;
+              
+              // Create ground plane
+              const planeGeometry = new THREE.PlaneGeometry(100, 100);
+              const planeMaterial = new THREE.MeshStandardMaterial({
+                color: 0x808080,
+                roughness: 0.7,
+                metalness: 0.1,
+              });
+              const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+              plane.rotation.x = -Math.PI / 2; // Rotate to be flat
+              plane.receiveShadow = true;
+              scene.add(plane);
+              
+              // Add grid for better visual reference
+              const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x444444);
+              scene.add(gridHelper);
+              
+              // Initialize camera position
+              camera.position.set(0, 3, 5);
+              camera.lookAt(0, 0, 0);
+              
+              log('Scene setup complete', 'info');
             } catch (e) {
-              log('Could not create orbit controls: ' + e.message, 'warn');
+              log('ERROR setting up scene: ' + e.message, 'error');
+              console.error('Scene setup error:', e);
             }
           }
+          setupScene();
           
           // Initialize physics
           initPhysics();
@@ -315,72 +598,51 @@
         }
       }
       
-      // Create basic scene elements (lights, ground, grid)
-      function createSceneElements() {
-        try {
-          log('Creating scene elements...', 'info');
-          
-          // Add basic white lights
-          const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-          scene.add(ambientLight);
-          
-          const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-          directionalLight.position.set(10, 10, 10);
-          directionalLight.castShadow = true;
-          scene.add(directionalLight);
-          
-          // Add a standard grey grid - smaller for better performance
-          const gridHelper = new THREE.GridHelper(20, 20, 0x888888, 0x444444);
-          scene.add(gridHelper);
-          
-          // Add ground plane - simple grey
-          const planeGeometry = new THREE.PlaneGeometry(50, 50);
-          const planeMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x303030, 
-            roughness: 0.8,
-            metalness: 0.2
-          });
-          const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-          plane.rotation.x = -Math.PI / 2;
-          plane.receiveShadow = true;
-          scene.add(plane);
-          
-          log('Scene elements created successfully', 'info');
-        } catch (error) {
-          log(`Error creating scene elements: ${error.message}`, 'error');
-          console.error('Scene elements error:', error);
-        }
-      }
-      
-      // Initialize physics world with improved error handling
+      // Initialize more realistic physics world
       function initPhysics() {
         log('Initializing physics world...', 'info');
         
         try {
-          // Create world with gravity
+          // Create world with gravity and damping
           world = new CANNON.World();
-          world.gravity.set(0, -9.82, 0);
+          world.gravity.set(0, -9.82, 0); // Earth gravity
+          world.defaultContactMaterial.friction = 0.2; // Global friction
+          world.allowSleep = true; // Allow objects to sleep when inactive (performance)
+          world.solver.iterations = 10; // More accurate physics
           
-          // Create ground plane
+          // Create ground plane with extra friction to prevent sliding
           const groundShape = new CANNON.Plane();
-          const groundBody = new CANNON.Body({ mass: 0 });
+          const groundBody = new CANNON.Body({ mass: 0 }); // Static body
           groundBody.addShape(groundShape);
           groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
           world.addBody(groundBody);
           
-          // Add friction to ground
-          groundBody.material = new CANNON.Material('groundMaterial');
-          
+          // Create materials with proper physical properties
           try {
-            const groundContactMaterial = new CANNON.ContactMaterial(
-              groundBody.material,
-              new CANNON.Material('cockroachMaterial'),
-              { friction: 0.5, restitution: 0.3 }
+            // Ground material (high friction)
+            const groundMaterial = new CANNON.Material('groundMaterial');
+            groundBody.material = groundMaterial;
+            
+            // Cockroach material (good grip for climbing)
+            const cockroachMaterial = new CANNON.Material('cockroachMaterial');
+            
+            // Contact behavior between materials
+            const contactMaterial = new CANNON.ContactMaterial(
+              groundMaterial,
+              cockroachMaterial,
+              { 
+                friction: 0.8, // High friction for better grip
+                restitution: 0.2, // Low bounce
+                contactEquationStiffness: 1e8, // Firm contact
+                contactEquationRelaxation: 3 // Stable contact
+              }
             );
-            world.addContactMaterial(groundContactMaterial);
+            world.addContactMaterial(contactMaterial);
+            
+            log('Physics materials configured for realistic movement', 'info');
           } catch (e) {
-            // If contact material fails, continue anyway
-            log("Contact material setup failed, using defaults", 'warn');
+            log("Advanced physics setup failed, using basic settings", 'warn');
+            console.warn('Physics setup issue:', e);
           }
           
           log('Physics world initialized successfully', 'info');
@@ -651,15 +913,24 @@
           
           // Handle through keyCode (most compatible approach)
           const action = keyCodes[event.keyCode];
-          if (action && !keys[action]) {
-            keys[action] = true;
-            // Force immediate movement update for responsiveness
-            updateCockroach();
-            
-            // Only log if this is the first key pressed
-            if (!keys.forward && !keys.backward && !keys.left && !keys.right && !keys.jump) {
+          if (action) {
+            // Special handling for jump to prevent continuous jumping
+            if (action === 'jump') {
+              if (!jumpPressed && canJump) {
+                keys.jump = true;
+                jumpPressed = true;
+                log('Jump key pressed - initiating jump', 'input');
+              }
+            } else if (!keys[action]) {
+              // Normal handling for movement keys
+              keys[action] = true;
+              
+              // Only log if this is a new key
               log(`Key pressed: ${event.code || event.keyCode}`, 'input');
             }
+            
+            // Force immediate movement update for responsiveness
+            updateCockroach();
           }
           
           // Toggle debug mode (T key = 84)
@@ -683,8 +954,13 @@
           // Handle through keyCode (most compatible approach)
           const action = keyCodes[event.keyCode];
           if (action) {
-            // Only reset non-jump keys - jump is handled by animation
-            if (action !== 'jump' || !isJumping) {
+            if (action === 'jump') {
+              // Reset jump key state and pressed tracking
+              keys.jump = false;
+              jumpPressed = false;
+              log('Jump key released', 'input');
+            } else {
+              // Normal handling for movement keys
               keys[action] = false;
             }
           }
@@ -718,14 +994,15 @@
         touchControls.style.bottom = '20px';
         touchControls.style.left = '50%';
         touchControls.style.transform = 'translateX(-50%)';
-        touchControls.style.display = 'flex';
+        touchControls.style.display = 'none'; // Hidden by default
         touchControls.style.flexWrap = 'wrap';
         touchControls.style.justifyContent = 'center';
         touchControls.style.gap = '5px';
         touchControls.style.zIndex = '1000';
         touchControls.style.maxWidth = '100%';
         touchControls.style.padding = '5px';
-                // Create touch buttons with simple style but improved responsiveness
+        
+        // Create touch buttons with simple style but improved responsiveness
         const createButton = (text, key) => {
           const btn = document.createElement('button');
           btn.textContent = text;
@@ -733,111 +1010,219 @@
           btn.style.color = '#ffffff';
           btn.style.border = '1px solid #888888';
           btn.style.borderRadius = '5px';
-          btn.style.padding = '10px';
-          btn.style.margin = '3px';
-          btn.style.fontSize = '20px';
-          btn.style.fontWeight = 'bold';
-          // Responsive button size based on screen width
-          const buttonSize = Math.min(70, window.innerWidth / 6) + 'px';
-          btn.style.width = buttonSize;
-          btn.style.height = buttonSize;
+          btn.style.fontSize = '24px';
+          btn.style.padding = '15px';
+          btn.style.margin = '5px';
+          btn.style.minWidth = '60px';
+          btn.style.minHeight = '60px';
           btn.style.touchAction = 'manipulation';
-          btn.style.fontFamily = 'Arial, sans-serif';
-          btn.style.userSelect = 'none'; // Prevent text selection
           
-          // Touch/mouse events with immediate update
-          btn.addEventListener('touchstart', (e) => { 
+          // Handle touch events for mobile
+          btn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent zooming
+            keys[key] = true;
+            log(`Touch control: ${text}`, 'input');
+          });
+          
+          btn.addEventListener('touchend', (e) => {
             e.preventDefault();
-            keys[key] = true; 
-            updateCockroach(); // Immediate update
-            btn.style.backgroundColor = 'rgba(120, 120, 120, 0.9)';
+            keys[key] = false;
           });
-          btn.addEventListener('touchend', () => { 
-            keys[key] = false; 
-            btn.style.backgroundColor = 'rgba(80, 80, 80, 0.7)';
+          
+          // Also handle mouse events for testing on desktop
+          btn.addEventListener('mousedown', () => {
+            keys[key] = true;
           });
-          btn.addEventListener('mousedown', () => { 
-            keys[key] = true; 
-            updateCockroach(); // Immediate update
-            btn.style.backgroundColor = 'rgba(120, 120, 120, 0.9)';
+          
+          btn.addEventListener('mouseup', () => {
+            keys[key] = false;
           });
-          btn.addEventListener('mouseup', () => { 
-            keys[key] = false; 
-            btn.style.backgroundColor = 'rgba(80, 80, 80, 0.7)';
-          });
+          
           btn.addEventListener('mouseleave', () => {
-            if (keys[key]) {
-              keys[key] = false;
-              btn.style.backgroundColor = 'rgba(80, 80, 80, 0.7)';
-            }
+            keys[key] = false;
           });
           
           return btn;
         };
         
-        // Add directional buttons
-        touchControls.appendChild(createButton('↑', 'forward'));
-        touchControls.appendChild(createButton('←', 'left'));
-        touchControls.appendChild(createButton('↓', 'backward'));
-        touchControls.appendChild(createButton('→', 'right'));
-        touchControls.appendChild(createButton('⯅', 'jump'));
+        // Create directional buttons
+        const upBtn = createButton('↑', 'forward');
+        const downBtn = createButton('↓', 'backward');
+        const leftBtn = createButton('←', 'left');
+        const rightBtn = createButton('→', 'right');
         
-        // Add to container
-        container.appendChild(touchControls);
+        // Create jump button
+        const jumpBtn = createButton('JUMP', 'jump');
+        jumpBtn.style.width = '120px';
+        
+        // Add buttons to container
+        touchControls.appendChild(upBtn);
+        touchControls.appendChild(document.createElement('br'));
+        touchControls.appendChild(leftBtn);
+        touchControls.appendChild(downBtn);
+        touchControls.appendChild(rightBtn);
+        touchControls.appendChild(document.createElement('br'));
+        touchControls.appendChild(jumpBtn);
+        
+        // Add to page
+        document.body.appendChild(touchControls);
+        
+        // Check if mobile and initialize touch button state
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          // Set initial state for settings button
+          document.getElementById('touch-controls-toggle').textContent = 'Hide';
+          touchControls.style.display = 'flex';
+          log('Mobile device detected - touch controls enabled', 'info');
+        } else {
+          document.getElementById('touch-controls-toggle').textContent = 'Show';
+          log('Desktop detected - touch controls hidden by default', 'info');
+        }
+        
+        // Set up toggle button functionality
+        document.getElementById('touch-controls-toggle').addEventListener('click', function() {
+          if (touchControls.style.display === 'none') {
+            touchControls.style.display = 'flex';
+            this.textContent = 'Hide';
+          } else {
+            touchControls.style.display = 'none';
+            this.textContent = 'Show';
+          }
+        });
       }
       
       // SIMPLE and DIRECT cockroach movement with no complex timing logic
       function updateCockroach() {
         if (!cockroachModel) return;
         
-        // MOVEMENT PARAMETERS - very fast, fixed speed
-        const MOVE_SPEED = 0.3; // Units per frame - fast enough to see
-        const ROTATE_SPEED = 0.1; // Radians per frame
+        // MOVEMENT PARAMETERS with realistic physics
+        const MOVE_SPEED = 0.25; // Base movement speed
+        const ROTATE_SPEED = 0.08; // Base rotation speed
+        const ACCELERATION = 0.01; // How quickly the cockroach speeds up
+        const DECELERATION = 0.95; // How quickly it slows down (friction)
+        const MAX_SPEED = 0.4; // Maximum movement speed
+        
+        // Keep track of current velocity
+        cockroachModel.userData.velocity = cockroachModel.userData.velocity || {
+          forward: 0,
+          rotation: 0
+        }
         
         // Track if any movement occurred
         let moved = false;
         
-        // FORWARD MOVEMENT (W key / Up arrow)
+        // REALISTIC MOVEMENT with acceleration/deceleration
+        
+        // FORWARD/BACKWARD MOVEMENT with acceleration
         if (keys.forward) {
-          // Move forward in the direction the cockroach is facing
-          cockroachModel.translateZ(MOVE_SPEED);
+          // Accelerate forward up to max speed
+          cockroachModel.userData.velocity.forward += ACCELERATION;
+          if (cockroachModel.userData.velocity.forward > MAX_SPEED) {
+            cockroachModel.userData.velocity.forward = MAX_SPEED;
+          }
+          moved = true;
+        } else if (keys.backward) {
+          // Accelerate backward up to max speed
+          cockroachModel.userData.velocity.forward -= ACCELERATION;
+          if (cockroachModel.userData.velocity.forward < -MAX_SPEED * 0.7) { // Cockroaches are slower backward
+            cockroachModel.userData.velocity.forward = -MAX_SPEED * 0.7;
+          }
+          moved = true;
+        } else {
+          // Decelerate when no forward/backward key is pressed
+          cockroachModel.userData.velocity.forward *= DECELERATION;
+          
+          // Stop completely if very slow (avoid endless tiny movements)
+          if (Math.abs(cockroachModel.userData.velocity.forward) < 0.01) {
+            cockroachModel.userData.velocity.forward = 0;
+          }
+        }
+        
+        // Apply forward/backward movement
+        if (cockroachModel.userData.velocity.forward !== 0) {
+          cockroachModel.translateZ(cockroachModel.userData.velocity.forward);
           moved = true;
         }
         
-        // BACKWARD MOVEMENT (S key / Down arrow)
-        if (keys.backward) {
-          cockroachModel.translateZ(-MOVE_SPEED);
-          moved = true;
-        }
-        
-        // LEFT ROTATION (A key / Left arrow)
+        // LEFT/RIGHT ROTATION with momentum
         if (keys.left) {
-          cockroachModel.rotation.y += ROTATE_SPEED;
+          // Increase rotation velocity (left)
+          cockroachModel.userData.velocity.rotation += ACCELERATION * 2;
+          if (cockroachModel.userData.velocity.rotation > ROTATE_SPEED) {
+            cockroachModel.userData.velocity.rotation = ROTATE_SPEED;
+          }
+          moved = true;
+        } else if (keys.right) {
+          // Increase rotation velocity (right)
+          cockroachModel.userData.velocity.rotation -= ACCELERATION * 2;
+          if (cockroachModel.userData.velocity.rotation < -ROTATE_SPEED) {
+            cockroachModel.userData.velocity.rotation = -ROTATE_SPEED;
+          }
+          moved = true;
+        } else {
+          // Decelerate rotation when no left/right key is pressed
+          cockroachModel.userData.velocity.rotation *= DECELERATION;
+          
+          // Stop rotating if very slow
+          if (Math.abs(cockroachModel.userData.velocity.rotation) < 0.005) {
+            cockroachModel.userData.velocity.rotation = 0;
+          }
+        }
+        
+        // Apply rotation
+        if (cockroachModel.userData.velocity.rotation !== 0) {
+          cockroachModel.rotation.y += cockroachModel.userData.velocity.rotation;
           moved = true;
         }
         
-        // RIGHT ROTATION (D key / Right arrow)
-        if (keys.right) {
-          cockroachModel.rotation.y -= ROTATE_SPEED;
-          moved = true;
+        // Add slight body tilt when turning (more realistic)
+        if (cockroachModel.userData.velocity.rotation !== 0) {
+          // Lean into turns
+          const targetTilt = -cockroachModel.userData.velocity.rotation * 2;
+          cockroachModel.rotation.z = targetTilt;
+        } else {
+          // Return to level when not turning
+          cockroachModel.rotation.z *= 0.8;
         }
         
-        // JUMPING (Spacebar)
-        if (keys.jump && !isJumping) {
+        // JUMPING (Spacebar) with single-press logic and cooldown
+        if (keys.jump && !isJumping && canJump) {
           isJumping = true;
           jumpTime = 0;
           jumpHeight = cockroachModel.position.y;
+          canJump = false; // Prevent new jumps until this one completes
+          keys.jump = false; // Immediately reset jump key to prevent multiple jumps
+          console.log('Jump initiated'); // Debug log
         }
         
-        // Simple jumping animation
+        // Realistic jumping with acceleration and landing
         if (isJumping) {
+          // More realistic jump curve with fast rise and slower fall
           jumpTime += 0.1;
-          cockroachModel.position.y = jumpHeight + Math.sin(jumpTime) * 1.5;
+          
+          // Calculate jump height using a custom curve for more realistic movement
+          let jumpCurve;
+          if (jumpTime < Math.PI/2) {
+            // Quick upward movement (0 to π/2)
+            jumpCurve = Math.sin(jumpTime) * 1.2;
+          } else {
+            // Slower fall (π/2 to π)
+            jumpCurve = Math.sin(jumpTime) * 0.8;
+          }
+          
+          // Apply jump height
+          cockroachModel.position.y = jumpHeight + jumpCurve;
           
           // End jump at end of cycle
           if (jumpTime >= Math.PI) {
             isJumping = false;
             cockroachModel.position.y = jumpHeight;
+            canJump = true; // Re-enable jumping after landing
+            console.log('Jump completed, can jump again'); // Debug log
+            
+            // Add a slight forward impulse on landing (cockroaches often jump forward)
+            if (cockroachModel.userData.velocity.forward >= 0) {
+              cockroachModel.userData.velocity.forward += 0.05;
+            }
           }
           
           moved = true;
@@ -890,26 +1275,37 @@
       // Jump state is tracked in global variables
       // initialized at the top of the script
       
-      // Update camera to follow cockroach with smooth lerping
+      // Update camera to follow cockroach with improved tracking
       function updateCamera() {
         if (!camera || !cockroachModel) return;
         
-        // Set camera position based on cockroach
-        const distance = 5; // Distance behind cockroach
-        const height = 3;   // Height above cockroach
+        // Camera settings
+        const distance = 5;  // Distance behind cockroach
+        const height = 3;    // Height above cockroach
+        const lookOffset = 2; // Look slightly ahead of cockroach
         
-        // Calculate target position
+        // Calculate target position behind cockroach
         const targetX = cockroachModel.position.x - Math.sin(cockroachModel.rotation.y) * distance;
         const targetZ = cockroachModel.position.z - Math.cos(cockroachModel.rotation.y) * distance;
         const targetY = cockroachModel.position.y + height;
         
-        // Smooth lerp camera position (gentle following)
-        camera.position.x = camera.position.x + (targetX - camera.position.x) * 0.1;
-        camera.position.z = camera.position.z + (targetZ - camera.position.z) * 0.1;
-        camera.position.y = camera.position.y + (targetY - camera.position.y) * 0.1;
+        // Calculate point to look at (slightly ahead of cockroach)
+        const lookAtX = cockroachModel.position.x + Math.sin(cockroachModel.rotation.y) * lookOffset;
+        const lookAtZ = cockroachModel.position.z + Math.cos(cockroachModel.rotation.y) * lookOffset;
+        const lookAtY = cockroachModel.position.y + 0.5; // Slightly above cockroach
         
-        // Look at cockroach
-        camera.lookAt(cockroachModel.position);
+        // Smooth camera movement based on cockroach velocity
+        // Faster follow when cockroach is moving quickly
+        const speedFactor = Math.abs(cockroachModel.userData.velocity.forward) * 2;
+        const followSpeed = 0.05 + speedFactor * 0.1; // 0.05 to 0.15 based on speed
+        
+        // Apply smooth camera movement
+        camera.position.x += (targetX - camera.position.x) * followSpeed;
+        camera.position.z += (targetZ - camera.position.z) * followSpeed;
+        camera.position.y += (targetY - camera.position.y) * followSpeed;
+        
+        // Look ahead of cockroach (makes turns look better)
+        camera.lookAt(new THREE.Vector3(lookAtX, lookAtY, lookAtZ));
       }
       
       // SIMPLE animation loop - no complex timing logic
