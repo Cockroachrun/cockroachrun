@@ -413,9 +413,13 @@
     <source src="assets/sounds/sfx/scatter.wav" type="audio/wav" />
   </audio>
 
+  <!-- 3D Libraries - Required for the game engine -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.144.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.144.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="js/config.js"></script>
   <script src="js/DropdownSystem.js"></script>
   <script src="js/audio.js" defer></script>
@@ -430,12 +434,6 @@
   <script src="js/services/wallet.js"></script>
   <!-- Game State Management -->
   <script src="js/core/gameStateManager.js"></script>
-  
-  <!-- 3D Libraries - Required for the game engine -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
   
   <!-- Game Engine - 3D Cockroach World -->
   <script src="js/game.js"></script>
