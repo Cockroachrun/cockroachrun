@@ -400,7 +400,7 @@
         this.zoomLevel = 5; // Initial zoom distance (matches initial Z offset)
         this.minZoom = 1.5; // Closest zoom
         this.maxZoom = 15;  // Furthest zoom
-        this.zoomSpeed = 0.3; // How much each scroll/click changes zoom (reduced for smoother zoom)
+        this.zoomSpeed = 0.5; // How much each scroll/click changes zoom
         
         // Debugging
         this.debugMode = false; // Set to false to enable camera following/zoom
@@ -1062,7 +1062,5 @@
       game.startGame('free-world', 'oriental');
     };
   </script>
-  <!-- Zoom Handler Script -->
-  <script src="zoom-handler.js"></script>
 </body>
 </html>

@@ -92,31 +92,22 @@ window.Game = (function() {
                     }
                 });
                 
-                // Show a message about focusing
-                const focusMessage = document.createElement('div');
-                focusMessage.style.position = 'absolute';
-                focusMessage.style.bottom = '10px';
-                focusMessage.style.right = '10px';
-                focusMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                focusMessage.style.color = '#00FF66';
-                focusMessage.style.padding = '10px';
-                focusMessage.style.borderRadius = '5px';
-                focusMessage.style.fontFamily = 'monospace';
-                focusMessage.style.zIndex = '1000';
-                focusMessage.textContent = 'Click in the game area to enable controls';
-                focusMessage.style.transition = 'opacity 0.5s';
-                gameContainer.appendChild(focusMessage);
-                
-                // Hide message after 5 seconds
-                setTimeout(function() {
-                    focusMessage.style.opacity = '0';
-                    // Remove after fade out
-                    setTimeout(function() {
-                        if (focusMessage.parentNode) {
-                            focusMessage.parentNode.removeChild(focusMessage);
-                        }
-                    }, 500);
-                }, 5000);
+                // IMPROVED: Add wheel event listener to container to forward zoom to iframe
+                gameContainer.addEventListener('wheel', function(event) {
+                    if (gameIframe && gameIframe.contentWindow) {
+                        event.preventDefault(); // Prevent parent page scrolling
+                        
+                        // Forward normalized wheel delta to iframe
+                        const delta = event.deltaY > 0 ? 1 : -1; // Normalize to 1 or -1 for consistent zoom speed
+                        console.log("ZOOM: Parent sending zoom delta:", delta);
+                        
+                        gameIframe.contentWindow.postMessage({
+                            type: 'zoom',
+                            delta: delta
+                        }, '*'); // Send to any origin within the iframe
+                    }
+                    return false;
+                }, { passive: false }); // Use passive: false to allow preventDefault
                 
                 // Focus iframe after a short delay to ensure it's rendered
                 setTimeout(function() {
@@ -172,6 +163,41 @@ window.Game = (function() {
             const gameContainer = document.getElementById('game-container');
             if (gameContainer) {
                 gameContainer.style.display = 'none';
+            }
+        },
+        
+        // Function to return to main menu - can be called from iframe
+        returnToMenu: function() {
+            console.log("Returning to main menu from game");
+            
+            try {
+                // First stop the game properly
+                this.stopGame();
+                
+                // Reset game state completely
+                isRunning = false;
+                gameIframe = null;
+                
+                // Make sure game container is hidden
+                const gameContainer = document.getElementById('game-container');
+                if (gameContainer) {
+                    gameContainer.innerHTML = '';
+                    gameContainer.style.display = 'none';
+                }
+                
+                // Then return to start screen
+                if (window.UIManager) {
+                    console.log("Showing start screen");
+                    window.UIManager.showScreen('start');
+                } else {
+                    console.error("UIManager not found");
+                    // Force reload as last resort
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error("Error returning to menu:", e);
+                // Force reload as last resort
+                window.location.reload();
             }
         }
     };

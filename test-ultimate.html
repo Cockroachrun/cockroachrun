@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cockroach Run - Ultimate Test</title>
+  <!-- Message remover script, loads first to immediately remove unwanted elements -->
+  <script src="message-remover.js"></script>
   <!-- Load Three.js libraries from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
@@ -68,24 +70,31 @@
       display: none; /* Hidden by default */
     }
     
-    /* Orange controls toggle button */
+    /* Controls toggle button to match game UI */
     #controls-toggle {
       position: absolute;
       top: 10px;
       right: 10px;
       width: 40px;
       height: 40px;
-      background-color: #FF8000;
-      color: white;
-      border-radius: 50%;
+      background-color: #000000;
+      color: #FF8000;
+      border-radius: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       z-index: 1000;
       font-size: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      border: none;
+      box-shadow: none;
+      border: 2px solid #FF8000;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    #controls-toggle:hover {
+      background-color: #444;
     }
     
     /* Controls panel - hidden by default */
@@ -93,56 +102,108 @@
       position: absolute;
       top: 60px;
       right: 10px;
-      background-color: rgba(0, 0, 0, 0.85);
-      color: #00ff00;
-      border: 1px solid #00ff00;
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
       padding: 15px;
-      font-family: monospace;
+      font-family: Arial, sans-serif;
       font-size: 14px;
       z-index: 100;
       display: none;
-      border-radius: 5px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border-radius: 0;
+      box-shadow: none;
       max-width: 300px;
     }
     
-    /* Settings menu */
+    /* Settings menu to match game UI exactly */
     #settings-menu {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.9);
-      color: white;
-      border: 1px solid #00ff00;
-      padding: 20px;
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 25px;
       z-index: 2000;
       width: 80%;
       max-width: 500px;
-      border-radius: 5px;
+      border-radius: 0;
       display: none;
+      box-shadow: none;
+      font-family: Arial, sans-serif;
+    }
+    
+    #settings-menu h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #FF8000;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
     }
     
     .settings-row {
       display: flex;
       justify-content: space-between;
-      margin: 10px 0;
+      margin: 15px 0;
       align-items: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+    }
+    
+    .settings-row:last-of-type {
+      border-bottom: none;
+    }
+    
+    .settings-row label {
+      font-size: 16px;
+      color: #FF8000;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .settings-row button, 
     #settings-menu button {
-      background-color: #333;
-      color: white;
-      border: 1px solid #555;
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
       padding: 8px 15px;
-      border-radius: 4px;
+      border-radius: 0;
       cursor: pointer;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      min-width: 80px;
+      transition: all 0.2s;
     }
     
     .settings-row button:hover,
     #settings-menu button:hover {
-      background-color: #444;
+      background-color: #111111;
+    }
+    
+    .settings-row button:active,
+    #settings-menu button:active {
+      background-color: #111111;
+    }
+    
+    #return-to-menu-button {
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 10px 15px;
+      width: 100%;
+      margin-top: 20px;
+      font-size: 16px;
+      text-transform: uppercase;
+      border-radius: 0;
+    }
+    
+    #return-to-menu-button:hover {
+      background-color: #111111;
     }
     
     #loading-indicator {
@@ -205,7 +266,7 @@
   <div id="debug-info"></div>
   <div id="position-display"></div>
   
-  <!-- Controls toggle button (orange icon) -->
+  <!-- Controls toggle button to match game UI -->
   <button id="controls-toggle">?</button>
   
   <!-- Controls info panel -->
@@ -222,36 +283,92 @@
   
   <!-- Settings menu (appears when ESC is pressed) -->
   <div id="settings-menu">
-    <h2 style="text-align: center; margin-top: 0; color: #FF8000;">Settings</h2>
+    <h2>Game Settings</h2>
     
     <div class="settings-row">
-      <label for="touch-controls-toggle">Touch Controls:</label>
+      <label for="touch-controls-toggle">Touch Controls</label>
       <button id="touch-controls-toggle">Show</button>
     </div>
     
     <div class="settings-row">
-      <label for="debug-toggle">Debug Info:</label>
+      <label for="debug-toggle">Debug Info</label>
       <button id="debug-toggle">Show</button>
     </div>
     
     <div class="settings-row">
-      <label for="music-toggle">Music:</label>
+      <label for="music-toggle">Music</label>
       <button id="music-toggle">On</button>
     </div>
     
     <div class="settings-row">
-      <label for="sfx-toggle">Sound Effects:</label>
+      <label for="sfx-toggle">Sound Effects</label>
       <button id="sfx-toggle">On</button>
     </div>
     
-    <div class="settings-row" style="justify-content: center; margin-top: 20px;">
-      <button id="close-settings">Close</button>
+    <div class="settings-row" style="border-bottom: none; justify-content: center;">
+      <button id="close-settings">Continue Game</button>
     </div>
+    
+    <button id="return-to-menu-button">Return to Main Menu</button>
   </div>
   
   <div id="loading-indicator" style="display: none;"></div>
   
   <script>
+    // EXTREMELY aggressive removal of any green focus messages
+    (function permanentlyRemoveGreenMessages() {
+      // First, immediate removal of anything matching
+      function removeMessages() {
+        // Target by multiple criteria to catch all variations
+        const selectors = [
+          'div[style*="color: rgb(0, 255, 102)"]', 
+          'div[style*="color: #00FF66"]',
+          'div[style*="color:#00FF66"]',
+          'div[style*="bottom: 10px; right: 10px"]',
+          'div[data-component-name="<div />"]',
+          'div[style*="monospace"]'
+        ];
+        
+        // Try to find by combined selectors
+        let messages = document.querySelectorAll(selectors.join(','));
+        let removed = false;
+        
+        messages.forEach(element => {
+          // If it has text about clicking OR has green color OR is at the bottom right
+          if (element && (
+              (element.textContent && element.textContent.includes('Click in the game area')) ||
+              (element.style && (element.style.color === '#00FF66' || element.style.color === 'rgb(0, 255, 102)')) ||
+              (element.style && element.style.bottom === '10px' && element.style.right === '10px')
+          )) {
+            if (element.parentNode) {
+              element.parentNode.removeChild(element);
+              removed = true;
+              console.log('Removed focus message');
+            }
+          }
+        });
+        
+        // Fallback - any div with that exact text
+        document.querySelectorAll('div').forEach(el => {
+          if (el.textContent && el.textContent.trim() === 'Click in the game area to enable controls') {
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+              removed = true;
+              console.log('Removed by text content');
+            }
+          }
+        });
+        
+        return removed;
+      }
+      
+      // Run immediately
+      removeMessages();
+      
+      // Also set up a monitor to remove any that appear later
+      setInterval(removeMessages, 500);
+    })();
+    
     // Immediately executing function to avoid global namespace pollution
     (function() {
       // Global variables
@@ -268,22 +385,21 @@
       
       // Enhanced log with color-coded messages and categories
       function log(message, type = 'info') {
+        // Format timestamp
+        const now = new Date();
+        const timestamp = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        
+        // Create log entry
         const debugInfo = document.getElementById('debug-info');
         if (debugInfo) {
-          const timestamp = new Date().toISOString().substr(11, 8);
           const logEntry = document.createElement('div');
+          logEntry.style.margin = '2px 0';
           
-          // Color code by type
-          let color = '#00FF66'; // Default cyberpunk green
-          switch(type) {
-            case 'error': color = '#FF3366'; break; // Red for errors
-            case 'warn': color = '#FFCC00'; break;  // Yellow for warnings
-            case 'move': color = '#9333EA'; break;  // Purple for movement
-            case 'input': color = '#00CCFF'; break; // Blue for input events
-          }
+          // Set color based on type - using consistent black and orange theme
+          let color = '#FF8000'; // Default orange for all messages
           
-          // Style with cyberpunk flair
-          logEntry.innerHTML = `<span style="color:#666666">[${timestamp}]</span> <span style="color:${color}">${message}</span>`;
+          // Style with consistent black/orange theme
+          logEntry.innerHTML = `<span style="color:#FF8000">[${timestamp}]</span> <span style="color:${color}">${message}</span>`;
           debugInfo.appendChild(logEntry);
           
           // Scroll to bottom
@@ -359,6 +475,36 @@
           resumeGame();
         });
         
+        // Return to main menu button - EXTREMELY simplified to guarantee success
+        const returnToMenuButton = document.getElementById('return-to-menu-button');
+        if (returnToMenuButton) {
+          returnToMenuButton.addEventListener('click', function() {
+            log('Returning to main menu', 'info');
+            
+            // Hide all menus to prevent flash
+            const settingsMenu = document.getElementById('settings-menu');
+            if (settingsMenu) settingsMenu.style.display = 'none';
+            
+            const controlsInfo = document.getElementById('controls-info');
+            if (controlsInfo) controlsInfo.style.display = 'none';
+            
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) debugInfo.style.display = 'none';
+            
+            // Stop all animations and rendering immediately
+            gamePaused = true;
+            
+            // Simple and reliable approach - use parent's top-level function
+            try {
+              // The parent's Game.returnToMenu has been fixed to be extremely reliable
+              window.parent.Game.returnToMenu();
+            } catch (e) {
+              // If all else fails, reload the page (last resort)
+              window.parent.location.reload();
+            }
+          });
+        }
+        
         // Debug toggle button
         document.getElementById('debug-toggle').addEventListener('click', function() {
           const debugInfo = document.getElementById('debug-info');
@@ -368,32 +514,68 @@
           this.textContent = currentDisplay ? 'Show' : 'Hide';
         });
         
-        // Music toggle button
+        // Music toggle button - completely rewritten to work properly
         document.getElementById('music-toggle').addEventListener('click', function() {
-          // Try to access parent window's audio manager
           try {
-            const audioManager = window.parent.AudioManager;
-            if (audioManager) {
-              if (audioManager.isMuted) {
-                audioManager.unmute();
-                this.textContent = 'On';
-              } else {
-                audioManager.mute();
-                this.textContent = 'Off';
+            if (window.parent && window.parent.AudioManager) {
+              const audioManager = window.parent.AudioManager;
+              
+              // Toggle the mute state directly using AudioManager's method
+              audioManager.isMuted = !audioManager.isMuted;
+              audioManager.applyMuteState();
+              localStorage.setItem('isMuted', JSON.stringify(audioManager.isMuted));
+              
+              // Update button text to match actual state
+              this.textContent = audioManager.isMuted ? 'Off' : 'On';
+              log('Music turned ' + (audioManager.isMuted ? 'off' : 'on'), 'info');
+              
+              // Also update SFX toggle to match
+              const sfxToggle = document.getElementById('sfx-toggle');
+              if (sfxToggle) {
+                sfxToggle.textContent = audioManager.isMuted ? 'Off' : 'On';
               }
             } else {
-              log('AudioManager not found in parent window', 'warn');
+              // Visual toggle as fallback
+              this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+              log('AudioManager not accessible, visual toggle only', 'warn');
+              
+              // Try parent window direct method
+              try {
+                window.parent.postMessage({ type: 'toggle-audio' }, '*');
+              } catch (err) {}
             }
           } catch (e) {
-            log('Cannot access parent audio: ' + e.message, 'error');
+            // Still toggle visually so the button feels responsive
+            this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+            log('Error toggling audio: ' + e.message, 'error');
           }
         });
         
-        // Sound effects toggle (same as music for now)
+        // Sound effects toggle - directly triggers the music toggle for consistency
         document.getElementById('sfx-toggle').addEventListener('click', function() {
-          const musicToggle = document.getElementById('music-toggle');
-          musicToggle.click(); // Reuse music toggle functionality
-          this.textContent = musicToggle.textContent;
+          try {
+            // Simply trigger the music toggle for synchronized behavior
+            // This ensures both buttons always show the same state
+            const musicToggle = document.getElementById('music-toggle');
+            if (musicToggle) {
+              // Trigger the click event on the music toggle
+              musicToggle.click();
+            } else {
+              // Fallback if music toggle isn't available
+              this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+              
+              if (window.parent && window.parent.AudioManager) {
+                const audioManager = window.parent.AudioManager;
+                audioManager.isMuted = !audioManager.isMuted;
+                audioManager.applyMuteState();
+                localStorage.setItem('isMuted', JSON.stringify(audioManager.isMuted));
+              }
+            }
+          } catch (e) {
+            // Visual toggle as fallback
+            this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+            log('Error with sound effects toggle: ' + e.message, 'error');
+          }
         });
         
         // Game state variables
@@ -434,7 +616,25 @@
           const touchControlsToggle = document.getElementById('touch-controls-toggle');
           if (touchControlsToggle) {
             touchControlsToggle.textContent = 'Hide';
+            // Actually show touch controls on mobile
+            const touchControls = document.querySelector('#touch-controls');
+            if (touchControls) {
+              touchControls.style.display = 'flex';
+            }
           }
+        }
+        
+        // Make sure all settings menu buttons work
+        const touchControlsToggleBtn = document.getElementById('touch-controls-toggle');
+        if (touchControlsToggleBtn) {
+          touchControlsToggleBtn.addEventListener('click', function() {
+            const touchControls = document.querySelector('#touch-controls');
+            if (touchControls) {
+              const isVisible = touchControls.style.display === 'flex';
+              touchControls.style.display = isVisible ? 'none' : 'flex';
+              this.textContent = isVisible ? 'Show' : 'Hide';
+            }
+          });
         }
         
         try {
@@ -652,36 +852,20 @@
         }
       }
       
-      // Load cockroach model with improved error handling and visual feedback
+      // Load cockroach model with faster loading and no delays
       function loadCockroachModel() {
-        // Updated paths based on actual file location in assets/models
+        // Hide loading indicator - we don't need it and it slows things down
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+        
+        // Use only the most likely path for faster loading
         const possibleFilenames = [
-          'assets/models/American Cockroach.glb',  // Correct path found in the repository
-          'assets/models/Oriental cockroach.glb',  // Correct path found in the repository
+          'assets/models/American Cockroach.glb',  // Most likely path
           './assets/models/American Cockroach.glb',
-          './assets/models/Oriental cockroach.glb',
-          '../assets/models/American Cockroach.glb',
-          '../assets/models/Oriental cockroach.glb',
-          'models/American Cockroach.glb',
-          'models/american-cockroach.glb',
-          'models/cockroach.glb'
+          '../assets/models/American Cockroach.glb'
         ];
-        
-        log(`Attempting to load cockroach model... trying ${possibleFilenames.length} possible paths`, 'info');
-        
-        // Show loading indicator
-        const loadingIndicator = document.createElement('div');
-        loadingIndicator.innerHTML = 'Loading cockroach model...';
-        loadingIndicator.style.position = 'absolute';
-        loadingIndicator.style.top = '50%';
-        loadingIndicator.style.left = '50%';
-        loadingIndicator.style.transform = 'translate(-50%, -50%)';
-        loadingIndicator.style.color = '#00FF66';
-        loadingIndicator.style.fontFamily = 'Courier New, monospace';
-        loadingIndicator.style.fontSize = '20px';
-        loadingIndicator.style.textShadow = '0 0 5px #00FF66';
-        loadingIndicator.style.zIndex = '1000';
-        document.getElementById('game-container').appendChild(loadingIndicator);
         
         // Load manager to handle all load attempts
         const loadManager = new THREE.LoadingManager();
@@ -691,29 +875,31 @@
         function tryNextModel(index) {
           if (index >= possibleFilenames.length) {
             if (!modelLoaded) {
-              log('Failed to load any cockroach model, creating placeholder', 'warn');
-              log('Model path attempts: ' + possibleFilenames.join(', '), 'error');
-              document.getElementById('game-container').removeChild(loadingIndicator);
+              try {
+                if (loadingIndicator && loadingIndicator.parentNode) {
+                  loadingIndicator.parentNode.removeChild(loadingIndicator);
+                }
+              } catch (e) {}
               createPlaceholderCockroach();
             }
             return;
           }
           
           const filename = possibleFilenames[index];
-          log(`Trying to load: ${filename}`, 'info');
-          loadingIndicator.innerHTML = `Loading ${filename.split('/').pop()}`;
-          
-          // Get absolute URL for debugging
-          const absoluteUrl = new URL(filename, window.location.href).href;
-          log(`Attempting to load: ${filename} (${absoluteUrl})`, 'info');
+          // Skip logging to improve performance
           
           const loader = new THREE.GLTFLoader(loadManager);
           loader.load(
             filename,
             function(gltf) {
-              log(`SUCCESS! Loaded model from ${filename}`, 'info');
               modelLoaded = true;
-              document.getElementById('game-container').removeChild(loadingIndicator);
+              
+              // Skip logging to speed up loading
+              try {
+                if (loadingIndicator && loadingIndicator.parentNode) {
+                  loadingIndicator.parentNode.removeChild(loadingIndicator);
+                }
+              } catch (e) {}
               
               // Store model
               cockroachModel = gltf.scene;
@@ -767,77 +953,32 @@
       function createPlaceholderCockroach() {
         log('Creating placeholder cockroach geometry', 'info');
         try {
-          // Create a simple cockroach shape using basic geometries
-          const cockroachGroup = new THREE.Group();
+          // Create a simple placeholder - just a capsule shape
+          const geometry = new THREE.CapsuleGeometry(0.5, 1.5, 4, 8);
+          const material = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Brown color
+          cockroach = new THREE.Mesh(geometry, material);
+          cockroach.scale.set(0.15, 0.08, 0.2); // Flatter, more cockroach-like
+          cockroach.position.y = 0.1; // Close to ground
+          scene.add(cockroach);
           
-          // Body - elongated ellipsoid
-          const bodyGeometry = new THREE.SphereGeometry(0.5, 16, 12);
-          bodyGeometry.scale(1, 0.4, 2);
-          const bodyMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x663300, 
-            roughness: 0.7,
-            metalness: 0.3
-          });
-          const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-          cockroachGroup.add(body);
-          
-          // Head
-          const headGeometry = new THREE.SphereGeometry(0.2, 16, 12);
-          const headMaterial = new THREE.MeshStandardMaterial({ color: 0x663300 });
-          const head = new THREE.Mesh(headGeometry, headMaterial);
-          head.position.z = 0.7;
-          head.position.y = 0.1;
-          cockroachGroup.add(head);
-          
-          // Legs
-          const legMaterial = new THREE.MeshStandardMaterial({ color: 0x663300 });
-          for (let i = 0; i < 6; i++) {
-            // Create a leg (curved cylinder)
-            const legGeometry = new THREE.CylinderGeometry(0.05, 0.03, 0.7);
-            // Bend it by manipulating vertices
-            const leg = new THREE.Mesh(legGeometry, legMaterial);
-            
-            // Position legs evenly along body
-            const side = i % 2 === 0 ? 1 : -1;
-            const offset = Math.floor(i / 2) - 1;
-            leg.position.set(side * 0.6, 0, offset * 0.5);
-            leg.rotation.x = Math.PI / 2;
-            leg.rotation.z = side * Math.PI / 4;
-            
-            cockroachGroup.add(leg);
-          }
-          
-          // Antennae
-          for (let i = 0; i < 2; i++) {
-            const antennaGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.5);
-            const antenna = new THREE.Mesh(antennaGeometry, legMaterial);
-            const side = i % 2 === 0 ? 1 : -1;
-            antenna.position.set(side * 0.1, 0.2, 0.8);
-            antenna.rotation.x = -Math.PI / 4;
-            antenna.rotation.y = side * Math.PI / 8;
-            cockroachGroup.add(antenna);
-          }
-          
-          // Make all parts cast shadows
-          cockroachGroup.traverse(function(child) {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-          
-          // Set position and add to scene
-          cockroachGroup.position.set(0, 0.3, 0);
-          cockroachModel = cockroachGroup;
-          scene.add(cockroachModel);
-          
-          // Create physics body
-          createCockroachPhysics();
-          
+          cockroachLoaded = true;
           log('Placeholder cockroach created', 'info');
         } catch (error) {
           log(`Error creating placeholder: ${error.message}`, 'error');
-          console.error('Error creating placeholder:', error);
+          console.error('Placeholder creation error:', error);
+          
+          // Ultra-simple fallback if all else fails
+          try {
+            const boxGeometry = new THREE.BoxGeometry(0.5, 0.2, 1);
+            const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+            cockroach = new THREE.Mesh(boxGeometry, boxMaterial);
+            cockroach.position.y = 0.1;
+            scene.add(cockroach);
+            cockroachLoaded = true;
+          } catch (e) {
+            // Last resort - if everything fails
+            console.error('Failed to create any cockroach model');
+          }
         }
       }
       
@@ -1378,45 +1519,6 @@
         log('Sent loaded message to parent');
       }
       
-      // Add click handler to ensure focus
-      document.addEventListener('click', function() {
-        log('Game area clicked, ensuring focus');
-        window.focus();
-      });
-      
-      // Add a visible message to click for controls
-      const clickMessage = document.createElement('div');
-      clickMessage.style.position = 'fixed';
-      clickMessage.style.top = '50%';
-      clickMessage.style.left = '50%';
-      clickMessage.style.transform = 'translate(-50%, -50%)';
-      clickMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-      clickMessage.style.color = '#00FF66';
-      clickMessage.style.padding = '20px';
-      clickMessage.style.borderRadius = '10px';
-      clickMessage.style.fontFamily = 'monospace';
-      clickMessage.style.zIndex = '2000';
-      clickMessage.style.textAlign = 'center';
-      clickMessage.style.boxShadow = '0 0 20px #9333EA';
-      clickMessage.style.cursor = 'pointer';
-      clickMessage.innerHTML = '<h2>Click to Enable Controls</h2><p>Click anywhere in this area to enable keyboard controls</p>';
-      document.body.appendChild(clickMessage);
-      
-      // Make message clickable to dismiss
-      clickMessage.addEventListener('click', function() {
-        window.focus();
-        if (clickMessage.parentNode) {
-          clickMessage.parentNode.removeChild(clickMessage);
-        }
-      });
-      
-      // Remove message after a click anywhere
-      document.addEventListener('click', function removeClickMessage() {
-        if (clickMessage.parentNode) {
-          clickMessage.parentNode.removeChild(clickMessage);
-        }
-        document.removeEventListener('click', removeClickMessage);
-      });
     })();
   </script>
 </body>
