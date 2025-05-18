@@ -279,6 +279,8 @@
     <p>A/Left Arrow - Rotate Left</p>
     <p>D/Right Arrow - Rotate Right</p>
     <p>Space - Jump</p>
+    <p>F - Zoom In</p>
+    <p>G - Zoom Out</p>
     <p>ESC - Settings Menu</p>
     <p>T - Toggle Debug Camera</p>
   </div>
@@ -315,6 +317,29 @@
   </div>
   
   <div id="loading-indicator" style="display: none;"></div>
+  
+  <!-- Zoom notification element -->
+  <div id="zoom-notification" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: #FF8000; padding: 10px 20px; border-radius: 5px; font-family: Arial, sans-serif; font-weight: bold; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
+  
+  <!-- Additional scripts -->
+  <script src="direct-keyboard-zoom.js"></script>
+  <script src="direct-zoom-handler.js"></script>
+  
+  <script>
+    // Function to show zoom notification
+    function showZoomNotification(message) {
+      const notification = document.getElementById('zoom-notification');
+      if (notification) {
+        notification.textContent = message;
+        notification.style.opacity = '1';
+        
+        // Hide after 1 second
+        setTimeout(() => {
+          notification.style.opacity = '0';
+        }, 1000);
+      }
+    }
+  </script>
   
   <script>
     // EXTREMELY aggressive removal of any green focus messages
@@ -384,6 +409,13 @@
       let debugMode = false;
       let frameCount = 0;
       let orbitControls = null;
+      
+      // FOV Zoom variables
+      let defaultFOV = 75;
+      let currentFOV = defaultFOV;
+      let minFOV = 45;
+      let maxFOV = 90;
+      let zoomStep = 5;
       
       // Enhanced log with color-coded messages and categories
       function log(message, type = 'info') {
@@ -711,6 +743,9 @@
               camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
               camera.position.set(0, 3, 5); // Positioned behind cockroach
               
+              // Make camera globally accessible for zoom functionality
+              window.camera = camera;
+              
               // Add lights
               const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
               scene.add(ambientLight);
@@ -1026,7 +1061,9 @@
           backward: false,
           left: false,
           right: false,
-          jump: false
+          jump: false,
+          zoomIn: false,
+          zoomOut: false
         };
         
         // Track pressed keys with keyCode fallbacks for maximum compatibility
@@ -1044,7 +1081,10 @@
           68: 'right',      // D
           39: 'right',      // Arrow Right
           // Jump
-          32: 'jump'        // Space
+          32: 'jump',       // Space
+          // Zoom controls
+          70: 'zoomIn',     // F
+          71: 'zoomOut'     // G
         };
         
         // Event handler - keydown with maximum compatibility
@@ -1426,6 +1466,23 @@
         const distance = 5;  // Distance behind cockroach
         const height = 3;    // Height above cockroach
         const lookOffset = 2; // Look slightly ahead of cockroach
+        
+        // Handle zoom controls
+        if (keys.zoomIn) {
+          // Zoom in (reduce FOV)
+          currentFOV = Math.max(minFOV, currentFOV - zoomStep * 0.1);
+          camera.fov = currentFOV;
+          camera.updateProjectionMatrix();
+          log('Zoom key pressed: zoomIn', 'input');
+        }
+        
+        if (keys.zoomOut) {
+          // Zoom out (increase FOV)
+          currentFOV = Math.min(maxFOV, currentFOV + zoomStep * 0.1);
+          camera.fov = currentFOV;
+          camera.updateProjectionMatrix();
+          log('Zoom key pressed: zoomOut', 'input');
+        }
         
         // Calculate target position behind cockroach
         const targetX = cockroachModel.position.x - Math.sin(cockroachModel.rotation.y) * distance;

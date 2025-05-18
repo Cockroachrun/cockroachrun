@@ -4,6 +4,7 @@ import * as CANNON from 'cannon-es';
 import CONFIG from '../config';
 import { UIManager } from './UIManager';
 import { FreeWorldMode } from '../game-modes/FreeWorldMode';
+import { ZoomControls } from '../../js/zoom-controls.js';
 
 export class Game {
   constructor() {
@@ -32,6 +33,9 @@ export class Game {
     
     // Managers
     this.ui = new UIManager(this);
+    
+    // Zoom controls will be initialized after camera is created
+    this.zoomControls = null;
     
     // Bind methods to maintain context
     this.gameLoop = this.gameLoop.bind(this);
@@ -120,8 +124,9 @@ export class Game {
     // Add camera to scene
     this.scene.add(this.camera);
     
-    // Add basic lighting
-    this.setupBasicLighting();
+    // Initialize zoom controls
+    this.zoomControls = new ZoomControls(this);
+    console.log('Zoom controls initialized');
     
     // Create clock for animation timing
     this.clock = new THREE.Clock();
@@ -359,6 +364,11 @@ export class Game {
   quitGame() {
     // Clear game objects
     this.clearScene();
+    
+    // Clean up zoom controls if they exist
+    if (this.zoomControls) {
+      this.zoomControls.destroy();
+    }
     
     // Reset game state
     this.isRunning = false;

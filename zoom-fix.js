@@ -5,50 +5,65 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM loaded, waiting for game to initialize...');
   
-  // Try to apply fix multiple times to ensure it catches the game
-  let attempts = 0;
-  const maxAttempts = 20;
-  const interval = setInterval(tryApplyFix, 1000);
+  // No need to check for iframe in the standalone version
+  // We'll directly add event listeners to the game container
   
-  function tryApplyFix() {
-    attempts++;
-    console.log(`Attempt ${attempts}/${maxAttempts} to apply zoom fix...`);
-    
-    if (attempts >= maxAttempts) {
-      clearInterval(interval);
-      console.log('Failed to apply zoom fix after maximum attempts');
-      return;
+  // Try to use the existing camera directly
+  const checkInterval = setInterval(function() {
+    if (window.camera) {
+      console.log('Camera found, applying zoom fix...');
+      setupDirectZoom();
+      clearInterval(checkInterval);
+    } else {
+      console.log('Still looking for camera...');
     }
+  }, 1000);
+  
+  function setupDirectZoom() {
+    // Set up zoom properties
+    const defaultFOV = 75;
+    const minFOV = 45;
+    const maxFOV = 90;
+    const zoomStep = 5;
+    let currentFOV = window.camera.fov;
     
-    try {
-      // Check if we can apply the fix now
-      if (applyZoomFix()) {
-        clearInterval(interval);
-        console.log('Zoom fix successfully applied!');
-      }
-    } catch (error) {
-      console.log('Error while applying zoom fix:', error);
+    // Add wheel event for zooming
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+      gameContainer.addEventListener('wheel', function(event) {
+        // Prevent the default scroll
+        event.preventDefault();
+        
+        // Calculate zoom delta (reversed, as negative deltaY means scroll up/zoom in)
+        const delta = event.deltaY > 0 ? -1 : 1;
+        
+        // Update FOV based on wheel direction
+        if (delta > 0) {
+          // Zoom in
+          currentFOV = Math.max(minFOV, currentFOV - zoomStep * 0.2);
+        } else {
+          // Zoom out
+          currentFOV = Math.min(maxFOV, currentFOV + zoomStep * 0.2);
+        }
+        
+        // Apply the new FOV
+        window.camera.fov = currentFOV;
+        window.camera.updateProjectionMatrix();
+        
+        console.log(`Zoomed with wheel: FOV = ${currentFOV}`);
+        
+        // Show notification if the function exists
+        if (typeof showZoomNotification === 'function') {
+          showZoomNotification(delta > 0 ? 'Zoomed In' : 'Zoomed Out');
+        }
+        
+        return false;
+      }, { passive: false });
+      
+      console.log('Mouse wheel zoom controls enabled');
     }
   }
-  
-  // Main function that applies the zoom fix
-  function applyZoomFix() {
-    const iframe = document.querySelector("iframe");
-    
-    if (!iframe) {
-      console.log("Waiting for iframe to load...");
-      setTimeout(checkIframe, 500);
-      return;
-    }
-    
-    console.log("Iframe found, checking game...");
-    
-    // Make sure iframe is loaded
-    if (!iframe.contentWindow || !iframe.contentDocument) {
-      console.log("Iframe content not available yet, waiting...");
-      setTimeout(checkIframe, 500);
-      return;
-    }
+});
     
     // Check for game object
     if (!iframe.contentWindow.game || !iframe.contentWindow.game.activeGameMode) {
