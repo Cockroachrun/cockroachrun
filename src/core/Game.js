@@ -5,6 +5,7 @@ import CONFIG from '../config';
 import { UIManager } from './UIManager';
 import { FreeWorldMode } from '../game-modes/FreeWorldMode';
 import { ZoomControls } from '../../js/zoom-controls.js';
+import { InGameSettings } from '../../js/in-game-settings.js';
 
 export class Game {
   constructor() {
@@ -36,6 +37,9 @@ export class Game {
     
     // Zoom controls will be initialized after camera is created
     this.zoomControls = null;
+    
+    // In-game settings will be initialized after startup
+    this.inGameSettings = null;
     
     // Bind methods to maintain context
     this.gameLoop = this.gameLoop.bind(this);
@@ -127,6 +131,25 @@ export class Game {
     // Initialize zoom controls
     this.zoomControls = new ZoomControls(this);
     console.log('Zoom controls initialized');
+    
+    // Make game instance accessible globally for the in-game settings
+    window.game = this;
+    
+    // Check if we already have an in-game settings instance from the global script
+    if (window.inGameSettingsInstance) {
+      console.log('Using existing in-game settings instance');
+      this.inGameSettings = window.inGameSettingsInstance;
+      this.inGameSettings.game = this; // Update reference to game
+    } else {
+      // Initialize in-game settings 
+      // This fallback uses the module version if available
+      try {
+        this.inGameSettings = new InGameSettings(this);
+        console.log('In-game settings initialized');
+      } catch (e) {
+        console.warn('Error initializing in-game settings:', e);
+      }
+    }
     
     // Create clock for animation timing
     this.clock = new THREE.Clock();
@@ -346,10 +369,12 @@ export class Game {
   }
   
   pauseGame() {
+    console.log('Game paused');
     this.isRunning = false;
   }
   
   resumeGame() {
+    console.log('Game resumed');
     this.isRunning = true;
   }
   
@@ -370,6 +395,11 @@ export class Game {
       this.zoomControls.destroy();
     }
     
+    // Clean up in-game settings if they exist
+    if (this.inGameSettings) {
+      this.inGameSettings.destroy();
+    }
+    
     // Reset game state
     this.isRunning = false;
   }
@@ -385,7 +415,7 @@ export class Game {
     }
     
     // STEP 2: Set up game container
-    const gameContainer = document.getElementById('game-container');
+    let gameContainer = document.getElementById('game-container');
     if (gameContainer) {
       gameContainer.style.display = 'block';
       gameContainer.style.position = 'fixed';

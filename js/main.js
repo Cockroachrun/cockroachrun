@@ -3,6 +3,18 @@
  * Initializes all game components and manages the game flow
  */
 
+// Add global keyboard event listener to help with debugging
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    console.log('ESC key detected at document level');
+    if (window.inGameSettingsInstance) {
+      console.log('In-game settings instance found');
+    } else {
+      console.warn('In-game settings instance not found');
+    }
+  }
+});
+
 // Preload important images
 function preloadImages() {
   const imagesToPreload = [

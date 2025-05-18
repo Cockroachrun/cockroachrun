@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Page</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+    }
+    h1 {
+      color: #ff6600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Page</h1>
+  <p>If you can see this, the Vite server is working correctly.</p>
+  <p>Check the browser's console for any JavaScript errors.</p>
+  <script type="module">
+    console.log('Test script loaded successfully');
+    
+    // Try to access some browser APIs
+    try {
+      console.log('WebGL supported:', !!document.createElement('canvas').getContext('webgl'));
+      console.log('Three.js available:', typeof THREE !== 'undefined');
+    } catch (e) {
+      console.error('Error accessing browser APIs:', e);
+    }
+  </script>
+</body>
+</html>

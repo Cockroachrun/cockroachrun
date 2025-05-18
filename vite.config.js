@@ -8,10 +8,11 @@ export default defineConfig({
   },
   server: {
     open: true,
-  },
-  resolve: {
-    alias: {
-      '@': '/src',
+    hmr: {
+      overlay: false, // Disable the error overlay
     },
+  },
+  css: {
+    devSourcemap: true,
   },
 });

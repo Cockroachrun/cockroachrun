@@ -24,12 +24,13 @@
   <link rel="stylesheet" href="css/components/music-controls.css" />
   <link rel="stylesheet" href="css/components/buttonFix.css" />
   <link rel="stylesheet" href="css/components/zoom-controls.css" />
+  <link rel="stylesheet" href="css/components/in-game-settings.css" />
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <!-- Preload character images -->
-  <link rel="preload" href="assets/images/characters/german_cockroach.png" as="image" />
-  <link rel="preload" href="assets/images/characters/American Cockroach with bg.png" as="image" />
-  <link rel="preload" href="assets/images/characters/Oreintal Cockroach.png" as="image" />
+  <link rel="preload" href="/assets/images/characters/german_cockroach.png" as="image" />
+  <link rel="preload" href="/assets/images/characters/American Cockroach with bg.png" as="image" />
+  <link rel="preload" href="/assets/images/characters/Oreintal Cockroach.png" as="image" />
 </head>
 <body>
   <!-- Game Canvas Container -->
@@ -43,7 +44,7 @@
     <div id="loading-screen" class="screen active">
       <div class="loading-content">
         <div class="logo-container">
-          <img src="assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
+          <img src="/assets/images/ui/logo_title.png" alt="Cockroach Run" class="game-logo" />
         </div>
 
         <div class="loading-title">SYSTEM LOADING</div>
@@ -402,16 +403,16 @@
 
   <!-- Audio Elements -->
   <audio id="menu-music" loop preload="auto">
-    <source src="assets/sounds/music/Menu_loop.mp3" type="audio/mpeg" />
+    <source src="/assets/sounds/music/Menu_loop.mp3" type="audio/mpeg" />
   </audio>
   <audio id="game-music" loop preload="auto">
-    <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
+    <source src="/assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
   </audio>
   <audio id="button-click" preload="auto">
-    <source src="assets/sounds/sfx/button_click.wav" type="audio/wav" />
+    <source src="/assets/sounds/sfx/button_click.wav" type="audio/wav" />
   </audio>
   <audio id="scatter-sound" preload="auto">
-    <source src="assets/sounds/sfx/scatter.wav" type="audio/wav" />
+    <source src="/assets/sounds/sfx/scatter.wav" type="audio/wav" />
   </audio>
 
   <!-- 3D Libraries - Required for the game engine -->
@@ -431,6 +432,8 @@
   <script src="js/smoothLoading.js"></script>
   <script src="js/fixCardTransition.js"></script>
   <script src="js/fixEventBugs.js"></script>
+  <!-- In-game settings -->
+  <script src="js/in-game-settings-global.js"></script>
   <!-- Bitcoin Wallet Integration -->
   <script src="js/services/wallet.js"></script>
   <!-- Game State Management -->

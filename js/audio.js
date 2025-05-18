@@ -105,6 +105,9 @@ const AudioManager = {
 
     this.loadSettings();
     console.log('AudioManager initialized');
+    
+    // Make AudioManager globally accessible
+    window.AudioManager = this;
   },
 
   loadSettings() {
