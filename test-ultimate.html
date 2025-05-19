@@ -190,6 +190,22 @@
       background-color: #111111;
     }
     
+    #settings-menu button {
+      background-color: #121212;
+      color: #FF8000;
+      border: 1px solid #FF8000;
+      padding: 5px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    #settings-menu button:hover {
+      background-color: #FF8000;
+      color: #121212;
+    }
+    
     #return-to-menu-button {
       background-color: #000000;
       color: #FF8000;
@@ -204,6 +220,68 @@
     
     #return-to-menu-button:hover {
       background-color: #111111;
+    }
+    
+    /* Music track selector styling */
+    #track-selector {
+      position: relative;
+      display: inline-block;
+    }
+    
+    #music-track-button {
+      min-width: 180px;
+      text-align: left;
+      position: relative;
+      padding-right: 25px;
+      background-color: #121212;
+      color: #FF8000;
+      border: 1px solid #FF8000;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    #music-track-button:after {
+      content: '▼';
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+    }
+    
+    #music-track-dropdown {
+      display: none;
+      position: absolute;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #121212;
+      border: 1px solid #FF8000;
+      z-index: 1000;
+    }
+    
+    .track-option {
+      padding: 6px 10px;
+      cursor: pointer;
+      color: #FF8000;
+      transition: all 0.2s;
+    }
+    
+    .track-option:hover {
+      background-color: #FF8000;
+      color: #121212;
+    }
+    
+    /* Now Playing indicator */
+    .now-playing {
+      font-size: 10px;
+      color: #FF8000;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
     }
     
     #loading-indicator {
@@ -243,6 +321,75 @@
       outline: 3px solid #00ff00;
     }
     
+    /* Music track selection dropdown */
+    #track-selector {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    
+    #music-track-button {
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 8px;
+      text-align: left;
+      cursor: pointer;
+      min-width: 120px;
+      position: relative;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 20px;
+    }
+    
+    #music-track-button:after {
+      content: '▼';
+      font-size: 10px;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    #music-track-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 180px;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #000000;
+      border: 2px solid #FF8000;
+      z-index: 1001;
+      display: none;
+    }
+    
+    .track-option {
+      padding: 5px 8px;
+      cursor: pointer;
+      color: #FF8000;
+      font-size: 14px;
+      text-align: left;
+    }
+    
+    .track-option:hover {
+      background-color: #333;
+    }
+    
+    /* Current track indicator */
+    .current-track {
+      color: #000000;
+      background-color: #FF8000;
+    }
+    
+    .current-track:hover {
+      background-color: #FF8000;
+      color: #000000;
+    }
+    
     @media (max-width: 768px) {
       #debug-info {
         width: 90%;
@@ -258,10 +405,25 @@
         min-width: 50px;
         height: 50px;
       }
+      
+      #music-track-button {
+        min-width: 100px;
+        font-size: 12px;
+      }
+      
+      #music-track-dropdown {
+        width: 150px;
+      }
+      
+      .track-option {
+        font-size: 12px;
+      }
     }
   </style>
   <!-- Zoom functionality fix -->
   <script src="zoom-fix.js"></script>
+  <!-- Audio Manager for music control -->
+  <script src="js/audio.js"></script>
 </head>
 <body>
   <div id="game-container" tabindex="0"><!-- Three.js will render here --></div>
@@ -286,8 +448,9 @@
   </div>
   
   <!-- Settings menu (appears when ESC is pressed) -->
-  <div id="settings-menu">
+  <div id="settings-menu" style="display: none;">
     <h2>Game Settings</h2>
+    <div class="now-playing" id="now-playing">NOW PLAYING: <span id="now-playing-text"></span></div>
     
     <div class="settings-row">
       <label for="touch-controls-toggle">Touch Controls</label>
@@ -297,6 +460,22 @@
     <div class="settings-row">
       <label for="debug-toggle">Debug Info</label>
       <button id="debug-toggle">Show</button>
+    </div>
+    
+    <div class="settings-row">
+      <label for="track-selector">Music Track</label>
+      <div id="track-selector">
+        <button id="music-track-button">Cockroach Run</button>
+        <div id="music-track-dropdown">
+          <div class="track-option" data-value="checkpoint-chaser">Checkpoint Chaser</div>
+          <div class="track-option" data-value="cockroach-comeback">Cockroach Comeback</div>
+          <div class="track-option" data-value="cockroach-run">Cockroach Run</div>
+          <div class="track-option" data-value="dodge-weave-waltz">Dodge and Weave Waltz</div>
+          <div class="track-option" data-value="neon-roach-runnin">Neon Roach Runnin</div>
+          <div class="track-option" data-value="run-roach-run">Run, Roach, Run!</div>
+          <div class="track-option" data-value="urban-jungle-jive">Urban Jungle Jive</div>
+        </div>
+      </div>
     </div>
     
     <div class="settings-row">
@@ -317,6 +496,12 @@
   </div>
   
   <div id="loading-indicator" style="display: none;"></div>
+  
+  <!-- Audio elements for the game -->
+  <audio id="button-click" src="audio/button-click.mp3" preload="auto"></audio>
+  <audio id="scatter-sound" src="audio/scatter.mp3" preload="auto"></audio>
+  <audio id="menu-music" loop preload="auto"></audio>
+  <audio id="game-music" loop preload="auto"></audio>
   
   <!-- Zoom notification element -->
   <div id="zoom-notification" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: #FF8000; padding: 10px 20px; border-radius: 5px; font-family: Arial, sans-serif; font-weight: bold; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
@@ -449,6 +634,53 @@
       
       // Initialize the game when the DOM is loaded
       window.onload = function() {
+        // Initialize AudioManager if it exists and we're in a browser context
+        if (window.AudioManager) {
+          log('Initializing AudioManager...', 'info');
+          window.AudioManager.init();
+          
+          // Verify audio elements and display state for debugging
+          const audioElements = {
+            'menu-music': document.getElementById('menu-music'),
+            'game-music': document.getElementById('game-music'),
+            'button-click': document.getElementById('button-click'),
+            'scatter-sound': document.getElementById('scatter-sound')
+          };
+          
+          let audioElementsLog = 'Audio Elements Status:\n';
+          for (const [id, element] of Object.entries(audioElements)) {
+            audioElementsLog += `${id}: ${element ? 'Found' : 'MISSING'}\n`;
+            if (!element) {
+              log(`ERROR: Audio element ${id} not found in the DOM!`, 'error');
+            }
+          }
+          log(audioElementsLog, 'debug');
+          
+          // Force loading the correct tracks into audio elements
+          if (audioElements['game-music']) {
+            const gameTrackId = window.AudioManager.gameTrackId;
+            const gameMusicPath = `assets/sounds/music/${window.AudioManager.trackMap[gameTrackId]}`;
+            
+            log(`Setting game music source to: ${gameMusicPath}`, 'info');
+            audioElements['game-music'].src = gameMusicPath;
+            audioElements['game-music'].load();
+            
+            // Also make sure button click and scatter sounds have correct paths
+            if (audioElements['button-click'] && !audioElements['button-click'].src) {
+              audioElements['button-click'].src = 'assets/sounds/button-click.mp3';
+            }
+            
+            if (audioElements['scatter-sound'] && !audioElements['scatter-sound'].src) {
+              audioElements['scatter-sound'].src = 'assets/sounds/scatter.mp3';
+            }
+          }
+          
+          // Set to game context since we're loading the game
+          log('Setting audio context to GAME', 'info');
+          window.AudioManager.setContext(true);
+        } else {
+          log('AudioManager not found!', 'error');
+        }
         init();
       };
       
@@ -456,6 +688,114 @@
       const urlParams = new URLSearchParams(window.location.search);
       const selectedMode = urlParams.get('mode') || 'free-world';
       const selectedCharacter = urlParams.get('character') || 'default-roach';
+      
+      // Function to initialize music track selector
+      function initMusicTrackSelector() {
+        const musicTrackButton = document.getElementById('music-track-button');
+        const musicTrackDropdown = document.getElementById('music-track-dropdown');
+        const trackOptions = document.querySelectorAll('.track-option');
+        const nowPlaying = document.getElementById('now-playing');
+        const nowPlayingText = document.getElementById('now-playing-text');
+        
+        if (!musicTrackButton || !musicTrackDropdown) return;
+        
+        // Set initial track from AudioManager's game track
+        if (window.AudioManager && window.AudioManager.gameTrackId) {
+          const gameTrack = window.AudioManager.gameTrackId;
+          const trackElement = document.querySelector(`.track-option[data-value="${gameTrack}"]`);
+          if (trackElement) {
+            musicTrackButton.textContent = trackElement.textContent;
+            nowPlayingText.textContent = trackElement.textContent;
+            nowPlaying.style.display = 'block';
+          }
+        }
+        
+        // Listen for track change events from AudioManager
+        window.addEventListener('trackChanged', function(e) {
+          if (e.detail && e.detail.trackId) {
+            // Only update if we're in game context - we only care about the game tracks here
+            if (window.AudioManager && window.AudioManager.inGameContext) {
+              const trackElement = document.querySelector(`.track-option[data-value="${e.detail.trackId}"]`);
+              if (trackElement) {
+                musicTrackButton.textContent = trackElement.textContent;
+                nowPlayingText.textContent = trackElement.textContent;
+                nowPlaying.style.display = 'block';
+                
+                // Update the game track in AudioManager
+                if (window.AudioManager) {
+                  window.AudioManager.gameTrackId = e.detail.trackId;
+                  localStorage.setItem('gameTrackId', e.detail.trackId);
+                }
+              }
+            }
+          }
+        });
+        
+        // Toggle dropdown on button click
+        musicTrackButton.addEventListener('click', function() {
+          const isVisible = musicTrackDropdown.style.display === 'block';
+          musicTrackDropdown.style.display = isVisible ? 'none' : 'block';
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!musicTrackButton.contains(e.target) && !musicTrackDropdown.contains(e.target)) {
+            musicTrackDropdown.style.display = 'none';
+          }
+        });
+        
+        // Track selection event handler
+        trackOptions.forEach(option => {
+          option.addEventListener('click', function() {
+            const trackId = this.getAttribute('data-value');
+            const trackName = this.textContent;
+            
+            // Update UI
+            musicTrackButton.textContent = trackName;
+            musicTrackDropdown.style.display = 'none';
+            nowPlayingText.textContent = trackName;
+            nowPlaying.style.display = 'block';
+            
+            // Change track via AudioManager - directly update game music
+            if (window.AudioManager) {
+              // Update the game track ID
+              window.AudioManager.gameTrackId = trackId;
+              localStorage.setItem('gameTrackId', trackId);
+              
+              // Force game music to change and play immediately
+              window.AudioManager.playMusicInGameContext();
+              
+              // Also update the current track ID for compatibility with other parts of the code
+              window.AudioManager.currentTrackId = trackId;
+              
+              // Extra step: Double-check that the audio element has the correct source
+              if (window.AudioManager.gameMusic) {
+                const expectedSrc = `assets/sounds/music/${window.AudioManager.trackMap[trackId]}`;
+                const currentSrc = window.AudioManager.gameMusic.src;
+                log(`Current audio src: ${currentSrc}`, 'debug');
+                
+                // Check if the source needs updating
+                if (!currentSrc || currentSrc.indexOf(window.AudioManager.trackMap[trackId]) === -1) {
+                  log(`Forcing audio source update to: ${expectedSrc}`, 'warning');
+                  window.AudioManager.gameMusic.src = expectedSrc;
+                  window.AudioManager.gameMusic.load();
+                  
+                  // Try to play immediately if not muted
+                  if (!window.AudioManager.isMuted) {
+                    window.AudioManager.gameMusic.play()
+                      .then(() => log('Game track playing after direct src update', 'info'))
+                      .catch(e => log('Failed to play after src update: ' + e.message, 'error'));
+                  }
+                } else {
+                  log('Audio source already correct, no update needed', 'debug');
+                }
+              }
+              
+              log(`Changed game music to: ${trackName}`, 'info');
+            }
+          });
+        });
+      }
       
       log(`Selected mode: ${selectedMode}, character: ${selectedCharacter}`);
       
@@ -490,24 +830,32 @@
         const settingsMenu = document.getElementById('settings-menu');
         const closeSettings = document.getElementById('close-settings');
         
-        // ESC key to open/close settings
-        window.addEventListener('keydown', function(e) {
+        // ESC key toggles settings menu
+        document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape' || e.keyCode === 27) {
-            if (settingsMenu.style.display === 'block') {
-              settingsMenu.style.display = 'none';
-              resumeGame();
-            } else {
-              settingsMenu.style.display = 'block';
-              pauseGame();
-            }
+            toggleSettingsMenu();
           }
         });
+        
+        // Function to toggle settings menu visibility
+        function toggleSettingsMenu() {
+          if (settingsMenu.style.display === 'block') {
+            settingsMenu.style.display = 'none';
+            resumeGame();
+          } else {
+            settingsMenu.style.display = 'block';
+            pauseGame();
+          }
+        }
         
         // Close button for settings
         closeSettings.addEventListener('click', function() {
           settingsMenu.style.display = 'none';
           resumeGame();
         });
+        
+        // Initialize music track selector
+        initMusicTrackSelector();
         
         // Return to main menu button - EXTREMELY simplified to guarantee success
         const returnToMenuButton = document.getElementById('return-to-menu-button');
@@ -527,6 +875,29 @@
             
             // Stop all animations and rendering immediately
             gamePaused = true;
+            
+            // Force stop any game music immediately
+            if (window.AudioManager) {
+              if (window.AudioManager.gameMusic && !window.AudioManager.gameMusic.paused) {
+                log('Forcefully stopping game music before returning to menu', 'info');
+                window.AudioManager.gameMusic.pause();
+                window.AudioManager.gameMusic.currentTime = 0;
+              }
+              
+              // Set the local audio context to menu
+              log('Setting audio context back to MENU', 'info');
+              window.AudioManager.setContext(false);
+            }
+            
+            // Tell the parent window we're returning to menu so it can handle menu music
+            try {
+              window.parent.postMessage({ 
+                type: 'return-to-menu',
+                audioContext: 'menu'
+              }, '*');
+            } catch (err) {
+              log('Error notifying parent of menu return: ' + err.message, 'error');
+            }
             
             // Simple and reliable approach - use parent's top-level function
             try {
@@ -551,7 +922,44 @@
         // Music toggle button - completely rewritten to work properly
         document.getElementById('music-toggle').addEventListener('click', function() {
           try {
-            if (window.parent && window.parent.AudioManager) {
+            // First try the local AudioManager we've added
+            if (window.AudioManager) {
+              const audioManager = window.AudioManager;
+              
+              // Toggle the mute state directly using AudioManager's method
+              audioManager.isMuted = !audioManager.isMuted;
+              
+              // Explicitly handle the currently playing game music
+              if (audioManager.gameMusic) {
+                if (audioManager.isMuted) {
+                  // If muted, pause the game music immediately
+                  audioManager.gameMusic.pause();
+                  log('Game music explicitly paused due to mute toggle', 'info');
+                } else {
+                  // If unmuted and we're in game context, resume playing the game music
+                  if (audioManager.inGameContext) {
+                    audioManager.gameMusic.play().catch(e => log('Could not autoplay game music: ' + e.message, 'warn'));
+                    log('Game music explicitly resumed', 'info');
+                  }
+                }
+              }
+              
+              // Apply general mute state for other sounds
+              audioManager.applyMuteState();
+              localStorage.setItem('isMuted', JSON.stringify(audioManager.isMuted));
+              
+              // Update button text to match actual state
+              this.textContent = audioManager.isMuted ? 'Off' : 'On';
+              log('Music turned ' + (audioManager.isMuted ? 'off' : 'on'), 'info');
+              
+              // Also update SFX toggle to match
+              const sfxToggle = document.getElementById('sfx-toggle');
+              if (sfxToggle) {
+                sfxToggle.textContent = audioManager.isMuted ? 'Off' : 'On';
+              }
+            } 
+            // Fallback to parent window if local AudioManager isn't available
+            else if (window.parent && window.parent.AudioManager) {
               const audioManager = window.parent.AudioManager;
               
               // Toggle the mute state directly using AudioManager's method
@@ -585,30 +993,48 @@
           }
         });
         
-        // Sound effects toggle - directly triggers the music toggle for consistency
+        // SFX toggle button
         document.getElementById('sfx-toggle').addEventListener('click', function() {
           try {
-            // Simply trigger the music toggle for synchronized behavior
-            // This ensures both buttons always show the same state
-            const musicToggle = document.getElementById('music-toggle');
-            if (musicToggle) {
-              // Trigger the click event on the music toggle
-              musicToggle.click();
-            } else {
-              // Fallback if music toggle isn't available
-              this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+            // First try the local AudioManager we've added
+            if (window.AudioManager) {
+              const audioManager = window.AudioManager;
               
-              if (window.parent && window.parent.AudioManager) {
-                const audioManager = window.parent.AudioManager;
-                audioManager.isMuted = !audioManager.isMuted;
-                audioManager.applyMuteState();
-                localStorage.setItem('isMuted', JSON.stringify(audioManager.isMuted));
-              }
+              // Toggle SFX volume
+              audioManager.sfxVolume = audioManager.sfxVolume > 0 ? 0 : 1.0;
+              audioManager.applyVolumeSettings();
+              localStorage.setItem('sfxVolume', audioManager.sfxVolume);
+              
+              // Update button text
+              this.textContent = audioManager.sfxVolume > 0 ? 'On' : 'Off';
+              log('Sound effects turned ' + (audioManager.sfxVolume > 0 ? 'on' : 'off'), 'info');
+            } 
+            // Fallback to parent window if local AudioManager isn't available
+            else if (window.parent && window.parent.AudioManager) {
+              const audioManager = window.parent.AudioManager;
+              
+              // Toggle SFX volume
+              audioManager.sfxVolume = audioManager.sfxVolume > 0 ? 0 : 1.0;
+              audioManager.applyVolumeSettings();
+              localStorage.setItem('sfxVolume', audioManager.sfxVolume);
+              
+              // Update button text
+              this.textContent = audioManager.sfxVolume > 0 ? 'On' : 'Off';
+              log('Sound effects turned ' + (audioManager.sfxVolume > 0 ? 'on' : 'off'), 'info');
+            } else {
+              // Visual toggle as fallback
+              this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+              log('AudioManager not accessible, visual toggle only', 'warn');
+              
+              // Try parent window direct method
+              try {
+                window.parent.postMessage({ type: 'toggle-sfx' }, '*');
+              } catch (err) {}
             }
           } catch (e) {
             // Visual toggle as fallback
             this.textContent = this.textContent === 'On' ? 'Off' : 'On';
-            log('Error with sound effects toggle: ' + e.message, 'error');
+            log('Error toggling SFX: ' + e.message, 'error');
           }
         });
         
@@ -1271,6 +1697,37 @@
             this.textContent = 'Show';
           }
         });
+        
+        // SFX toggle button
+        document.getElementById('sfx-toggle').addEventListener('click', function() {
+          try {
+            // First try the local AudioManager we've added
+            if (window.AudioManager) {
+              const audioManager = window.AudioManager;
+              
+              // Toggle SFX volume
+              audioManager.sfxVolume = audioManager.sfxVolume > 0 ? 0 : 1.0;
+              audioManager.applyVolumeSettings();
+              localStorage.setItem('sfxVolume', audioManager.sfxVolume);
+              
+              // Update button text
+              this.textContent = audioManager.sfxVolume > 0 ? 'On' : 'Off';
+              log('Sound effects turned ' + (audioManager.sfxVolume > 0 ? 'on' : 'off'), 'info');
+            } 
+            // Fallback to parent window
+            else {
+              // Visual toggle
+              this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+              
+              // Send message to parent window
+              window.parent.postMessage({ type: 'toggle-sfx' }, '*');
+            }
+          } catch (e) {
+            // Visual toggle as fallback
+            this.textContent = this.textContent === 'On' ? 'Off' : 'On';
+            log('Error toggling SFX: ' + e.message, 'error');
+          }  
+        });
       }
       
       // SIMPLE and DIRECT cockroach movement with no complex timing logic
@@ -1545,10 +2002,99 @@
       
       // Listen for messages from parent window
       window.addEventListener('message', function(event) {
-        if (event.data && event.data.action) {
-          log(`Received message from parent: ${event.data.action}`);
+        // Handle messages from parent
+        const message = event.data;
+        
+        // Handle new message types first
+        if (message.type) {
+          if (message.type === 'set-mode') {
+            // Parent is telling us which mode to use
+            log(`Parent set mode: ${message.mode}`, 'info');
+            return;
+          }
           
-          switch(event.data.action) {
+          if (message.type === 'set-character') {
+            // Parent is telling us which character to use
+            log(`Parent set character: ${message.character}`, 'info');
+            return;
+          }
+          
+          if (message.type === 'set-audio-context') {
+            // Parent is telling us which audio context to use (menu or game)
+            const isGameContext = message.context === 'game';
+            const forceStopMenuMusic = message.forceStopMenuMusic === true;
+            log(`Parent set audio context: ${message.context.toUpperCase()} (force stop: ${forceStopMenuMusic})`, 'info');
+            
+            // EMERGENCY MUSIC SHUTDOWN - Stop ALL audio playing in the document
+            const allAudioElements = document.querySelectorAll('audio');
+            log(`Stopping all ${allAudioElements.length} audio elements before context change`, 'warning');
+            
+            allAudioElements.forEach(audio => {
+              if (!audio.paused) {
+                log(`Forcefully stopping audio: ${audio.id || 'unnamed'}`, 'info');
+                try {
+                  audio.pause();
+                  audio.currentTime = 0;
+                } catch (e) {
+                  log(`Error stopping audio: ${e.message}`, 'error');
+                }
+              }
+            });
+            
+            // Delay before starting new context to ensure clean transition
+            setTimeout(() => {
+              // Update AudioManager context if available
+              if (window.AudioManager) {
+                // Reset all tracks to make sure we start fresh
+                if (window.AudioManager.menuMusic) {
+                  log('Resetting menu music', 'info');
+                  window.AudioManager.menuMusic.pause();
+                  window.AudioManager.menuMusic.currentTime = 0;
+                }
+                
+                if (window.AudioManager.gameMusic) {
+                  log('Resetting game music', 'info');
+                  window.AudioManager.gameMusic.pause();
+                  window.AudioManager.gameMusic.currentTime = 0;
+                }
+                
+                // Set the context (this will trigger appropriate music)
+                log(`Setting AudioManager context to: ${isGameContext ? 'GAME' : 'MENU'}`, 'info');
+                window.AudioManager.setContext(isGameContext);
+                
+                // Explicitly play game music to ensure it starts, but only after a short delay
+                if (isGameContext) {
+                  setTimeout(() => {
+                    log('Forcing game music to play after context change', 'info');
+                    window.AudioManager.playMusicInGameContext();
+                    
+                    // Update the now playing indicator
+                    const nowPlaying = document.getElementById('now-playing');
+                    const nowPlayingText = document.getElementById('now-playing-text');
+                    const musicTrackButton = document.getElementById('music-track-button');
+                    
+                    if (nowPlaying && nowPlayingText && musicTrackButton) {
+                      const gameTrack = window.AudioManager.gameTrackId;
+                      const trackElement = document.querySelector(`.track-option[data-value="${gameTrack}"]`);
+                      if (trackElement) {
+                        musicTrackButton.textContent = trackElement.textContent;
+                        nowPlayingText.textContent = trackElement.textContent;
+                        nowPlaying.style.display = 'block';
+                      }
+                    }
+                  }, 1000); // Longer delay to ensure clean transition
+                }
+              }
+            }, 200); // Short delay to ensure all audio is properly stopped
+          }
+          return;
+        }
+        
+        // Handle legacy message format with action property
+        if (message.action) {
+          log(`Received message from parent: ${message.action}`);
+          
+          switch(message.action) {
             case 'focus':
               // Focus this window
               window.focus();
@@ -1566,7 +2112,7 @@
               break;
             case 'keypress':
               // Simulate a keypress from parent
-              log(`Received keypress: ${event.data.key}`);
+              log(`Received keypress: ${message.key}`);
               break;
           }
         }

@@ -143,7 +143,23 @@ class InGameSettingsClass {
     if (musicSelect) {
       musicSelect.addEventListener('change', (e) => {
         if (window.AudioManager) {
+          console.log('In-game menu: Changing track to', e.target.value);
           window.AudioManager.changeTrack(e.target.value);
+          
+          // Update the main menu's music selection if it exists
+          const mainMenuSelect = document.getElementById('music-select');
+          if (mainMenuSelect) {
+            mainMenuSelect.value = e.target.value;
+            
+            // Also update the main menu's dropdown display text
+            const mainMenuSelectedText = document.getElementById('selected-music-text');
+            if (mainMenuSelectedText) {
+              const selectedOption = mainMenuSelect.options[mainMenuSelect.selectedIndex];
+              if (selectedOption) {
+                mainMenuSelectedText.textContent = selectedOption.textContent;
+              }
+            }
+          }
         }
       });
     }
@@ -318,6 +334,7 @@ class InGameSettingsClass {
       const selectedText = document.getElementById('in-game-selected-music-text');
       
       if (musicSelect && window.AudioManager.currentTrackId) {
+        // Set the value to match the current track
         musicSelect.value = window.AudioManager.currentTrackId;
         
         if (selectedText) {
@@ -326,13 +343,50 @@ class InGameSettingsClass {
             selectedText.textContent = selectedOption.textContent;
           }
         }
+        
+        console.log('In-game menu: Updated track display to', window.AudioManager.currentTrackId);
       }
       
       // Update playback mode buttons
       this.updatePlaybackModeButtons(window.AudioManager.playbackMode);
+      
+      // Add a visual indication of what music is currently playing
+      this.addNowPlayingIndicator();
     }
   }
-    // Clean up event listeners when no longer needed
+    // Add a visual indication of the currently playing track
+  addNowPlayingIndicator() {
+    // First remove any existing indicators
+    const existingIndicators = this.settingsElement.querySelectorAll('.now-playing-indicator');
+    existingIndicators.forEach(el => el.remove());
+    
+    if (window.AudioManager && window.AudioManager.currentTrackId) {
+      // Create the indicator
+      const indicator = document.createElement('div');
+      indicator.className = 'now-playing-indicator';
+      indicator.innerHTML = '<i class="fas fa-play"></i> NOW PLAYING';
+      indicator.style.cssText = `
+        position: absolute;
+        right: 10px;
+        top: -18px;
+        background-color: #ff6600;
+        color: #000;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: bold;
+      `;
+      
+      // Find the dropdown wrapper
+      const dropdownWrapper = this.settingsElement.querySelector('.custom-dropdown-wrapper');
+      if (dropdownWrapper) {
+        // Position the indicator relative to the dropdown
+        dropdownWrapper.style.position = 'relative';
+        dropdownWrapper.appendChild(indicator);
+      }
+    }
+  }
+  
+  // Clean up event listeners when no longer needed
   destroy() {
     try {
       console.log('Cleaning up in-game settings');

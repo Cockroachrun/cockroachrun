@@ -78,6 +78,13 @@ window.Game = (function() {
                                 // Handle game end
                                 this.stopGame();
                                 break;
+                            case 'return-to-menu':
+                                console.log("Game iframe is returning to main menu - restarting menu music");
+                                // Notify AudioManager to switch back to menu context if it exists
+                                if (window.AudioManager) {
+                                    window.AudioManager.setContext(false); // false = menu context
+                                }
+                                break;
                         }
                     }
                 }.bind(this));
@@ -122,6 +129,19 @@ window.Game = (function() {
                             gameIframe.contentWindow.postMessage({ 
                                 action: 'keypress',
                                 key: 'test'
+                            }, '*');
+                            
+                            // Tell the game iframe to set audio context to game mode - with hard stop for menu music
+                            if (window.AudioManager && window.AudioManager.menuMusic) {
+                                console.log('Force stopping menu music before launching game');
+                                window.AudioManager.menuMusic.pause();
+                                window.AudioManager.menuMusic.currentTime = 0;
+                            }
+                            
+                            gameIframe.contentWindow.postMessage({
+                                type: 'set-audio-context',
+                                context: 'game',
+                                forceStopMenuMusic: true
                             }, '*');
                         }
                     }

@@ -63,24 +63,40 @@ const AudioManager = {
         console.warn("AudioManager Warning: Mute toggle button element not found!");
     }
     
-    // Event listener for music track selection
+    // Load saved menu and game track preferences
+    const savedMenuTrack = localStorage.getItem('menuTrackId');
+    if (savedMenuTrack && this.trackMap[savedMenuTrack]) {
+        this.menuTrackId = savedMenuTrack;
+        console.log(`Loaded saved menu track: ${savedMenuTrack}`);
+    }
+    
+    const savedGameTrack = localStorage.getItem('gameTrackId');
+    if (savedGameTrack && this.trackMap[savedGameTrack]) {
+        this.gameTrackId = savedGameTrack;
+        console.log(`Loaded saved game track: ${savedGameTrack}`);
+    }
+    
+    // Default current track to menu track since we start in menu
+    this.currentTrackId = this.menuTrackId;
+    
+    // Event listener for music track selection in main menu
     const musicSelect = document.getElementById('music-select');
     if (musicSelect) {
         musicSelect.addEventListener('change', (e) => {
             this.changeTrack(e.target.value);
         });
         
-        // Initialize with saved track or default
-        const savedTrack = localStorage.getItem('currentTrackId');
-        if (savedTrack && this.trackMap[savedTrack]) {
-            this.currentTrackId = savedTrack;
-            musicSelect.value = savedTrack;
+        // Initialize dropdown with saved menu track
+        if (this.trackMap[this.menuTrackId]) {
+            musicSelect.value = this.menuTrackId;
             
             // Update the custom dropdown text
             const selectedTextElement = document.getElementById('selected-music-text');
             if (selectedTextElement) {
                 const selectedOption = musicSelect.options[musicSelect.selectedIndex];
-                selectedTextElement.textContent = selectedOption.textContent;
+                if (selectedOption) {
+                    selectedTextElement.textContent = selectedOption.textContent;
+                }
             }
         }
     }
@@ -202,7 +218,19 @@ const AudioManager = {
       console.error(`Track ID not found: ${trackId}`);
       return null;
     }
-    return `assets/sounds/music/${filename}`;
+    
+    // Log to debug the track selection
+    console.log(`Getting path for track ID: ${trackId}, filename: ${filename}`);
+    
+    // Simplified and more robust path construction
+    let audioPath;
+    
+    // Both the main menu and game iframe need to use the same path structure
+    // The audio files are only located in assets/sounds/music/
+    audioPath = `assets/sounds/music/${filename}`;
+    console.log('Using path for audio:', audioPath);
+    
+    return audioPath;
   },
   
   // Create or get an audio element for a track
@@ -304,47 +332,279 @@ const AudioManager = {
     }
   },
   
-  // Change to a different track
+  // Context flag to know if we're in the main menu or in-game
+  // Default is main menu
+  inGameContext: false,
+  
+  // Separate track selections for menu and game
+  menuTrackId: 'cockroach-run',
+  gameTrackId: 'neon-roach-runnin',
+  
+  // Set current context to main menu or game
+  setContext(isGameContext) {
+    const wasGameContext = this.inGameContext;
+    this.inGameContext = isGameContext;
+    
+    // If context changed, update the audio playback
+    if (wasGameContext !== isGameContext) {
+      console.log(`Audio context changed to: ${isGameContext ? 'GAME' : 'MENU'}`);
+      this.updateAudioContext();
+    }
+  },
+  
+  // Update audio playback based on current context
+  updateAudioContext() {
+    // Don't do anything if muted
+    if (this.isMuted) return;
+    
+    if (this.inGameContext) {
+      // We're in the game - completely stop menu music
+      if (this.menuMusic) {
+        console.log('Stopping menu music completely');
+        this.menuMusic.pause();
+        this.menuMusic.currentTime = 0;
+      }
+      
+      // Update current track ID to game track
+      this.currentTrackId = this.gameTrackId;
+      
+      // Start game music with game track - force it to play immediately
+      this.playMusicInGameContext();
+      
+      // Double check that game music is actually playing
+      if (this.gameMusic && this.gameMusic.paused && !this.isMuted) {
+        console.log('Forcing game music to play with delay');
+        // Sometimes there's a delay in audio context activation, so try again after a short delay
+        setTimeout(() => {
+          if (this.gameMusic && this.gameMusic.paused && !this.isMuted) {
+            this.gameMusic.play().catch(e => console.warn('Delayed game music autoplay prevented:', e));
+          }
+        }, 1000);
+      }
+      
+      // Update UI to show current game track
+      this.updateMusicSelectionUI('in-game-music-select', 'in-game-selected-music-text', this.gameTrackId);
+      
+      // Show the correct now playing indicator
+      this.updateNowPlayingIndicator(this.gameTrackId);
+    } else {
+      // We're in the menu - completely stop game music
+      if (this.gameMusic) {
+        console.log('Stopping game music completely');
+        this.gameMusic.pause();
+        this.gameMusic.currentTime = 0;
+      }
+      
+      // Update current track ID to menu track
+      this.currentTrackId = this.menuTrackId;
+      
+      // Start menu music with menu track
+      this.playMusicInMenuContext();
+      
+      // Update UI to show current menu track
+      this.updateMusicSelectionUI('music-select', 'selected-music-text', this.menuTrackId);
+    }
+  },
+  
+  // Update the now playing indicator
+  updateNowPlayingIndicator(trackId) {
+    const nowPlaying = document.getElementById('now-playing');
+    const nowPlayingText = document.getElementById('now-playing-text');
+    
+    if (nowPlaying && nowPlayingText) {
+      // Find track name from track ID
+      const trackElement = document.querySelector(`.track-option[data-value="${trackId}"]`);
+      if (trackElement) {
+        nowPlayingText.textContent = trackElement.textContent;
+        nowPlaying.style.display = 'block';
+      }
+    }
+  },
+  
+  // Play music in menu context
+  playMusicInMenuContext() {
+    if (!this.menuMusic || this.isMuted) return;
+    
+    const trackPath = this.getTrackPath(this.menuTrackId);
+    console.log(`Playing menu music: ${this.menuTrackId}`);
+    
+    // Only update if source is different
+    if (this.menuMusic.src !== trackPath) {
+      this.menuMusic.src = trackPath;
+      this.menuMusic.loop = true;
+    }
+    
+    // Play if not already playing
+    if (this.menuMusic.paused) {
+      this.menuMusic.currentTime = 0;
+      this.menuMusic.play().catch(e => console.warn('Menu music autoplay prevented:', e));
+    }
+  },
+  
+  // Play music in game context - improved version with better error handling and debugging
+  playMusicInGameContext() {
+    // First stop any menu music if it's playing to prevent overlap
+    if (this.menuMusic && !this.menuMusic.paused) {
+      console.log('Stopping menu music before playing game music');
+      this.menuMusic.pause();
+      this.menuMusic.currentTime = 0;
+    }
+    
+    // Exit early if game music element isn't available
+    if (!this.gameMusic) {
+      console.error('Game music audio element not found');
+      // Try to recreate it dynamically if it doesn't exist
+      try {
+        console.log('Attempting to create game music element dynamically');
+        this.gameMusic = document.createElement('audio');
+        this.gameMusic.id = 'game-music';
+        this.gameMusic.loop = true;
+        document.body.appendChild(this.gameMusic);
+        console.log('Successfully created game music element');
+      } catch (e) {
+        console.error('Failed to create game music element:', e);
+        return;
+      }
+    }
+    
+    // Get the track info
+    const trackId = this.gameTrackId;
+    if (!this.trackMap[trackId]) {
+      console.error(`Track ID ${trackId} not found in trackMap`);
+      console.log('Available tracks:', Object.keys(this.trackMap).join(', '));
+      return;
+    }
+    
+    const trackPath = this.getTrackPath(trackId);
+    console.log(`Playing game music: ${trackId} (Muted: ${this.isMuted})`);
+    console.log(`Track filename: ${this.trackMap[trackId]}`);
+    console.log(`Full track path: ${trackPath}`);
+    
+    // Always update src to ensure correct track
+    try {
+      console.log(`Current src: ${this.gameMusic.src || 'none'}`);
+      console.log(`Updating game music source to: ${trackPath}`);
+      this.gameMusic.src = trackPath;
+      this.gameMusic.loop = true;
+      this.gameMusic.load(); // Explicitly load the audio
+    } catch (e) {
+      console.error('Error setting game music source:', e);
+    }
+    
+    // If muted, make sure the game music is paused and exit
+    if (this.isMuted) {
+      if (!this.gameMusic.paused) {
+        console.log('Game music is muted, pausing playback');
+        this.gameMusic.pause();
+      }
+      return;
+    }
+    
+    // If not muted and in game context, try to play the music
+    if (this.inGameContext) {
+      // Only restart if paused
+      if (this.gameMusic.paused) {
+        console.log('Starting game music playback');
+        this.gameMusic.currentTime = 0;
+        
+        // Try to play the music with multiple fallbacks
+        const playPromise = this.gameMusic.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Game music playing successfully');
+              // Update the Now Playing indicator
+              this.updateNowPlayingIndicator(trackId);
+            })
+            .catch(e => {
+              console.warn('Game music autoplay prevented:', e);
+              
+              // Try again after a short delay (browser might need user interaction)
+              setTimeout(() => {
+                console.log('Retrying game music playback after delay');
+                this.gameMusic.play()
+                  .catch(e2 => console.error('Second play attempt failed:', e2));
+              }, 1000);
+            });
+        }
+      } else {
+        console.log('Game music already playing');
+      }
+    } else {
+      console.log('Not in game context, not playing game music');
+    }
+  },
+  
+  // Change to a different track - handles switching tracks in the proper context
   changeTrack(trackId) {
     if (!this.trackMap[trackId]) {
       console.error(`Invalid track ID: ${trackId}`);
       return;
     }
     
-    // Stop current music if playing
-    if (this.currentMusic) {
-      this.currentMusic.pause();
-      this.currentMusic.currentTime = 0;
+    // Store track selection in the appropriate context
+    if (this.inGameContext) {
+      // Change game track
+      this.gameTrackId = trackId;
+      localStorage.setItem('gameTrackId', trackId);
+      console.log(`Game track changed to: ${trackId}`);
+      
+      // Update the in-game ESC menu's music selection dropdown
+      this.updateMusicSelectionUI('in-game-music-select', 'in-game-selected-music-text', trackId);
+      
+      // Update now playing indicator
+      this.updateNowPlayingIndicator(trackId);
+      
+      // Play the new game track
+      this.playMusicInGameContext();
+    } else {
+      // Change menu track
+      this.menuTrackId = trackId;
+      localStorage.setItem('menuTrackId', trackId);
+      console.log(`Menu track changed to: ${trackId}`);
+      
+      // Update the main menu's music selection dropdown
+      this.updateMusicSelectionUI('music-select', 'selected-music-text', trackId);
+      
+      // Play the new menu track
+      this.playMusicInMenuContext();
     }
     
-    // Store track selection
+    // Also update the overall current track ID for compatibility
     this.currentTrackId = trackId;
-    localStorage.setItem('currentTrackId', trackId);
     
-    // Get the audio for this track
-    const audio = this.getTrackAudio(trackId);
-    this.currentMusic = audio;
-    
-    // Ensure loop setting is correct based on current mode
-    if (audio) {
-      audio.loop = this.playbackMode === 'single';
+    // If in-game settings is open, update its now playing indicator
+    if (window.inGameSettingsInstance && window.inGameSettingsInstance.isVisible) {
+      setTimeout(() => {
+        window.inGameSettingsInstance.addNowPlayingIndicator();
+      }, 100);
     }
     
-    // Update the dropdown display text
-    const selectedTextElement = document.getElementById('selected-music-text');
-    const musicSelect = document.getElementById('music-select');
-    if (selectedTextElement && musicSelect) {
-      // Make sure the actual select element value is updated first
-      musicSelect.value = trackId;
-      const selectedOption = musicSelect.options[musicSelect.selectedIndex];
-      if (selectedOption) {
-        selectedTextElement.textContent = selectedOption.textContent;
+    // Dispatch custom event for track change to notify other UI components
+    window.dispatchEvent(new CustomEvent('trackChanged', {
+      detail: {
+        trackId: trackId,
+        trackName: this.trackMap[trackId]
       }
-    }
+    }));
+  },
+  
+  // Helper to update any music selection UI
+  updateMusicSelectionUI(selectId, textId, trackId) {
+    const selectElement = document.getElementById(selectId);
+    const textElement = document.getElementById(textId);
     
-    // Play the new track
-    if (audio) {
-      audio.play().catch(e => console.warn('Autoplay prevented:', e));
+    if (selectElement) {
+      // Make sure the select element value is updated
+      selectElement.value = trackId;
+      
+      // Update display text if available
+      if (textElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        if (selectedOption) {
+          textElement.textContent = selectedOption.textContent;
+        }
+      }
     }
   },
   
