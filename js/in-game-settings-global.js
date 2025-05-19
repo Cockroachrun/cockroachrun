@@ -21,7 +21,7 @@ class InGameSettingsClass {
   }
   
   init() {
-    console.log('Initializing in-game settings menu');
+    // console.log('Initializing in-game settings menu');
     
     // Create settings menu element if it doesn't exist
     if (!document.getElementById('in-game-settings')) {
@@ -143,7 +143,7 @@ class InGameSettingsClass {
     if (musicSelect) {
       musicSelect.addEventListener('change', (e) => {
         if (window.AudioManager) {
-          console.log('In-game menu: Changing track to', e.target.value);
+          // console.log('In-game menu: Changing track to', e.target.value);
           window.AudioManager.changeTrack(e.target.value);
           
           // Update the main menu's music selection if it exists
@@ -269,15 +269,13 @@ class InGameSettingsClass {
     handleKeyDown(event) {
     // Toggle menu when ESC key is pressed
     if (event.key === 'Escape') {
-      console.log('ESC key pressed, toggling in-game menu');
+      // console.log('ESC key pressed, toggling menu. Current state:', this.isMenuOpen);
+      event.preventDefault(); // Prevent default ESC behavior (e.g., exiting full screen)
+      event.stopPropagation(); // Stop event from bubbling up
       this.toggleMenu();
-      
-      // Prevent default browser behavior and event propagation
-      event.preventDefault();
-      event.stopPropagation();
     }
   }
-  
+
   handleClickOutside(event) {
     // Close menu when clicking outside
     if (this.isVisible && this.settingsElement && 
@@ -286,8 +284,15 @@ class InGameSettingsClass {
     }
   }
     toggleMenu() {
-    this.isVisible = !this.isVisible;
-    console.log(`In-game settings menu ${this.isVisible ? 'opened' : 'closed'}`);
+    // console.log('toggleMenu called. Current state:', this.isMenuOpen, 'Game instance:', this.game);
+    if (!this.settingsElement) {
+      // console.error('Settings menu element not found in toggleMenu.');
+      return;
+    }
+    
+    this.settingsElement.style.display = this.isVisible ? 'none' : 'flex';
+    // console.log('Settings menu', this.isVisible ? 'hidden' : 'shown');
+    document.removeEventListener('click', this.handleClickOutside);
     
     if (this.isVisible) {
       // Show menu and pause game
@@ -301,30 +306,30 @@ class InGameSettingsClass {
       if (this.game && typeof this.game.pauseGame === 'function') {
         try {
           this.game.pauseGame();
-          console.log('Game paused');
+          // console.log('Game paused');
         } catch (err) {
-          console.warn('Error pausing game:', err);
+          // console.warn('Error pausing game:', err);
         }
       } else {
-        console.log('Game instance not available or pauseGame method not found');
+        // console.log('Game instance not available or pauseGame method not found');
       }
     } else {
       // Hide menu and resume game
       this.settingsElement.style.display = 'none';
-      document.removeEventListener('click', this.handleClickOutside);
-      
-      // Resume game if it was running
-      if (this.game && typeof this.game.resumeGame === 'function') {
-        try {
+      // console.log('Settings menu hidden');
+      try {
+        if (this.game && typeof this.game.resumeGame === 'function') {
           this.game.resumeGame();
-          console.log('Game resumed');
-        } catch (err) {
-          console.warn('Error resuming game:', err);
+          // console.log('Game resumed');
+        } else {
+          // console.warn('Game instance or resumeGame method not available.');
         }
-      } else {
-        console.log('Game instance not available or resumeGame method not found');
+      } catch (error) {
+        // console.error('Error resuming game:', error);
       }
     }
+    this.isVisible = !this.isVisible;
+    // console.log('Menu state after toggle:', this.isMenuOpen);
   }
   
   updateSettingsDisplay() {
@@ -344,7 +349,7 @@ class InGameSettingsClass {
           }
         }
         
-        console.log('In-game menu: Updated track display to', window.AudioManager.currentTrackId);
+        // console.log('In-game menu: Updated track display to', window.AudioManager.currentTrackId);
       }
       
       // Update playback mode buttons
@@ -388,16 +393,19 @@ class InGameSettingsClass {
   
   // Clean up event listeners when no longer needed
   destroy() {
-    try {
-      console.log('Cleaning up in-game settings');
-      document.removeEventListener('keydown', this.handleKeyDown);
-      document.removeEventListener('click', this.handleClickOutside);
-      
-      if (this.settingsElement && this.settingsElement.parentNode) {
-        this.settingsElement.parentNode.removeChild(this.settingsElement);
-      }
-    } catch (err) {
-      console.error('Error cleaning up in-game settings:', err);
+    // console.log('Cleaning up in-game settings');
+    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('click', this.handleClickOutside);
+    
+    if (this.settingsElement && this.settingsElement.parentNode) {
+      this.settingsElement.parentNode.removeChild(this.settingsElement);
+    }
+    
+    // console.log('InGameSettingsGlobal destroyed.');
+    // Clear the global instance if this is the one
+    if (window.inGameSettingsInstance === this) {
+      window.inGameSettingsInstance = null;
+      // console.log('window.inGameSettingsInstance cleared.');
     }
   }
 }
@@ -410,15 +418,15 @@ window.inGameSettingsInstance = null;
 
 // Initialize after the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM loaded, initializing in-game settings');
+  // console.log('DOM loaded, initializing in-game settings');
   
   // Wait a short time to ensure game object is available
   setTimeout(() => {
     if (window.game) {
       window.inGameSettingsInstance = new InGameSettingsClass(window.game);
-      console.log('In-game settings initialized with game instance');
+      // console.log('In-game settings initialized with game instance');
     } else {
-      console.warn('Game instance not found, creating placeholder settings');
+      // console.warn('Game instance not found, creating placeholder settings');
       // Create settings anyway, will connect to game object later
       window.inGameSettingsInstance = new InGameSettingsClass({});
       
@@ -426,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const checkGameInterval = setInterval(() => {
         if (window.game) {
           window.inGameSettingsInstance.game = window.game;
-          console.log('In-game settings connected to game instance');
+          // console.log('In-game settings connected to game instance');
           clearInterval(checkGameInterval);
         }
       }, 1000);

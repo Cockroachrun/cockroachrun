@@ -443,6 +443,14 @@ const AudioManager = {
   
   // Play music in game context - improved version with better error handling and debugging
   playMusicInGameContext() {
+    console.log('playMusicInGameContext called');
+    
+    // Exit early if muted
+    if (this.isMuted) {
+      console.log('Audio is muted, not playing game music');
+      return;
+    }
+    
     // First stop any menu music if it's playing to prevent overlap
     if (this.menuMusic && !this.menuMusic.paused) {
       console.log('Stopping menu music before playing game music');

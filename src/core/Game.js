@@ -369,13 +369,23 @@ export class Game {
   }
   
   pauseGame() {
-    console.log('Game paused');
-    this.isRunning = false;
+    // console.log('Game.pauseGame() called');
+    if (this.isPaused) return;
+    this.isPaused = true;
+    
+    // Optionally, pause any sounds or animations here
+    // this.soundManager.pauseAll();
+    // this.animationMixer.timeScale = 0;
   }
   
   resumeGame() {
-    console.log('Game resumed');
-    this.isRunning = true;
+    // console.log('Game.resumeGame() called');
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    
+    // Optionally, resume sounds or animations
+    // this.soundManager.resumeAll();
+    // this.animationMixer.timeScale = 1;
   }
   
   restartGame() {

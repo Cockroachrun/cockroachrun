@@ -35,3 +35,21 @@
 .zoom-indicator:hover {
   opacity: 1;
 }
+
+/* Controls help overlay */
+.controls-help {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #00FF66;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 9997;
+  pointer-events: none;
+  border: 1px solid #FF8000;
+  text-shadow: 0 0 3px #00FF66;
+}

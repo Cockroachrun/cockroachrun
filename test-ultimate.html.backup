@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cockroach Run - Ultimate Test</title>
-  <!-- Google Fonts for consistent UI with main menu -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Message remover script, loads first to immediately remove unwanted elements -->
   <script src="message-remover.js"></script>
   <!-- Load Three.js libraries from CDN -->
@@ -25,7 +23,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #1a1a1a;
       color: #ffffff;
     }
@@ -133,7 +131,7 @@
       border-radius: 0;
       display: none;
       box-shadow: none;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-family: Arial, sans-serif;
     }
     
     #settings-menu h2 {
@@ -145,7 +143,6 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: bold;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
     }
     
     .settings-row {
@@ -167,7 +164,6 @@
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
     }
     
     .settings-row button, 
@@ -178,7 +174,7 @@
       padding: 8px 15px;
       border-radius: 0;
       cursor: pointer;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-family: Arial, sans-serif;
       font-weight: bold;
       min-width: 80px;
       transition: all 0.2s;
@@ -199,7 +195,7 @@
       color: #FF8000;
       border: 1px solid #FF8000;
       padding: 5px 10px;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-family: 'Courier New', monospace;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
@@ -220,7 +216,35 @@
       font-size: 16px;
       text-transform: uppercase;
       border-radius: 0;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    }
+    
+    .audio-player {
+      margin-top: 5px;
+    }
+    
+    /* Audio unlock overlay - shown only if needed */
+    #audio-unlock-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    #audio-unlock-message {
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 20px;
+      max-width: 80%;
+      text-align: center;
+      font-size: 18px;
     }
     
     #return-to-menu-button:hover {
@@ -234,33 +258,26 @@
     }
     
     #music-track-button {
-      min-width: 200px;
+      min-width: 180px;
       text-align: left;
       position: relative;
-      padding: 10px 30px 10px 15px;
-      background-color: #000000;
+      padding-right: 25px;
+      background-color: #121212;
       color: #FF8000;
-      border: 2px solid #FF8000;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
+      border: 1px solid #FF8000;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     
     #music-track-button:after {
       content: '▼';
       position: absolute;
-      right: 10px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       font-size: 10px;
-      color: #FF8000;
     }
     
     #music-track-dropdown {
@@ -269,52 +286,21 @@
       width: 100%;
       max-height: 200px;
       overflow-y: auto;
-      background-color: #000000;
-      border: 2px solid #FF8000;
+      background-color: #121212;
+      border: 1px solid #FF8000;
       z-index: 1000;
-      margin-top: 2px;
-    }
-    
-    /* Custom scrollbar for dropdown */
-    #music-track-dropdown::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    #music-track-dropdown::-webkit-scrollbar-track {
-      background: #000000;
-    }
-    
-    #music-track-dropdown::-webkit-scrollbar-thumb {
-      background: #FF8000;
-      border: 1px solid #000000;
-    }
-    
-    #music-track-dropdown::-webkit-scrollbar-thumb:hover {
-      background: #FF9900;
     }
     
     .track-option {
-      padding: 8px 12px;
+      padding: 6px 10px;
       cursor: pointer;
       color: #FF8000;
       transition: all 0.2s;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #333;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     
     .track-option:hover {
       background-color: #FF8000;
-      color: #000000;
-    }
-    
-    .track-option:last-child {
-      border-bottom: none;
+      color: #121212;
     }
     
     /* Now Playing indicator */
@@ -325,7 +311,6 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       display: block;
-      font-family: 'Orbitron', 'Rajdhani', sans-serif;
     }
     
     #loading-indicator {
@@ -550,6 +535,8 @@
   <!-- Zoom notification element -->
   <div id="zoom-notification" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: #FF8000; padding: 10px 20px; border-radius: 5px; font-family: Arial, sans-serif; font-weight: bold; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
   
+  <!-- Audio overlay removed to prevent game breaking -->
+  
   <!-- Additional scripts -->
   <script src="direct-keyboard-zoom.js"></script>
   <script src="direct-zoom-handler.js"></script>
@@ -717,11 +704,56 @@
             if (audioElements['scatter-sound'] && !audioElements['scatter-sound'].src) {
               audioElements['scatter-sound'].src = 'assets/sounds/scatter.mp3';
             }
+            
+            // Simple attempt to start music without the overlay
+            setTimeout(() => {
+              if (window.AudioManager && !window.AudioManager.isMuted) {
+                log('Simple attempt to start game music', 'info');
+                try {
+                  window.AudioManager.playMusicInGameContext();
+                } catch (e) {
+                  log('Could not auto-start music: ' + e.message, 'error');
+                }
+              }
+            }, 1000);
           }
+          
           
           // Set to game context since we're loading the game
           log('Setting audio context to GAME', 'info');
           window.AudioManager.setContext(true);
+          
+          // Force game music to start playing immediately (with multiple attempts)
+          setTimeout(() => {
+            if (!window.AudioManager.isMuted) {
+              log('Auto-starting game music on page load', 'info');
+              
+              // Get the game track info
+              const gameTrackId = window.AudioManager.gameTrackId;
+              const trackElement = document.querySelector(`.track-option[data-value="${gameTrackId}"]`);
+              if (trackElement) {
+                log(`Auto-playing track: ${trackElement.textContent}`, 'info');
+              }
+              
+              // Try to play with multiple fallbacks
+              window.AudioManager.playMusicInGameContext();
+              
+              // Second attempt after a short delay (for browsers that need user interaction)
+              setTimeout(() => {
+                if (window.AudioManager.gameMusic && window.AudioManager.gameMusic.paused) {
+                  log('Second attempt to auto-start game music', 'warning');
+                  window.AudioManager.gameMusic.play().catch(e => log('Second attempt failed: ' + e.message, 'error'));
+                  
+                  // Try once more with a user interaction simulation
+                  document.addEventListener('click', function autoPlayHandler() {
+                    log('Trying to play music after user interaction', 'info');
+                    window.AudioManager.gameMusic.play();
+                    document.removeEventListener('click', autoPlayHandler);
+                  }, { once: true });
+                }
+              }, 2000);
+            }
+          }, 500);
         } else {
           log('AudioManager not found!', 'error');
         }
@@ -1196,11 +1228,18 @@
             renderer.shadowMap.enabled = true;
             gameContainer.appendChild(renderer.domElement);
             log('Renderer created successfully', 'info');
+            
+            // Simple attempt to play music if needed
+            if (window.AudioManager && !window.AudioManager.isMuted) {
+              setTimeout(() => {
+                window.AudioManager.playMusicInGameContext();
+              }, 1000);
+            }
           } catch (e) {
             log('ERROR creating renderer: ' + e.message, 'error');
             console.error('Renderer error:', e);
           }
-          
+        
           // Setup scene with the simplest possible environment
           function setupScene() {
             log('Setting up scene...', 'info');
@@ -2059,21 +2098,6 @@
           
           if (message.type === 'set-character') {
             // Parent is telling us which character to use
-            log(`Parent set character: ${message.character}`, 'info');
-            return;
-          }
-          
-          if (message.type === 'set-audio-context') {
-            // Parent is telling us which audio context to use (menu or game)
-            const isGameContext = message.context === 'game';
-            const forceStopMenuMusic = message.forceStopMenuMusic === true;
-            log(`Parent set audio context: ${message.context.toUpperCase()} (force stop: ${forceStopMenuMusic})`, 'info');
-            
-            // EMERGENCY MUSIC SHUTDOWN - Stop ALL audio playing in the document
-            const allAudioElements = document.querySelectorAll('audio');
-            log(`Stopping all ${allAudioElements.length} audio elements before context change`, 'warning');
-            
-            allAudioElements.forEach(audio => {
               if (!audio.paused) {
                 log(`Forcefully stopping audio: ${audio.id || 'unnamed'}`, 'info');
                 try {
@@ -2111,6 +2135,16 @@
                   setTimeout(() => {
                     log('Forcing game music to play after context change', 'info');
                     window.AudioManager.playMusicInGameContext();
+                    
+                    // Make additional attempts if first playback failed
+                    setTimeout(() => {
+                      if (window.AudioManager.gameMusic && window.AudioManager.gameMusic.paused && !window.AudioManager.isMuted) {
+                        log('First auto-play attempt failed, trying again...', 'warning');
+                        window.AudioManager.gameMusic.play().catch(e => log('Auto-play still blocked: ' + e.message, 'error'));
+                      } else {
+                        log('Music playback successful or muted', 'info');
+                      }
+                    }, 1000);
                     
                     // Update the now playing indicator
                     const nowPlaying = document.getElementById('now-playing');
@@ -2169,60 +2203,6 @@
       }
       
     })();
-  </script>
-  <!-- Auto audio playback helper script -->
-  <script>
-    // Make multiple attempts to start the music automatically
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded - attempting to initialize audio');
-      
-      // First attempt - direct init
-      if (window.AudioManager) {
-        window.AudioManager.setContext(true); // Set game context
-        console.log('Setting audio context to GAME');
-      }
-      
-      // Sequence of attempts to play game music
-      function tryPlayMusic(attempt) {
-        console.log('Attempt ' + attempt + ' to play game music');
-        if (window.AudioManager && !window.AudioManager.isMuted) {
-          if (window.AudioManager.gameMusic && window.AudioManager.gameMusic.paused) {
-            try {
-              window.AudioManager.playMusicInGameContext();
-              console.log('Initiated game music playback on attempt ' + attempt);
-            } catch (e) {
-              console.error('Error playing game music:', e);
-            }
-          }
-        }
-      }
-      
-      // Attempt after short delay (500ms)
-      setTimeout(() => tryPlayMusic(1), 500);
-      
-      // Attempt after medium delay (2s)
-      setTimeout(() => tryPlayMusic(2), 2000);
-      
-      // Attempt after long delay (5s)
-      setTimeout(() => tryPlayMusic(3), 5000);
-      
-      // Also try on first interaction
-      function onFirstInteraction() {
-        console.log('User interaction detected - attempting autoplay');
-        if (window.AudioManager && !window.AudioManager.isMuted) {
-          window.AudioManager.playMusicInGameContext();
-        }
-        // Remove listeners after first interaction
-        document.removeEventListener('click', onFirstInteraction);
-        document.removeEventListener('keydown', onFirstInteraction);
-        document.removeEventListener('touchstart', onFirstInteraction);
-      }
-      
-      // Add interaction listeners
-      document.addEventListener('click', onFirstInteraction);
-      document.addEventListener('keydown', onFirstInteraction);
-      document.addEventListener('touchstart', onFirstInteraction);
-    });
   </script>
 </body>
 </html>
