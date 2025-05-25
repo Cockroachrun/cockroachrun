@@ -399,20 +399,18 @@
       </div>
       <button id="pause-button" class="pause-button">II</button>
     </div>
-  </div>
-
-  <!-- Audio Elements -->
+  </div>  <!-- Audio Elements -->
   <audio id="menu-music" loop preload="auto">
-    <source src="/assets/sounds/music/Menu_loop.mp3" type="audio/mpeg" />
+    <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
   </audio>
   <audio id="game-music" loop preload="auto">
-    <source src="/assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
+    <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
   </audio>
   <audio id="button-click" preload="auto">
-    <source src="/assets/sounds/sfx/button_click.wav" type="audio/wav" />
+    <source src="assets/sounds/sfx/button_click.wav" type="audio/wav" />
   </audio>
   <audio id="scatter-sound" preload="auto">
-    <source src="/assets/sounds/sfx/scatter.wav" type="audio/wav" />
+    <source src="assets/sounds/sfx/scatter.wav" type="audio/wav" />
   </audio>
 
   <!-- 3D Libraries - Required for the game engine -->
@@ -420,9 +418,9 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
-
   <!-- Scripts -->
   <script src="js/config.js"></script>
+  <script src="js/autoplay-helper.js" defer></script>
   <script src="js/DropdownSystem.js"></script>
   <script src="js/audio.js" defer></script>
   <script src="js/ui.js" defer></script>
@@ -435,9 +433,11 @@
   <!-- In-game settings -->
   <script src="js/in-game-settings-global.js"></script>
   <!-- Bitcoin Wallet Integration -->
-  <script src="js/services/wallet.js"></script>
-  <!-- Game State Management -->
+  <script src="js/services/wallet.js"></script>  <!-- Game State Management -->
   <script src="js/core/gameStateManager.js"></script>
+  
+  <!-- Performance Optimizer - Reduces lag and improves responsiveness -->
+  <script src="js/performanceOptimizer.js"></script>
   
   <!-- Game Engine - 3D Cockroach World -->
   <script src="js/game.js"></script>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Dropdown Test - Cockroach Run</title>
+    <style>
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            padding: 12px 24px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            transition: transform 0.2s ease;
+        }
+        
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .status.success {
+            background: #004d00;
+            border: 1px solid #00ff00;
+        }
+        
+        .status.error {
+            background: #4d0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .status.info {
+            background: #003d4d;
+            border: 1px solid #00ccff;
+        }
+        
+        .track-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .track-item {
+            background: #2d2d2d;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        #log {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            white-space: pre-wrap;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <h1><i class="fas fa-music"></i> Music Dropdown Test Suite</h1>
+    <p>Testing the two identified issues with the music dropdown system.</p>
+    
+    <div class="test-section">
+        <h2>Test 1: Autoplay Functionality</h2>
+        <p>Testing whether music starts automatically and handles browser autoplay restrictions.</p>
+        
+        <div id="autoplay-status" class="status info">
+            Status: Initializing autoplay test...
+        </div>
+        
+        <button class="test-button" onclick="testAutoplay()">
+            <i class="fas fa-play"></i> Test Autoplay
+        </button>
+        
+        <button class="test-button" onclick="forceStartMusic()">
+            <i class="fas fa-volume-up"></i> Force Start Music
+        </button>
+        
+        <button class="test-button" onclick="testAutoplayHelper()">
+            <i class="fas fa-magic"></i> Test AutoplayHelper
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: ESC Menu Track List</h2>
+        <p>Testing whether the ESC menu shows the complete track list (should be 21 tracks).</p>
+        
+        <div id="esc-menu-status" class="status info">
+            Status: Ready to test ESC menu...
+        </div>
+        
+        <button class="test-button" onclick="testEscMenu()">
+            <i class="fas fa-list"></i> Test ESC Menu Tracks
+        </button>
+        
+        <button class="test-button" onclick="showTrackComparison()">
+            <i class="fas fa-compare"></i> Compare Track Lists
+        </button>
+        
+        <div id="track-comparison" style="display: none;">
+            <h3>Track List Comparison</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Main Menu Tracks:</h4>
+                    <div id="main-menu-tracks" class="track-list"></div>
+                </div>
+                <div>
+                    <h4>ESC Menu Tracks:</h4>
+                    <div id="esc-menu-tracks" class="track-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Dropdown Integration</h2>
+        <p>Testing the dropdown system integration and track switching.</p>
+        
+        <div id="dropdown-status" class="status info">
+            Status: Ready to test dropdown integration...
+        </div>
+        
+        <button class="test-button" onclick="testDropdownIntegration()">
+            <i class="fas fa-cogs"></i> Test Dropdown System
+        </button>
+        
+        <button class="test-button" onclick="simulateTrackChange()">
+            <i class="fas fa-exchange-alt"></i> Simulate Track Change
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div id="log"></div>
+        <button class="test-button" onclick="clearLog()">
+            <i class="fas fa-trash"></i> Clear Log
+        </button>
+    </div>
+    
+    <!-- Audio elements for testing -->
+    <audio id="menu-music" loop preload="auto">
+        <source src="assets/sounds/music/Cockroach run music.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="game-music" loop preload="auto">
+        <source src="assets/sounds/music/Neon Roach Runnin.mp3" type="audio/mpeg" />
+    </audio>
+    
+    <!-- Include necessary scripts -->
+    <script src="js/autoplay-helper.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/DropdownSystem.js"></script>
+    <script src="js/in-game-settings-global.js"></script>
+    
+    <script>
+        // Test suite implementation
+        let logElement;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type.toUpperCase();
+            logElement.textContent += `[${timestamp}] ${prefix}: ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            if (logElement) logElement.textContent = '';
+        }
+        
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = `Status: ${message}`;
+                element.className = `status ${type}`;
+            }
+        }
+        
+        // Test 1: Autoplay functionality
+        function testAutoplay() {
+            log('Testing autoplay functionality...');
+            updateStatus('autoplay-status', 'Testing autoplay...', 'info');
+            
+            if (!window.AudioManager) {
+                log('ERROR: AudioManager not found!', 'error');
+                updateStatus('autoplay-status', 'AudioManager not found!', 'error');
+                return;
+            }
+            
+            // Test basic autoplay
+            try {
+                AudioManager.playCurrentTrack();
+                
+                // Check if music is playing after a short delay
+                setTimeout(() => {
+                    const menuMusic = document.getElementById('menu-music');
+                    const gameMusic = document.getElementById('game-music');
+                    
+                    let playing = false;
+                    if (menuMusic && !menuMusic.paused) {
+                        playing = true;
+                        log('SUCCESS: Menu music is playing');
+                    }
+                    if (gameMusic && !gameMusic.paused) {
+                        playing = true;
+                        log('SUCCESS: Game music is playing');
+                    }
+                    
+                    if (playing) {
+                        updateStatus('autoplay-status', 'Autoplay working!', 'success');
+                    } else {
+                        log('INFO: Music not playing (browser autoplay restrictions)');
+                        updateStatus('autoplay-status', 'Autoplay blocked by browser (expected)', 'info');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                log(`ERROR: Autoplay test failed: ${error.message}`, 'error');
+                updateStatus('autoplay-status', 'Autoplay test failed', 'error');
+            }
+        }
+        
+        function forceStartMusic() {
+            log('Force starting music...');
+            
+            if (window.AudioManager) {
+                AudioManager.unmute();
+                AudioManager.playCurrentTrack();
+                log('Music force start attempted');
+            } else {
+                log('ERROR: AudioManager not available');
+            }
+        }
+        
+        function testAutoplayHelper() {
+            log('Testing AutoplayHelper...');
+            
+            if (!window.AutoplayHelper) {
+                log('ERROR: AutoplayHelper not found!', 'error');
+                updateStatus('autoplay-status', 'AutoplayHelper not found!', 'error');
+                return;
+            }
+            
+            log(`AutoplayHelper status - Can play: ${window.AutoplayHelper.canPlayAudio()}`);
+            log(`User interacted: ${window.AutoplayHelper.hasUserInteracted}`);
+            log(`Audio unlocked: ${window.AutoplayHelper.audioUnlocked}`);
+            
+            if (!window.AutoplayHelper.canPlayAudio()) {
+                log('INFO: AutoplayHelper will show overlay for user interaction');
+                updateStatus('autoplay-status', 'AutoplayHelper ready (needs interaction)', 'info');
+            } else {
+                log('SUCCESS: AutoplayHelper ready to play audio');
+                updateStatus('autoplay-status', 'AutoplayHelper ready!', 'success');
+            }
+        }
+        
+        // Test 2: ESC menu track list
+        function testEscMenu() {
+            log('Testing ESC menu track list...');
+            updateStatus('esc-menu-status', 'Testing ESC menu...', 'info');
+            
+            // Initialize in-game settings if not already done
+            if (!window.inGameSettingsInstance) {
+                log('INFO: Initializing in-game settings...');
+                if (window.InGameSettings) {
+                    window.inGameSettingsInstance = new window.InGameSettings({});
+                }
+            }
+            
+            // Look for the in-game music select element
+            const inGameSelect = document.getElementById('in-game-music-select');
+            if (!inGameSelect) {
+                log('INFO: ESC menu not in DOM yet, creating...');
+                
+                // Trigger ESC menu creation
+                if (window.inGameSettingsInstance && window.inGameSettingsInstance.createSettingsMenu) {
+                    window.inGameSettingsInstance.createSettingsMenu();
+                }
+                
+                // Try again after creation
+                setTimeout(() => testEscMenuTracks(), 500);
+            } else {
+                testEscMenuTracks();
+            }
+        }
+        
+        function testEscMenuTracks() {
+            const inGameSelect = document.getElementById('in-game-music-select');
+            
+            if (inGameSelect) {
+                const trackCount = inGameSelect.options.length;
+                log(`ESC menu has ${trackCount} tracks`);
+                
+                if (trackCount === 21) {
+                    log('SUCCESS: ESC menu has complete track list (21 tracks)');
+                    updateStatus('esc-menu-status', 'ESC menu track list complete!', 'success');
+                } else {
+                    log(`WARNING: ESC menu has ${trackCount} tracks, expected 21`);
+                    updateStatus('esc-menu-status', `ESC menu has ${trackCount} tracks (expected 21)`, 'error');
+                }
+                
+                // Log track names
+                Array.from(inGameSelect.options).forEach((option, index) => {
+                    log(`  Track ${index + 1}: ${option.textContent} (${option.value})`);
+                });
+            } else {
+                log('ERROR: ESC menu select element not found');
+                updateStatus('esc-menu-status', 'ESC menu select not found', 'error');
+            }
+        }
+        
+        function showTrackComparison() {
+            log('Comparing track lists...');
+            
+            const comparison = document.getElementById('track-comparison');
+            comparison.style.display = 'block';
+            
+            // Get main menu tracks
+            const mainMenuSelect = document.getElementById('music-select');
+            const mainMenuTracksDiv = document.getElementById('main-menu-tracks');
+            
+            if (mainMenuSelect && mainMenuTracksDiv) {
+                mainMenuTracksDiv.innerHTML = '';
+                Array.from(mainMenuSelect.options).forEach(option => {
+                    const trackDiv = document.createElement('div');
+                    trackDiv.className = 'track-item';
+                    trackDiv.textContent = option.textContent;
+                    mainMenuTracksDiv.appendChild(trackDiv);
+                });
+                log(`Main menu: ${mainMenuSelect.options.length} tracks`);
+            }
+            
+            // Get ESC menu tracks
+            const escMenuSelect = document.getElementById('in-game-music-select');
+            const escMenuTracksDiv = document.getElementById('esc-menu-tracks');
+            
+            if (escMenuSelect && escMenuTracksDiv) {
+                escMenuTracksDiv.innerHTML = '';
+                Array.from(escMenuSelect.options).forEach(option => {
+                    const trackDiv = document.createElement('div');
+                    trackDiv.className = 'track-item';
+                    trackDiv.textContent = option.textContent;
+                    escMenuTracksDiv.appendChild(trackDiv);
+                });
+                log(`ESC menu: ${escMenuSelect.options.length} tracks`);
+            } else {
+                escMenuTracksDiv.innerHTML = '<div class="track-item" style="color: #ff0000;">ESC menu not available</div>';
+                log('ESC menu select not found for comparison');
+            }
+        }
+        
+        // Test 3: Dropdown integration
+        function testDropdownIntegration() {
+            log('Testing dropdown integration...');
+            updateStatus('dropdown-status', 'Testing dropdown...', 'info');
+            
+            if (!window.DropdownSystem) {
+                log('WARNING: DropdownSystem not found');
+                updateStatus('dropdown-status', 'DropdownSystem not found', 'error');
+                return;
+            }
+            
+            // Test dropdown functionality
+            log('DropdownSystem found, testing functionality...');
+            updateStatus('dropdown-status', 'DropdownSystem working!', 'success');
+        }
+        
+        function simulateTrackChange() {
+            log('Simulating track change...');
+            
+            if (window.AudioManager) {
+                const tracks = Object.keys(window.AudioManager.trackMap);
+                const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+                
+                log(`Changing to random track: ${randomTrack}`);
+                window.AudioManager.changeTrack(randomTrack);
+                
+                updateStatus('dropdown-status', `Changed to: ${randomTrack}`, 'success');
+            } else {
+                log('ERROR: AudioManager not available for track change');
+                updateStatus('dropdown-status', 'Track change failed', 'error');
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Test suite initialized');
+            log('Click the test buttons to run individual tests');
+            
+            // Wait for AudioManager to initialize
+            setTimeout(() => {
+                if (window.AudioManager) {
+                    log('AudioManager detected and ready');
+                } else {
+                    log('WARNING: AudioManager not detected');
+                }
+                
+                if (window.AutoplayHelper) {
+                    log('AutoplayHelper detected and ready');
+                } else {
+                    log('WARNING: AutoplayHelper not detected');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -420,8 +420,7 @@ const AudioManager = {
       }
     }
   },
-  
-  // Play music in menu context
+    // Play music in menu context - enhanced with AutoplayHelper
   playMusicInMenuContext() {
     if (!this.menuMusic || this.isMuted) return;
     
@@ -434,14 +433,27 @@ const AudioManager = {
       this.menuMusic.loop = true;
     }
     
-    // Play if not already playing
+    // Play if not already playing using AutoplayHelper
     if (this.menuMusic.paused) {
-      this.menuMusic.currentTime = 0;
-      this.menuMusic.play().catch(e => console.warn('Menu music autoplay prevented:', e));
+      if (window.AutoplayHelper) {
+        window.AutoplayHelper.requestMusicPlay(this.menuMusic, {
+          gameContext: false,
+          resetTime: true,
+          trackName: this.trackMap[this.menuTrackId]
+        }).then(() => {
+          console.log('Menu music playing successfully via AutoplayHelper');
+        }).catch(e => {
+          console.log('AutoplayHelper: User interaction required for menu music');
+          // The overlay will be shown automatically by AutoplayHelper
+        });
+      } else {
+        // Fallback to original method
+        this.menuMusic.currentTime = 0;
+        this.menuMusic.play().catch(e => console.warn('Menu music autoplay prevented:', e));
+      }
     }
   },
-  
-  // Play music in game context - improved version with better error handling and debugging
+    // Play music in game context - enhanced with AutoplayHelper
   playMusicInGameContext() {
     // First stop any menu music if it's playing to prevent overlap
     if (this.menuMusic && !this.menuMusic.paused) {
@@ -500,32 +512,46 @@ const AudioManager = {
       return;
     }
     
-    // If not muted and in game context, try to play the music
+    // If not muted and in game context, try to play the music using AutoplayHelper
     if (this.inGameContext) {
       // Only restart if paused
       if (this.gameMusic.paused) {
-        console.log('Starting game music playback');
-        this.gameMusic.currentTime = 0;
+        console.log('Starting game music playback with AutoplayHelper');
         
-        // Try to play the music with multiple fallbacks
-        const playPromise = this.gameMusic.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log('Game music playing successfully');
-              // Update the Now Playing indicator
-              this.updateNowPlayingIndicator(trackId);
-            })
-            .catch(e => {
-              console.warn('Game music autoplay prevented:', e);
-              
-              // Try again after a short delay (browser might need user interaction)
-              setTimeout(() => {
-                console.log('Retrying game music playback after delay');
-                this.gameMusic.play()
-                  .catch(e2 => console.error('Second play attempt failed:', e2));
-              }, 1000);
-            });
+        // Use AutoplayHelper for enhanced autoplay handling
+        if (window.AutoplayHelper) {
+          window.AutoplayHelper.requestMusicPlay(this.gameMusic, {
+            gameContext: true,
+            resetTime: true,
+            trackName: this.trackMap[trackId]
+          }).then(() => {
+            console.log('Game music playing successfully via AutoplayHelper');
+            this.updateNowPlayingIndicator(trackId);
+          }).catch(e => {
+            console.log('AutoplayHelper: User interaction required for game music');
+            // The overlay will be shown automatically by AutoplayHelper
+          });
+        } else {
+          // Fallback to original method if AutoplayHelper isn't available
+          this.gameMusic.currentTime = 0;
+          const playPromise = this.gameMusic.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log('Game music playing successfully (fallback)');
+                this.updateNowPlayingIndicator(trackId);
+              })
+              .catch(e => {
+                console.warn('Game music autoplay prevented (fallback):', e);
+                
+                // Try again after a short delay
+                setTimeout(() => {
+                  console.log('Retrying game music playback after delay');
+                  this.gameMusic.play()
+                    .catch(e2 => console.error('Second play attempt failed:', e2));
+                }, 1000);
+              });
+          }
         }
       } else {
         console.log('Game music already playing');

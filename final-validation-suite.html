@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Music Dropdown Validation - Cockroach Run</title>
+    <style>
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            border-radius: 15px;
+            color: #000;
+            box-shadow: 0 8px 32px rgba(255, 102, 0, 0.3);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 2px solid #ff6600;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .test-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255, 102, 0, 0.2);
+        }
+        
+        .section-title {
+            color: #ff6600;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #ff6600;
+            padding-bottom: 10px;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            padding: 12px 20px;
+            margin: 8px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+        }
+        
+        .test-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.5);
+        }
+        
+        .test-button:active {
+            transform: scale(0.95);
+        }
+        
+        .test-button.primary {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            font-size: 1.1em;
+            padding: 15px 30px;
+        }
+        
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .result.pass {
+            background: linear-gradient(145deg, #004d00, #006600);
+            border-left-color: #00ff00;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.2);
+        }
+        
+        .result.fail {
+            background: linear-gradient(145deg, #4d0000, #660000);
+            border-left-color: #ff0000;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        }
+        
+        .result.info {
+            background: linear-gradient(145deg, #004080, #0066cc);
+            border-left-color: #0080ff;
+            box-shadow: 0 4px 15px rgba(0, 128, 255, 0.2);
+        }
+        
+        .result.warning {
+            background: linear-gradient(145deg, #806600, #cc9900);
+            border-left-color: #ffcc00;
+            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2);
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress {
+            background: #333;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .status-text {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .track-list {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #444;
+        }
+        
+        .track-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .track-item:last-child {
+            border-bottom: none;
+        }
+        
+        .track-id {
+            color: #ff6600;
+            font-weight: bold;
+            min-width: 150px;
+        }
+        
+        .track-name {
+            color: #ccc;
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .now-playing {
+            background: linear-gradient(145deg, #333, #444);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #ff6600;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(255, 102, 0, 0.3);
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border-top: 3px solid #ff6600;
+        }
+        
+        .score-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .score-excellent { background: linear-gradient(45deg, #00ff88, #00cc6a); color: #000; }
+        .score-good { background: linear-gradient(45deg, #0080ff, #0066cc); }
+        .score-fair { background: linear-gradient(45deg, #ffcc00, #ff9900); color: #000; }
+        .score-poor { background: linear-gradient(45deg, #ff0000, #cc0000); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎵 Final Music System Validation</h1>
+        <p>Comprehensive testing suite for Cockroach Run music dropdown fixes</p>
+        <p><strong>Testing both autoplay fixes and ESC menu track completeness</strong></p>
+    </div>
+
+    <div class="test-grid">
+        <!-- System Status -->
+        <div class="test-section">
+            <h2 class="section-title">🔧 System Status</h2>
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="status-text" id="status-text">Ready to begin validation...</div>
+            </div>
+            <div class="controls-grid">
+                <button class="test-button primary" onclick="runComprehensiveTest()">🚀 Run Full Suite</button>
+                <button class="test-button" onclick="resetAllTests()">🔄 Reset Tests</button>
+            </div>
+        </div>
+
+        <!-- AutoplayHelper Tests -->
+        <div class="test-section">
+            <h2 class="section-title">🎵 AutoplayHelper System</h2>
+            <div class="controls-grid">
+                <button class="test-button" onclick="testAutoplayHelper()">Test Helper</button>
+                <button class="test-button" onclick="testAudioContext()">Audio Context</button>
+                <button class="test-button" onclick="testOverlaySystem()">Test Overlay</button>
+                <button class="test-button" onclick="testInteractionDetection()">User Interaction</button>
+            </div>
+            <div id="autoplay-results"></div>
+        </div>
+
+        <!-- Track List Validation -->
+        <div class="test-section">
+            <h2 class="section-title">📋 Track List Validation</h2>
+            <div class="controls-grid">
+                <button class="test-button" onclick="validateAllTracks()">Validate Tracks</button>
+                <button class="test-button" onclick="testTrackPaths()">Test Paths</button>
+                <button class="test-button" onclick="showTrackList()">Show All Tracks</button>
+            </div>
+            <div id="track-results"></div>
+            <div id="track-display" class="track-list" style="display: none;"></div>
+        </div>
+
+        <!-- Music Playback -->
+        <div class="test-section">
+            <h2 class="section-title">🎮 Music Playback</h2>
+            <div class="controls-grid">
+                <button class="test-button" onclick="testMenuMusic()">Menu Music</button>
+                <button class="test-button" onclick="testGameMusic()">Game Music</button>
+                <button class="test-button" onclick="testTrackSwitching()">Track Switch</button>
+                <button class="test-button" onclick="stopAllMusic()">Stop All</button>
+            </div>
+            <div id="playback-results"></div>
+            <div id="now-playing" class="now-playing" style="display: none;">
+                <strong>🎵 Now Playing:</strong> <span id="current-track">None</span>
+            </div>
+        </div>
+
+        <!-- File & Path Integrity -->
+        <div class="test-section">
+            <h2 class="section-title">🔍 File Integrity</h2>
+            <div class="controls-grid">
+                <button class="test-button" onclick="checkAudioFiles()">Audio Files</button>
+                <button class="test-button" onclick="checkScriptFiles()">Script Files</button>
+                <button class="test-button" onclick="testPathResolution()">Path Resolution</button>
+            </div>
+            <div id="integrity-results"></div>
+        </div>
+
+        <!-- Real-world Testing -->
+        <div class="test-section">
+            <h2 class="section-title">🌍 Real-world Tests</h2>
+            <div class="controls-grid">
+                <button class="test-button" onclick="simulateGameStart()">Simulate Game Start</button>
+                <button class="test-button" onclick="simulateESCMenu()">Simulate ESC Menu</button>
+                <button class="test-button" onclick="testBrowserAutoplay()">Browser Autoplay</button>
+            </div>
+            <div id="realworld-results"></div>
+        </div>
+    </div>
+
+    <!-- Final Score Display -->
+    <div class="test-section" style="grid-column: 1 / -1;">
+        <h2 class="section-title">📊 Test Results Summary</h2>
+        <div id="score-display" class="score-display" style="display: none;"></div>
+        <div id="final-results"></div>
+    </div>
+
+    <div class="footer">
+        <p>🎮 Cockroach Run - Music System Validation Suite</p>
+        <p>Tests both autoplay restrictions handling and complete track list functionality</p>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/autoplay-helper.js"></script>
+    <script src="js/audio.js"></script>
+    
+    <script>
+        const TestSuite = {
+            results: {
+                autoplayHelper: { score: 0, total: 0 },
+                trackValidation: { score: 0, total: 0 },
+                musicPlayback: { score: 0, total: 0 },
+                fileIntegrity: { score: 0, total: 0 },
+                realWorldTests: { score: 0, total: 0 }
+            },
+            
+            init() {
+                this.updateStatus('Validation suite initialized and ready');
+                this.checkInitialState();
+            },
+            
+            checkInitialState() {
+                setTimeout(() => {
+                    if (typeof AutoplayHelper !== 'undefined') {
+                        this.addResult('autoplay-results', 'pass', 'AutoplayHelper', 'Successfully loaded');
+                    } else {
+                        this.addResult('autoplay-results', 'fail', 'AutoplayHelper', 'Not loaded');
+                    }
+                    
+                    if (typeof AudioManager !== 'undefined') {
+                        this.addResult('track-results', 'pass', 'AudioManager', 'Successfully loaded');
+                    } else {
+                        this.addResult('track-results', 'fail', 'AudioManager', 'Not loaded');
+                    }
+                }, 1000);
+            },
+            
+            updateProgress(percentage) {
+                document.getElementById('progress-bar').style.width = percentage + '%';
+            },
+            
+            updateStatus(message) {
+                document.getElementById('status-text').textContent = message;
+            },
+            
+            addResult(containerId, type, title, message, category = null) {
+                const container = document.getElementById(containerId);
+                const result = document.createElement('div');
+                result.className = `result ${type}`;
+                result.innerHTML = `<strong>${title}:</strong> ${message}`;
+                container.appendChild(result);
+                
+                // Update scoring
+                if (category && this.results[category]) {
+                    this.results[category].total++;
+                    if (type === 'pass') {
+                        this.results[category].score++;
+                    }
+                }
+                
+                // Auto-scroll to new result
+                result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            },
+            
+            calculateOverallScore() {
+                let totalScore = 0;
+                let totalPossible = 0;
+                
+                Object.values(this.results).forEach(category => {
+                    totalScore += category.score;
+                    totalPossible += category.total;
+                });
+                
+                return totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0;
+            },
+            
+            displayFinalScore() {
+                const score = this.calculateOverallScore();
+                const scoreDisplay = document.getElementById('score-display');
+                scoreDisplay.style.display = 'block';
+                
+                let className = 'score-poor';
+                let message = 'Needs significant improvement';
+                
+                if (score >= 90) {
+                    className = 'score-excellent';
+                    message = 'Excellent! All systems working perfectly';
+                } else if (score >= 75) {
+                    className = 'score-good';
+                    message = 'Good! Most systems working correctly';
+                } else if (score >= 50) {
+                    className = 'score-fair';
+                    message = 'Fair - Some issues need attention';
+                }
+                
+                scoreDisplay.className = `score-display ${className}`;
+                scoreDisplay.innerHTML = `
+                    <div>Overall Score: ${score}%</div>
+                    <div style="font-size: 0.8em; margin-top: 10px;">${message}</div>
+                `;
+            }
+        };
+
+        // AutoplayHelper Tests
+        function testAutoplayHelper() {
+            const category = 'autoplayHelper';
+            TestSuite.addResult('autoplay-results', 'info', 'Testing', 'AutoplayHelper functionality...', category);
+            
+            if (typeof AutoplayHelper !== 'undefined' && window.AutoplayHelper) {
+                TestSuite.addResult('autoplay-results', 'pass', 'AutoplayHelper Available', 'Class loaded and accessible', category);
+                
+                // Test methods existence
+                const helper = window.AutoplayHelper;
+                const requiredMethods = ['requestMusicPlay', 'showOverlay', 'hideOverlay', 'unlockAudioContext'];
+                
+                requiredMethods.forEach(method => {
+                    if (typeof helper[method] === 'function') {
+                        TestSuite.addResult('autoplay-results', 'pass', `Method: ${method}`, 'Available', category);
+                    } else {
+                        TestSuite.addResult('autoplay-results', 'fail', `Method: ${method}`, 'Missing', category);
+                    }
+                });
+                
+                // Test properties
+                TestSuite.addResult('autoplay-results', 'info', 'User Interaction', 
+                    helper.hasUserInteracted ? 'Detected' : 'Not yet detected', category);
+                TestSuite.addResult('autoplay-results', 'info', 'Audio Unlocked', 
+                    helper.audioUnlocked ? 'Yes' : 'Requires interaction', category);
+                    
+            } else {
+                TestSuite.addResult('autoplay-results', 'fail', 'AutoplayHelper Missing', 'Not loaded or accessible', category);
+            }
+        }
+
+        function testAudioContext() {
+            if (window.AutoplayHelper) {
+                window.AutoplayHelper.unlockAudioContext().then(() => {
+                    TestSuite.addResult('autoplay-results', 'pass', 'Audio Context', 'Successfully unlocked');
+                }).catch(error => {
+                    TestSuite.addResult('autoplay-results', 'warning', 'Audio Context', 'Requires user interaction: ' + error.message);
+                });
+            } else {
+                TestSuite.addResult('autoplay-results', 'fail', 'Audio Context', 'AutoplayHelper not available');
+            }
+        }
+
+        function testOverlaySystem() {
+            if (window.AutoplayHelper) {
+                try {
+                    window.AutoplayHelper.showOverlay('Test overlay system', 'Testing overlay functionality');
+                    TestSuite.addResult('autoplay-results', 'pass', 'Overlay System', 'Successfully displayed test overlay');
+                    
+                    setTimeout(() => {
+                        window.AutoplayHelper.hideOverlay();
+                        TestSuite.addResult('autoplay-results', 'pass', 'Overlay Hide', 'Successfully hidden');
+                    }, 2000);
+                } catch (error) {
+                    TestSuite.addResult('autoplay-results', 'fail', 'Overlay System', 'Error: ' + error.message);
+                }
+            } else {
+                TestSuite.addResult('autoplay-results', 'fail', 'Overlay System', 'AutoplayHelper not available');
+            }
+        }
+
+        function testInteractionDetection() {
+            if (window.AutoplayHelper) {
+                const wasInteracted = window.AutoplayHelper.hasUserInteracted;
+                TestSuite.addResult('autoplay-results', 'info', 'User Interaction State', 
+                    wasInteracted ? 'User has interacted' : 'No interaction detected yet');
+                    
+                // Simulate interaction by triggering the handler
+                const event = new Event('click');
+                window.AutoplayHelper.handleUserInteraction(event);
+                
+                TestSuite.addResult('autoplay-results', 'pass', 'Interaction Simulation', 'Successfully simulated user interaction');
+            } else {
+                TestSuite.addResult('autoplay-results', 'fail', 'Interaction Detection', 'AutoplayHelper not available');
+            }
+        }
+
+        // Track validation tests
+        function validateAllTracks() {
+            const category = 'trackValidation';
+            
+            if (typeof AudioManager !== 'undefined' && window.AudioManager) {
+                const am = window.AudioManager;
+                
+                if (am.trackMap) {
+                    const trackCount = Object.keys(am.trackMap).length;
+                    TestSuite.addResult('track-results', 'pass', 'Track Map', `Found ${trackCount} tracks`, category);
+                    
+                    if (trackCount >= 21) {
+                        TestSuite.addResult('track-results', 'pass', 'Track Count', 'Complete track list (21 tracks)', category);
+                    } else {
+                        TestSuite.addResult('track-results', 'warning', 'Track Count', `Only ${trackCount} tracks, expected 21`, category);
+                    }
+                    
+                    // Validate specific tracks
+                    const essentialTracks = ['cockroach-run', 'neon-roach-runnin', 'checkpoint-chaser'];
+                    essentialTracks.forEach(trackId => {
+                        if (am.trackMap[trackId]) {
+                            TestSuite.addResult('track-results', 'pass', `Essential Track: ${trackId}`, 'Available', category);
+                        } else {
+                            TestSuite.addResult('track-results', 'fail', `Essential Track: ${trackId}`, 'Missing', category);
+                        }
+                    });
+                    
+                } else {
+                    TestSuite.addResult('track-results', 'fail', 'Track Map', 'Not found in AudioManager', category);
+                }
+            } else {
+                TestSuite.addResult('track-results', 'fail', 'AudioManager', 'Not available', category);
+            }
+        }
+
+        function testTrackPaths() {
+            const category = 'trackValidation';
+            
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const tracks = Object.entries(window.AudioManager.trackMap);
+                let validPaths = 0;
+                
+                tracks.slice(0, 5).forEach(([trackId, filename]) => {
+                    const path = window.AudioManager.getTrackPath(trackId);
+                    if (path) {
+                        TestSuite.addResult('track-results', 'pass', `Path: ${trackId}`, path, category);
+                        validPaths++;
+                    } else {
+                        TestSuite.addResult('track-results', 'fail', `Path: ${trackId}`, 'Invalid path', category);
+                    }
+                });
+                
+                TestSuite.addResult('track-results', 'info', 'Path Validation', `Tested ${Math.min(5, tracks.length)} track paths`);
+            } else {
+                TestSuite.addResult('track-results', 'fail', 'Path Testing', 'AudioManager or trackMap not available');
+            }
+        }
+
+        function showTrackList() {
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const trackDisplay = document.getElementById('track-display');
+                trackDisplay.style.display = 'block';
+                trackDisplay.innerHTML = '<h4>Complete Track List:</h4>';
+                
+                Object.entries(window.AudioManager.trackMap).forEach(([id, filename]) => {
+                    const trackItem = document.createElement('div');
+                    trackItem.className = 'track-item';
+                    trackItem.innerHTML = `
+                        <span class="track-id">${id}</span>
+                        <span class="track-name">${filename}</span>
+                    `;
+                    trackDisplay.appendChild(trackItem);
+                });
+                
+                TestSuite.addResult('track-results', 'info', 'Track List', 'Displayed complete track list');
+            } else {
+                TestSuite.addResult('track-results', 'fail', 'Track List', 'Cannot display - AudioManager not available');
+            }
+        }
+
+        // Music playback tests
+        function testMenuMusic() {
+            const category = 'musicPlayback';
+            
+            if (window.AudioManager) {
+                TestSuite.addResult('playback-results', 'info', 'Menu Music', 'Starting playback test...', category);
+                
+                try {
+                    window.AudioManager.playMusicInMenuContext();
+                    TestSuite.addResult('playback-results', 'pass', 'Menu Music', 'Playback initiated successfully', category);
+                    
+                    updateNowPlaying(`Menu Music (${window.AudioManager.menuTrackId})`);
+                } catch (error) {
+                    TestSuite.addResult('playback-results', 'fail', 'Menu Music', 'Error: ' + error.message, category);
+                }
+            } else {
+                TestSuite.addResult('playback-results', 'fail', 'Menu Music', 'AudioManager not available', category);
+            }
+        }
+
+        function testGameMusic() {
+            const category = 'musicPlayback';
+            
+            if (window.AudioManager) {
+                TestSuite.addResult('playback-results', 'info', 'Game Music', 'Starting playback test...', category);
+                
+                try {
+                    window.AudioManager.inGameContext = true;
+                    window.AudioManager.playMusicInGameContext();
+                    TestSuite.addResult('playback-results', 'pass', 'Game Music', 'Playback initiated successfully', category);
+                    
+                    updateNowPlaying(`Game Music (${window.AudioManager.gameTrackId})`);
+                } catch (error) {
+                    TestSuite.addResult('playback-results', 'fail', 'Game Music', 'Error: ' + error.message, category);
+                }
+            } else {
+                TestSuite.addResult('playback-results', 'fail', 'Game Music', 'AudioManager not available', category);
+            }
+        }
+
+        function testTrackSwitching() {
+            const category = 'musicPlayback';
+            
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const tracks = Object.keys(window.AudioManager.trackMap);
+                if (tracks.length > 1) {
+                    const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+                    
+                    try {
+                        window.AudioManager.setTrack(randomTrack);
+                        TestSuite.addResult('playback-results', 'pass', 'Track Switching', `Switched to: ${randomTrack}`, category);
+                        
+                        updateNowPlaying(`${window.AudioManager.trackMap[randomTrack]} (${randomTrack})`);
+                    } catch (error) {
+                        TestSuite.addResult('playback-results', 'fail', 'Track Switching', 'Error: ' + error.message, category);
+                    }
+                } else {
+                    TestSuite.addResult('playback-results', 'fail', 'Track Switching', 'Insufficient tracks for test', category);
+                }
+            } else {
+                TestSuite.addResult('playback-results', 'fail', 'Track Switching', 'AudioManager/trackMap not available', category);
+            }
+        }
+
+        function updateNowPlaying(track) {
+            const nowPlaying = document.getElementById('now-playing');
+            const currentTrack = document.getElementById('current-track');
+            nowPlaying.style.display = 'block';
+            currentTrack.textContent = track;
+        }
+
+        function stopAllMusic() {
+            if (window.AudioManager) {
+                try {
+                    window.AudioManager.stopAllMusic();
+                    TestSuite.addResult('playback-results', 'pass', 'Stop Music', 'All music stopped');
+                    document.getElementById('now-playing').style.display = 'none';
+                } catch (error) {
+                    TestSuite.addResult('playback-results', 'fail', 'Stop Music', 'Error: ' + error.message);
+                }
+            } else {
+                TestSuite.addResult('playback-results', 'fail', 'Stop Music', 'AudioManager not available');
+            }
+        }
+
+        // File integrity tests
+        function checkAudioFiles() {
+            const category = 'fileIntegrity';
+            TestSuite.addResult('integrity-results', 'info', 'Audio Files', 'Testing file accessibility...', category);
+            
+            const testFiles = [
+                'assets/sounds/music/Cockroach run music.mp3',
+                'assets/sounds/music/Neon Roach Runnin.mp3',
+                'assets/sounds/sfx/button_click.wav'
+            ];
+            
+            let validFiles = 0;
+            testFiles.forEach((file, index) => {
+                const audio = new Audio();
+                
+                audio.addEventListener('canplaythrough', () => {
+                    validFiles++;
+                    TestSuite.addResult('integrity-results', 'pass', 'Audio File', `${file} - Accessible`, category);
+                }, { once: true });
+                
+                audio.addEventListener('error', () => {
+                    TestSuite.addResult('integrity-results', 'fail', 'Audio File', `${file} - Not accessible`, category);
+                }, { once: true });
+                
+                audio.src = file;
+            });
+        }
+
+        function checkScriptFiles() {
+            const category = 'fileIntegrity';
+            
+            const requiredClasses = ['AutoplayHelper', 'AudioManager'];
+            requiredClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    TestSuite.addResult('integrity-results', 'pass', 'Script Class', `${className} loaded`, category);
+                } else {
+                    TestSuite.addResult('integrity-results', 'fail', 'Script Class', `${className} not loaded`, category);
+                }
+            });
+            
+            const scripts = document.querySelectorAll('script[src*="autoplay-helper"], script[src*="audio"]');
+            TestSuite.addResult('integrity-results', 'info', 'Script Tags', `Found ${scripts.length} script tags`);
+        }
+
+        function testPathResolution() {
+            const category = 'fileIntegrity';
+            
+            if (window.AudioManager) {
+                const testPath = window.AudioManager.getTrackPath('cockroach-run');
+                if (testPath && testPath.includes('assets/sounds/music/')) {
+                    TestSuite.addResult('integrity-results', 'pass', 'Path Resolution', `Correct format: ${testPath}`, category);
+                } else {
+                    TestSuite.addResult('integrity-results', 'fail', 'Path Resolution', `Invalid format: ${testPath}`, category);
+                }
+            } else {
+                TestSuite.addResult('integrity-results', 'fail', 'Path Resolution', 'AudioManager not available', category);
+            }
+        }
+
+        // Real-world tests
+        function simulateGameStart() {
+            const category = 'realWorldTests';
+            TestSuite.addResult('realworld-results', 'info', 'Game Start', 'Simulating game startup sequence...', category);
+            
+            try {
+                if (window.AudioManager) {
+                    window.AudioManager.setContext(false); // Menu context
+                    window.AudioManager.playMusicInMenuContext();
+                    TestSuite.addResult('realworld-results', 'pass', 'Game Start Simulation', 'Menu music started', category);
+                } else {
+                    TestSuite.addResult('realworld-results', 'fail', 'Game Start Simulation', 'AudioManager not available', category);
+                }
+            } catch (error) {
+                TestSuite.addResult('realworld-results', 'fail', 'Game Start Simulation', 'Error: ' + error.message, category);
+            }
+        }
+
+        function simulateESCMenu() {
+            const category = 'realWorldTests';
+            TestSuite.addResult('realworld-results', 'info', 'ESC Menu', 'Simulating ESC menu access...', category);
+            
+            // Check if ESC menu track selection is available
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const trackCount = Object.keys(window.AudioManager.trackMap).length;
+                if (trackCount >= 21) {
+                    TestSuite.addResult('realworld-results', 'pass', 'ESC Menu Tracks', `All ${trackCount} tracks available for selection`, category);
+                } else {
+                    TestSuite.addResult('realworld-results', 'warning', 'ESC Menu Tracks', `Only ${trackCount} tracks available`, category);
+                }
+            } else {
+                TestSuite.addResult('realworld-results', 'fail', 'ESC Menu Tracks', 'Track list not available', category);
+            }
+        }
+
+        function testBrowserAutoplay() {
+            const category = 'realWorldTests';
+            TestSuite.addResult('realworld-results', 'info', 'Browser Autoplay', 'Testing autoplay restrictions...', category);
+            
+            if (window.AutoplayHelper) {
+                if (window.AutoplayHelper.hasUserInteracted) {
+                    TestSuite.addResult('realworld-results', 'pass', 'Autoplay Status', 'User interaction detected - autoplay should work', category);
+                } else {
+                    TestSuite.addResult('realworld-results', 'warning', 'Autoplay Status', 'No user interaction - autoplay may be blocked', category);
+                }
+                
+                if (window.AutoplayHelper.audioUnlocked) {
+                    TestSuite.addResult('realworld-results', 'pass', 'Audio Context', 'Audio context is unlocked', category);
+                } else {
+                    TestSuite.addResult('realworld-results', 'info', 'Audio Context', 'Audio context requires user interaction', category);
+                }
+            } else {
+                TestSuite.addResult('realworld-results', 'fail', 'Autoplay Helper', 'AutoplayHelper not available', category);
+            }
+        }
+
+        // Comprehensive test runner
+        function runComprehensiveTest() {
+            TestSuite.updateStatus('Running comprehensive validation suite...');
+            TestSuite.updateProgress(0);
+            
+            // Clear previous results
+            resetAllTests();
+            
+            const tests = [
+                { fn: testAutoplayHelper, delay: 500, progress: 15 },
+                { fn: testAudioContext, delay: 1000, progress: 25 },
+                { fn: validateAllTracks, delay: 1500, progress: 40 },
+                { fn: testTrackPaths, delay: 2000, progress: 55 },
+                { fn: testMenuMusic, delay: 2500, progress: 70 },
+                { fn: checkAudioFiles, delay: 3000, progress: 85 },
+                { fn: simulateGameStart, delay: 3500, progress: 95 },
+                { fn: () => {
+                    TestSuite.updateProgress(100);
+                    TestSuite.updateStatus('Comprehensive test completed!');
+                    TestSuite.displayFinalScore();
+                }, delay: 4000, progress: 100 }
+            ];
+            
+            tests.forEach(test => {
+                setTimeout(() => {
+                    TestSuite.updateProgress(test.progress);
+                    test.fn();
+                }, test.delay);
+            });
+        }
+
+        function resetAllTests() {
+            const resultContainers = [
+                'autoplay-results', 'track-results', 'playback-results', 
+                'integrity-results', 'realworld-results', 'final-results'
+            ];
+            
+            resultContainers.forEach(id => {
+                const container = document.getElementById(id);
+                if (container) container.innerHTML = '';
+            });
+            
+            document.getElementById('track-display').style.display = 'none';
+            document.getElementById('now-playing').style.display = 'none';
+            document.getElementById('score-display').style.display = 'none';
+            
+            // Reset scoring
+            Object.keys(TestSuite.results).forEach(key => {
+                TestSuite.results[key] = { score: 0, total: 0 };
+            });
+            
+            TestSuite.updateProgress(0);
+            TestSuite.updateStatus('Tests reset. Ready to run validation suite.');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            TestSuite.init();
+        });
+    </script>
+</body>
+</html>

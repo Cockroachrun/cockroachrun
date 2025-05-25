@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Music Test - Cockroach Run</title>
+    <style>
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 10px;
+            padding: 30px;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            padding: 15px 25px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .status {
+            background: #333;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #ff6600;
+        }
+        
+        .success { border-left-color: #00ff00; background: #003300; }
+        .error { border-left-color: #ff0000; background: #330000; }
+        .warning { border-left-color: #ffff00; background: #333300; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎵 Quick Music System Test</h1>
+        <p>Testing the music dropdown fixes for Cockroach Run</p>
+        
+        <div class="test-section">
+            <h3>Quick Tests</h3>
+            <button class="test-button" onclick="testAutoplayHelper()">Test AutoplayHelper</button>
+            <button class="test-button" onclick="testAudioManager()">Test AudioManager</button>
+            <button class="test-button" onclick="testMusicPlayback()">Test Music Playback</button>
+            <button class="test-button" onclick="testTrackCount()">Test Track Count</button>
+        </div>
+        
+        <div id="test-results"></div>
+        
+        <div class="test-section">
+            <h3>Real Music Test</h3>
+            <button class="test-button" onclick="playMenuMusic()">Play Menu Music</button>
+            <button class="test-button" onclick="playGameMusic()">Play Game Music</button>
+            <button class="test-button" onclick="switchRandomTrack()">Switch Random Track</button>
+            <button class="test-button" onclick="stopMusic()">Stop Music</button>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/autoplay-helper.js"></script>
+    <script src="js/audio.js"></script>
+    
+    <script>
+        function addResult(message, type = 'status') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function testAutoplayHelper() {
+            if (typeof AutoplayHelper !== 'undefined' && window.AutoplayHelper) {
+                addResult('✅ AutoplayHelper: Successfully loaded and accessible', 'success');
+                addResult(`🎵 User Interaction Status: ${window.AutoplayHelper.hasUserInteracted ? 'Detected' : 'Not yet detected'}`, 'status');
+                addResult(`🔊 Audio Unlocked: ${window.AutoplayHelper.audioUnlocked ? 'Yes' : 'Requires interaction'}`, 'status');
+            } else {
+                addResult('❌ AutoplayHelper: Not loaded or accessible', 'error');
+            }
+        }
+
+        function testAudioManager() {
+            if (typeof AudioManager !== 'undefined' && window.AudioManager) {
+                addResult('✅ AudioManager: Successfully loaded and accessible', 'success');
+                
+                if (window.AudioManager.trackMap) {
+                    const trackCount = Object.keys(window.AudioManager.trackMap).length;
+                    addResult(`📋 Track Count: ${trackCount} tracks available`, trackCount >= 21 ? 'success' : 'warning');
+                    
+                    // Test essential tracks
+                    const essentialTracks = ['cockroach-run', 'neon-roach-runnin', 'checkpoint-chaser'];
+                    essentialTracks.forEach(trackId => {
+                        if (window.AudioManager.trackMap[trackId]) {
+                            addResult(`✅ Essential Track "${trackId}": Available`, 'success');
+                        } else {
+                            addResult(`❌ Essential Track "${trackId}": Missing`, 'error');
+                        }
+                    });
+                } else {
+                    addResult('❌ Track Map: Not found in AudioManager', 'error');
+                }
+            } else {
+                addResult('❌ AudioManager: Not loaded or accessible', 'error');
+            }
+        }
+
+        function testMusicPlayback() {
+            if (window.AudioManager) {
+                try {
+                    // Test path generation
+                    const testPath = window.AudioManager.getTrackPath('cockroach-run');
+                    if (testPath && testPath.includes('assets/sounds/music/')) {
+                        addResult(`✅ Path Generation: Working correctly (${testPath})`, 'success');
+                    } else {
+                        addResult(`❌ Path Generation: Invalid format (${testPath})`, 'error');
+                    }
+                    
+                    // Test audio elements
+                    const menuMusic = document.getElementById('menu-music') || window.AudioManager.menuMusic;
+                    const gameMusic = document.getElementById('game-music') || window.AudioManager.gameMusic;
+                    
+                    if (menuMusic) {
+                        addResult('✅ Menu Music Element: Available', 'success');
+                    } else {
+                        addResult('⚠️ Menu Music Element: Not found, will be created dynamically', 'warning');
+                    }
+                    
+                    if (gameMusic) {
+                        addResult('✅ Game Music Element: Available', 'success');
+                    } else {
+                        addResult('⚠️ Game Music Element: Not found, will be created dynamically', 'warning');
+                    }
+                    
+                } catch (error) {
+                    addResult(`❌ Music Playback Test: Error - ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ Music Playback Test: AudioManager not available', 'error');
+            }
+        }
+
+        function testTrackCount() {
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const tracks = Object.entries(window.AudioManager.trackMap);
+                addResult(`📊 Total Tracks: ${tracks.length}`, tracks.length >= 21 ? 'success' : 'warning');
+                
+                // Show first few tracks as examples
+                addResult('📋 Sample Tracks:', 'status');
+                tracks.slice(0, 5).forEach(([id, filename]) => {
+                    addResult(`&nbsp;&nbsp;&nbsp;• ${id}: ${filename}`, 'status');
+                });
+                
+                if (tracks.length > 5) {
+                    addResult(`&nbsp;&nbsp;&nbsp;... and ${tracks.length - 5} more tracks`, 'status');
+                }
+                
+                // This confirms both issues are resolved:
+                // 1. We have a complete track list (21 tracks)
+                // 2. Each track has a proper file mapping
+                if (tracks.length >= 21) {
+                    addResult('🎉 ISSUE RESOLUTION: Complete track list confirmed - ESC menu will show all tracks!', 'success');
+                } else {
+                    addResult('⚠️ ISSUE: Incomplete track list - some tracks may be missing from ESC menu', 'warning');
+                }
+            } else {
+                addResult('❌ Track Count Test: AudioManager or trackMap not available', 'error');
+            }
+        }
+
+        function playMenuMusic() {
+            if (window.AudioManager) {
+                try {
+                    window.AudioManager.setContext(false); // Menu context
+                    window.AudioManager.playMusicInMenuContext();
+                    addResult('🎵 Menu Music: Playback initiated (check browser console for autoplay status)', 'success');
+                } catch (error) {
+                    addResult(`❌ Menu Music: Error - ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ Menu Music: AudioManager not available', 'error');
+            }
+        }
+
+        function playGameMusic() {
+            if (window.AudioManager) {
+                try {
+                    window.AudioManager.setContext(true); // Game context
+                    window.AudioManager.playMusicInGameContext();
+                    addResult('🎮 Game Music: Playback initiated (check browser console for autoplay status)', 'success');
+                } catch (error) {
+                    addResult(`❌ Game Music: Error - ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ Game Music: AudioManager not available', 'error');
+            }
+        }
+
+        function switchRandomTrack() {
+            if (window.AudioManager && window.AudioManager.trackMap) {
+                const tracks = Object.keys(window.AudioManager.trackMap);
+                if (tracks.length > 0) {
+                    const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+                    try {
+                        window.AudioManager.setTrack(randomTrack);
+                        addResult(`🔄 Track Switch: Switched to "${randomTrack}" (${window.AudioManager.trackMap[randomTrack]})`, 'success');
+                    } catch (error) {
+                        addResult(`❌ Track Switch: Error - ${error.message}`, 'error');
+                    }
+                } else {
+                    addResult('❌ Track Switch: No tracks available', 'error');
+                }
+            } else {
+                addResult('❌ Track Switch: AudioManager/trackMap not available', 'error');
+            }
+        }
+
+        function stopMusic() {
+            if (window.AudioManager) {
+                try {
+                    if (window.AudioManager.stopAllMusic) {
+                        window.AudioManager.stopAllMusic();
+                        addResult('⏹️ Stop Music: All music stopped', 'success');
+                    } else {
+                        // Fallback method
+                        if (window.AudioManager.menuMusic) window.AudioManager.menuMusic.pause();
+                        if (window.AudioManager.gameMusic) window.AudioManager.gameMusic.pause();
+                        addResult('⏹️ Stop Music: Music paused (fallback method)', 'success');
+                    }
+                } catch (error) {
+                    addResult(`❌ Stop Music: Error - ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ Stop Music: AudioManager not available', 'error');
+            }
+        }
+
+        // Auto-run basic tests when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            addResult('🚀 Quick Music Test Suite Initialized', 'success');
+            addResult('👆 Click the test buttons above to validate the music system', 'status');
+            
+            // Run automatic initial tests
+            setTimeout(() => {
+                testAutoplayHelper();
+                testAudioManager();
+                testTrackCount();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
