@@ -2,13 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  <title>Cockroach Run - Ultimate Test</title>
-  <!-- Font imports -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet" />
-  <!-- CSS variables -->
-  <link rel="stylesheet" href="css/variables.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cockroach Run - Ultimate Test</title>
   <!-- Message remover script, loads first to immediately remove unwanted elements -->
   <script src="message-remover.js"></script>
   <!-- Load Three.js libraries from CDN -->
@@ -23,11 +18,12 @@
       margin: 0;
       padding: 0;
     }
-      body {
+    
+    body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      font-family: var(--font-body);
+      font-family: Arial, sans-serif;
       background-color: #1a1a1a;
       color: #ffffff;
     }
@@ -86,12 +82,13 @@
       border-radius: 0;
       display: flex;
       justify-content: center;
-      align-items: center;      cursor: pointer;
+      align-items: center;
+      cursor: pointer;
       z-index: 1000;
       font-size: 20px;
       box-shadow: none;
       border: 2px solid #FF8000;
-      font-family: var(--font-heading);
+      font-family: Arial, sans-serif;
       font-weight: bold;
       transition: background-color 0.2s;
     }
@@ -104,11 +101,12 @@
     #controls-info {
       position: absolute;
       top: 60px;
-      right: 10px;      background-color: #000000;
+      right: 10px;
+      background-color: #000000;
       color: #FF8000;
       border: 2px solid #FF8000;
       padding: 15px;
-      font-family: var(--font-body);
+      font-family: Arial, sans-serif;
       font-size: 14px;
       z-index: 100;
       display: none;
@@ -116,7 +114,8 @@
       box-shadow: none;
       max-width: 300px;
     }
-      /* Settings menu to match game UI exactly */
+    
+    /* Settings menu to match game UI exactly */
     #settings-menu {
       position: absolute;
       top: 50%;
@@ -132,9 +131,10 @@
       border-radius: 0;
       display: none;
       box-shadow: none;
-      font-family: var(--font-body);
+      font-family: Arial, sans-serif;
     }
-      #settings-menu h2 {
+    
+    #settings-menu h2 {
       text-align: center;
       margin-top: 0;
       margin-bottom: 20px;
@@ -143,7 +143,6 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: bold;
-      font-family: var(--font-heading);
     }
     
     .settings-row {
@@ -166,7 +165,8 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-      .settings-row button, 
+    
+    .settings-row button, 
     #settings-menu button {
       background-color: #000000;
       color: #FF8000;
@@ -174,7 +174,7 @@
       padding: 8px 15px;
       border-radius: 0;
       cursor: pointer;
-      font-family: var(--font-heading);
+      font-family: Arial, sans-serif;
       font-weight: bold;
       min-width: 80px;
       transition: all 0.2s;
@@ -189,12 +189,13 @@
     #settings-menu button:active {
       background-color: #111111;
     }
-      #settings-menu button {
+    
+    #settings-menu button {
       background-color: #121212;
       color: #FF8000;
       border: 1px solid #FF8000;
       padding: 5px 10px;
-      font-family: var(--font-heading);
+      font-family: 'Courier New', monospace;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
@@ -217,139 +218,89 @@
       border-radius: 0;
     }
     
+    .audio-player {
+      margin-top: 5px;
+    }
+    
+    /* Audio unlock overlay - shown only if needed */
+    #audio-unlock-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    #audio-unlock-message {
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 20px;
+      max-width: 80%;
+      text-align: center;
+      font-size: 18px;
+    }
+    
     #return-to-menu-button:hover {
       background-color: #111111;
     }
-      /* Music track selector styling - Updated to match main settings menu */
-    .custom-dropdown-wrapper {
+    
+    /* Music track selector styling */
+    #track-selector {
       position: relative;
-      width: 55%;
-      z-index: 100;
+      display: inline-block;
     }
-
-    .custom-dropdown-trigger {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 20px 4px 8px;
-      background-color: rgba(0, 0, 0, 1);
-      border: 1px solid var(--orange);
-      color: var(--orange);
+    
+    #music-track-button {
+      min-width: 180px;
+      text-align: left;
+      position: relative;
+      padding-right: 25px;
+      background-color: #121212;
+      color: #FF8000;
+      border: 1px solid #FF8000;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
       cursor: pointer;
-      font-family: var(--font-body);
-      width: 100%;
-      font-size: 0.9em;
-      position: relative;
-      z-index: 1500;
+      transition: all 0.2s;
     }
-
-    .custom-dropdown-trigger::after {
-      content: '';
+    
+    #music-track-button:after {
+      content: '▼';
       position: absolute;
+      right: 8px;
       top: 50%;
-      right: 12px;
       transform: translateY(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 6px solid var(--orange);
-      pointer-events: none;
-      transition: border-top-color 0.2s ease;
+      font-size: 10px;
     }
-
-    .custom-dropdown-trigger:hover {
-      background-color: rgba(0, 0, 0, 0.9);
-      border-color: var(--orange);
-    }
-
-    .custom-dropdown-trigger:hover::after {
-      border-top-color: var(--orange);
-    }
-
-    .custom-dropdown-trigger:focus {
-      outline: 2px solid var(--orange);
-      outline-offset: 2px;
-      border-color: var(--orange);
-      background-color: rgba(0, 0, 0, 0.9);
-    }
-
-    .custom-options-list {
+    
+    #music-track-dropdown {
+      display: none;
       position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
       width: 100%;
-      z-index: 10;
-      background-color: #000000;
-      border: 1px solid var(--orange);
-      border-top: none;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      visibility: hidden;
-      transition: max-height 0.3s ease-out, opacity 0.3s ease-out, visibility 0s linear 0.3s;
-    }
-
-    .custom-options-list.visible {
-      max-height: 300px;
-      opacity: 1;
-      visibility: visible !important;
-      display: block;
-      transition: max-height 0.3s ease-in, opacity 0.2s ease-in, visibility 0s linear 0s;
-      z-index: 9999;
+      max-height: 200px;
       overflow-y: auto;
-      background-color: #000000;
-      border: 1px solid var(--orange);
-      scrollbar-width: thin;
-      scrollbar-color: var(--orange) #121212;
+      background-color: #121212;
+      border: 1px solid #FF8000;
+      z-index: 1000;
     }
-
-    .custom-options-list.visible::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .custom-options-list.visible::-webkit-scrollbar-track {
-      background: #121212;
-    }
-
-    .custom-options-list.visible::-webkit-scrollbar-thumb {
-      background-color: var(--orange);
-      border-radius: 0;
-    }
-
-    .custom-option {
-      padding: 4px 8px;
-      color: var(--orange);
-      background-color: #000000;
+    
+    .track-option {
+      padding: 6px 10px;
       cursor: pointer;
-      transition: background-color 0.1s ease, color 0.1s ease;
-      font-family: var(--font-body);
-      font-size: 0.9em;
+      color: #FF8000;
+      transition: all 0.2s;
     }
-
-    .custom-option:hover,
-    .custom-option:focus {
-      background-color: #000000;
-      color: #FFB84D;
-      outline: none;
-    }
-
-    .original-select {
-      position: absolute;
-      left: -9999px;
-      top: auto;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      opacity: 0;
-      pointer-events: none;
-      border: 0;
-      padding: 0;
-      margin: -1px;
+    
+    .track-option:hover {
+      background-color: #FF8000;
+      color: #121212;
     }
     
     /* Now Playing indicator */
@@ -366,11 +317,12 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);      background-color: rgba(0, 0, 0, 0.7);
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
       color: #ffffff;
       padding: 20px;
       border-radius: 5px;
-      font-family: var(--font-body);
+      font-family: sans-serif;
       z-index: 1000;
     }
     
@@ -405,7 +357,67 @@
       align-items: center;
       position: relative;
     }
-  
+    
+    #music-track-button {
+      background-color: #000000;
+      color: #FF8000;
+      border: 2px solid #FF8000;
+      padding: 8px;
+      text-align: left;
+      cursor: pointer;
+      min-width: 120px;
+      position: relative;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 20px;
+    }
+    
+    #music-track-button:after {
+      content: '▼';
+      font-size: 10px;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    #music-track-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 180px;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #000000;
+      border: 2px solid #FF8000;
+      z-index: 1001;
+      display: none;
+    }
+    
+    .track-option {
+      padding: 5px 8px;
+      cursor: pointer;
+      color: #FF8000;
+      font-size: 14px;
+      text-align: left;
+    }
+    
+    .track-option:hover {
+      background-color: #333;
+    }
+    
+    /* Current track indicator */
+    .current-track {
+      color: #000000;
+      background-color: #FF8000;
+    }
+    
+    .current-track:hover {
+      background-color: #FF8000;
+      color: #000000;
+    }
     
     @media (max-width: 768px) {
       #debug-info {
@@ -423,29 +435,17 @@
         height: 50px;
       }
       
-      /* Mobile styles for custom dropdown */
-      .custom-dropdown-wrapper {
-        min-width: 120px;
-      }
-      
-      .custom-dropdown-trigger {
+      #music-track-button {
+        min-width: 100px;
         font-size: 12px;
-        padding: 6px 8px;
-        min-height: 36px;
       }
       
-      .custom-options-list {
-        max-height: 120px;
-        width: 100%;
-        min-width: 150px;
+      #music-track-dropdown {
+        width: 150px;
       }
       
-      .custom-option {
+      .track-option {
         font-size: 12px;
-        padding: 8px 10px;
-        min-height: 32px;
-        display: flex;
-        align-items: center;
       }
     }
   </style>
@@ -461,9 +461,10 @@
   
   <!-- Controls toggle button to match game UI -->
   <button id="controls-toggle">?</button>
-    <!-- Controls info panel -->
+  
+  <!-- Controls info panel -->
   <div id="controls-info">
-    <h3 style="margin-top: 0;">Controls:</h3>
+    <h3 style="margin-top: 0; color: #FF8000;">Controls:</h3>
     <p>W/Up Arrow - Move Forward</p>
     <p>S/Down Arrow - Move Backward</p>
     <p>A/Left Arrow - Rotate Left</p>
@@ -474,9 +475,10 @@
     <p>ESC - Settings Menu</p>
     <p>T - Toggle Debug Camera</p>
   </div>
-    <!-- Settings menu (appears when ESC is pressed) -->
+  
+  <!-- Settings menu (appears when ESC is pressed) -->
   <div id="settings-menu" style="display: none;">
-    <h2 class="screen-title">Game Settings</h2>
+    <h2>Game Settings</h2>
     <div class="now-playing" id="now-playing">NOW PLAYING: <span id="now-playing-text"></span></div>
     
     <div class="settings-row">
@@ -488,33 +490,20 @@
       <label for="debug-toggle">Debug Info</label>
       <button id="debug-toggle">Show</button>
     </div>
-      <div class="settings-row">
+    
+    <div class="settings-row">
       <label for="track-selector">Music Track</label>
-      <div class="custom-dropdown-wrapper" data-target-select="music-track-select">
-        <!-- Hidden original select -->
-        <select id="music-track-select" class="original-select" aria-hidden="true" tabindex="-1">
-          <option value="checkpoint-chaser">Checkpoint Chaser</option>
-          <option value="cockroach-comeback">Cockroach Comeback</option>
-          <option value="cockroach-run" selected>Cockroach Run</option>
-          <option value="dodge-weave-waltz">Dodge and Weave Waltz</option>
-          <option value="neon-roach-runnin">Neon Roach Runnin</option>
-          <option value="run-roach-run">Run, Roach, Run!</option>
-          <option value="urban-jungle-jive">Urban Jungle Jive</option>
-        </select>
-        <!-- Visible custom dropdown trigger -->
-        <div class="custom-dropdown-trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="music-track-label selected-music-text" tabindex="0">
-          <span class="selected-option-text" id="selected-music-text">Cockroach Run</span>
+      <div id="track-selector">
+        <button id="music-track-button">Cockroach Run</button>
+        <div id="music-track-dropdown">
+          <div class="track-option" data-value="checkpoint-chaser">Checkpoint Chaser</div>
+          <div class="track-option" data-value="cockroach-comeback">Cockroach Comeback</div>
+          <div class="track-option" data-value="cockroach-run">Cockroach Run</div>
+          <div class="track-option" data-value="dodge-weave-waltz">Dodge and Weave Waltz</div>
+          <div class="track-option" data-value="neon-roach-runnin">Neon Roach Runnin</div>
+          <div class="track-option" data-value="run-roach-run">Run, Roach, Run!</div>
+          <div class="track-option" data-value="urban-jungle-jive">Urban Jungle Jive</div>
         </div>
-        <!-- Custom options list -->
-        <ul class="custom-options-list" role="listbox" aria-labelledby="music-track-label" hidden>
-          <li class="custom-option" data-value="checkpoint-chaser" role="option" tabindex="-1">Checkpoint Chaser</li>
-          <li class="custom-option" data-value="cockroach-comeback" role="option" tabindex="-1">Cockroach Comeback</li>
-          <li class="custom-option" data-value="cockroach-run" role="option" tabindex="-1">Cockroach Run</li>
-          <li class="custom-option" data-value="dodge-weave-waltz" role="option" tabindex="-1">Dodge and Weave Waltz</li>
-          <li class="custom-option" data-value="neon-roach-runnin" role="option" tabindex="-1">Neon Roach Runnin</li>
-          <li class="custom-option" data-value="run-roach-run" role="option" tabindex="-1">Run, Roach, Run!</li>
-          <li class="custom-option" data-value="urban-jungle-jive" role="option" tabindex="-1">Urban Jungle Jive</li>
-        </ul>
       </div>
     </div>
     
@@ -544,7 +533,9 @@
   <audio id="game-music" loop preload="auto"></audio>
   
   <!-- Zoom notification element -->
-  <div id="zoom-notification" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: #FF8000; padding: 10px 20px; border-radius: 5px; font-family: var(--font-body); font-weight: bold; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
+  <div id="zoom-notification" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: #FF8000; padding: 10px 20px; border-radius: 5px; font-family: Arial, sans-serif; font-weight: bold; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;"></div>
+  
+  <!-- Audio overlay removed to prevent game breaking -->
   
   <!-- Additional scripts -->
   <script src="direct-keyboard-zoom.js"></script>
@@ -713,11 +704,56 @@
             if (audioElements['scatter-sound'] && !audioElements['scatter-sound'].src) {
               audioElements['scatter-sound'].src = 'assets/sounds/scatter.mp3';
             }
+            
+            // Simple attempt to start music without the overlay
+            setTimeout(() => {
+              if (window.AudioManager && !window.AudioManager.isMuted) {
+                log('Simple attempt to start game music', 'info');
+                try {
+                  window.AudioManager.playMusicInGameContext();
+                } catch (e) {
+                  log('Could not auto-start music: ' + e.message, 'error');
+                }
+              }
+            }, 1000);
           }
+          
           
           // Set to game context since we're loading the game
           log('Setting audio context to GAME', 'info');
           window.AudioManager.setContext(true);
+          
+          // Force game music to start playing immediately (with multiple attempts)
+          setTimeout(() => {
+            if (!window.AudioManager.isMuted) {
+              log('Auto-starting game music on page load', 'info');
+              
+              // Get the game track info
+              const gameTrackId = window.AudioManager.gameTrackId;
+              const trackElement = document.querySelector(`.track-option[data-value="${gameTrackId}"]`);
+              if (trackElement) {
+                log(`Auto-playing track: ${trackElement.textContent}`, 'info');
+              }
+              
+              // Try to play with multiple fallbacks
+              window.AudioManager.playMusicInGameContext();
+              
+              // Second attempt after a short delay (for browsers that need user interaction)
+              setTimeout(() => {
+                if (window.AudioManager.gameMusic && window.AudioManager.gameMusic.paused) {
+                  log('Second attempt to auto-start game music', 'warning');
+                  window.AudioManager.gameMusic.play().catch(e => log('Second attempt failed: ' + e.message, 'error'));
+                  
+                  // Try once more with a user interaction simulation
+                  document.addEventListener('click', function autoPlayHandler() {
+                    log('Trying to play music after user interaction', 'info');
+                    window.AudioManager.gameMusic.play();
+                    document.removeEventListener('click', autoPlayHandler);
+                  }, { once: true });
+                }
+              }, 2000);
+            }
+          }, 500);
         } else {
           log('AudioManager not found!', 'error');
         }
@@ -728,54 +764,38 @@
       const urlParams = new URLSearchParams(window.location.search);
       const selectedMode = urlParams.get('mode') || 'free-world';
       const selectedCharacter = urlParams.get('character') || 'default-roach';
-        // Function to initialize music track selector with new dropdown system
+      
+      // Function to initialize music track selector
       function initMusicTrackSelector() {
-        console.log('Initializing music track selector...');
-        const customDropdownWrapper = document.querySelector('.custom-dropdown-wrapper[data-target-select="music-track-select"]');
-        const customDropdownTrigger = customDropdownWrapper?.querySelector('.custom-dropdown-trigger');
-        const customOptionsList = customDropdownWrapper?.querySelector('.custom-options-list');
-        const customOptions = customDropdownWrapper?.querySelectorAll('.custom-option');
-        const selectedText = customDropdownWrapper?.querySelector('.selected-option-text');
+        const musicTrackButton = document.getElementById('music-track-button');
+        const musicTrackDropdown = document.getElementById('music-track-dropdown');
+        const trackOptions = document.querySelectorAll('.track-option');
         const nowPlaying = document.getElementById('now-playing');
         const nowPlayingText = document.getElementById('now-playing-text');
         
-        console.log('Dropdown elements:', {
-          wrapper: !!customDropdownWrapper,
-          trigger: !!customDropdownTrigger,
-          optionsList: !!customOptionsList,
-          selectedText: !!selectedText,
-          optionsCount: customOptions?.length || 0
-        });
-        
-        if (!customDropdownWrapper || !customDropdownTrigger || !customOptionsList || !selectedText) {
-          log('Custom dropdown elements not found', 'error');
-          return;
-        }
+        if (!musicTrackButton || !musicTrackDropdown) return;
         
         // Set initial track from AudioManager's game track
         if (window.AudioManager && window.AudioManager.gameTrackId) {
           const gameTrack = window.AudioManager.gameTrackId;
-          const trackElement = document.querySelector(`.custom-option[data-value="${gameTrack}"]`);
+          const trackElement = document.querySelector(`.track-option[data-value="${gameTrack}"]`);
           if (trackElement) {
-            selectedText.textContent = trackElement.textContent;
-            if (nowPlayingText) {
-              nowPlayingText.textContent = trackElement.textContent;
-              if (nowPlaying) nowPlaying.style.display = 'block';
-            }
+            musicTrackButton.textContent = trackElement.textContent;
+            nowPlayingText.textContent = trackElement.textContent;
+            nowPlaying.style.display = 'block';
           }
         }
         
         // Listen for track change events from AudioManager
         window.addEventListener('trackChanged', function(e) {
           if (e.detail && e.detail.trackId) {
+            // Only update if we're in game context - we only care about the game tracks here
             if (window.AudioManager && window.AudioManager.inGameContext) {
-              const trackElement = document.querySelector(`.custom-option[data-value="${e.detail.trackId}"]`);
+              const trackElement = document.querySelector(`.track-option[data-value="${e.detail.trackId}"]`);
               if (trackElement) {
-                selectedText.textContent = trackElement.textContent;
-                if (nowPlayingText) {
-                  nowPlayingText.textContent = trackElement.textContent;
-                  if (nowPlaying) nowPlaying.style.display = 'block';
-                }
+                musicTrackButton.textContent = trackElement.textContent;
+                nowPlayingText.textContent = trackElement.textContent;
+                nowPlaying.style.display = 'block';
                 
                 // Update the game track in AudioManager
                 if (window.AudioManager) {
@@ -787,53 +807,30 @@
           }
         });
         
-        // Toggle dropdown on trigger click
-        customDropdownTrigger.addEventListener('click', function() {
-          const isVisible = customOptionsList.classList.contains('visible');
-          if (isVisible) {
-            customOptionsList.classList.remove('visible');
-            customDropdownTrigger.setAttribute('aria-expanded', 'false');
-            customOptionsList.setAttribute('hidden', '');
-          } else {
-            customOptionsList.classList.add('visible');
-            customDropdownTrigger.setAttribute('aria-expanded', 'true');
-            customOptionsList.removeAttribute('hidden');
-          }
+        // Toggle dropdown on button click
+        musicTrackButton.addEventListener('click', function() {
+          const isVisible = musicTrackDropdown.style.display === 'block';
+          musicTrackDropdown.style.display = isVisible ? 'none' : 'block';
         });
         
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
-          if (!customDropdownWrapper.contains(e.target)) {
-            customOptionsList.classList.remove('visible');
-            customDropdownTrigger.setAttribute('aria-expanded', 'false');
-            customOptionsList.setAttribute('hidden', '');
-          }
-        });
-        
-        // Handle keyboard navigation
-        customDropdownTrigger.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            this.click();
+          if (!musicTrackButton.contains(e.target) && !musicTrackDropdown.contains(e.target)) {
+            musicTrackDropdown.style.display = 'none';
           }
         });
         
         // Track selection event handler
-        customOptions.forEach(option => {
+        trackOptions.forEach(option => {
           option.addEventListener('click', function() {
             const trackId = this.getAttribute('data-value');
             const trackName = this.textContent;
             
             // Update UI
-            selectedText.textContent = trackName;
-            customOptionsList.classList.remove('visible');
-            customDropdownTrigger.setAttribute('aria-expanded', 'false');
-            customOptionsList.setAttribute('hidden', '');
-            
-            if (nowPlayingText) {
-              nowPlayingText.textContent = trackName;
-              if (nowPlaying) nowPlaying.style.display = 'block';
-            }
+            musicTrackButton.textContent = trackName;
+            musicTrackDropdown.style.display = 'none';
+            nowPlayingText.textContent = trackName;
+            nowPlaying.style.display = 'block';
             
             // Change track via AudioManager - directly update game music
             if (window.AudioManager) {
@@ -841,15 +838,12 @@
               window.AudioManager.gameTrackId = trackId;
               localStorage.setItem('gameTrackId', trackId);
               
-
               // Force game music to change and play immediately
               window.AudioManager.playMusicInGameContext();
               
-
               // Also update the current track ID for compatibility with other parts of the code
               window.AudioManager.currentTrackId = trackId;
               
-
               // Extra step: Double-check that the audio element has the correct source
               if (window.AudioManager.gameMusic) {
                 const expectedSrc = `assets/sounds/music/${window.AudioManager.trackMap[trackId]}`;
@@ -873,9 +867,9 @@
                 }
               }
               
-
               log(`Changed game music to: ${trackName}`, 'info');
-            }          });
+            }
+          });
         });
       }
       
@@ -1008,11 +1002,9 @@
             if (window.AudioManager) {
               const audioManager = window.AudioManager;
               
-
               // Toggle the mute state directly using AudioManager's method
               audioManager.isMuted = !audioManager.isMuted;
               
-
               // Explicitly handle the currently playing game music
               if (audioManager.gameMusic) {
                 if (audioManager.isMuted) {
@@ -1046,7 +1038,6 @@
             else if (window.parent && window.parent.AudioManager) {
               const audioManager = window.parent.AudioManager;
               
-
               // Toggle the mute state directly using AudioManager's method
               audioManager.isMuted = !audioManager.isMuted;
               audioManager.applyMuteState();
@@ -1237,11 +1228,18 @@
             renderer.shadowMap.enabled = true;
             gameContainer.appendChild(renderer.domElement);
             log('Renderer created successfully', 'info');
+            
+            // Simple attempt to play music if needed
+            if (window.AudioManager && !window.AudioManager.isMuted) {
+              setTimeout(() => {
+                window.AudioManager.playMusicInGameContext();
+              }, 1000);
+            }
           } catch (e) {
             log('ERROR creating renderer: ' + e.message, 'error');
             console.error('Renderer error:', e);
           }
-          
+        
           // Setup scene with the simplest possible environment
           function setupScene() {
             log('Setting up scene...', 'info');
@@ -1250,27 +1248,22 @@
               scene = new THREE.Scene();
               scene.background = new THREE.Color(0x333333); // Medium grey background
               
-
               // Create camera
               camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
               camera.position.set(0, 3, 5); // Positioned behind cockroach
               
-
               // Make camera globally accessible for zoom functionality
               window.camera = camera;
               
-
               // Add lights
               const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
               scene.add(ambientLight);
               
-
               const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
               directionalLight.position.set(5, 10, 7.5);
               directionalLight.castShadow = true;
               scene.add(directionalLight);
               
-
               // Set up shadow properties
               directionalLight.shadow.mapSize.width = 1024;
               directionalLight.shadow.mapSize.height = 1024;
@@ -1278,7 +1271,6 @@
               directionalLight.shadow.camera.far = 50;
               directionalLight.shadow.bias = -0.001;
               
-
               // Create ground plane
               const planeGeometry = new THREE.PlaneGeometry(100, 100);
               const planeMaterial = new THREE.MeshStandardMaterial({
@@ -1291,17 +1283,14 @@
               plane.receiveShadow = true;
               scene.add(plane);
               
-
               // Add grid for better visual reference
               const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x444444);
               scene.add(gridHelper);
               
-
               // Initialize camera position
               camera.position.set(0, 3, 5);
               camera.lookAt(0, 0, 0);
               
-
               log('Scene setup complete', 'info');
             } catch (e) {
               log('ERROR setting up scene: ' + e.message, 'error');
@@ -1458,14 +1447,12 @@
                 }
               } catch (e) {}
               
-
               // Store model
               cockroachModel = gltf.scene;
               // Increased scale for better visibility
               cockroachModel.scale.set(0.3, 0.3, 0.3);
               cockroachModel.position.set(0, 0.2, 0); // Raised position slightly
               
-
               // Make sure model casts shadows
               cockroachModel.traverse(function (child) {
                 if (child.isMesh) {
@@ -1478,17 +1465,14 @@
                 }
               });
               
-
               scene.add(cockroachModel);
               
-
               // Create physics body
               createCockroachPhysics();
               
               // Update cockroach for rendering
               updateCockroach();
               
-
               log('Cockroach model added to scene', 'info');
             },
             function(xhr) {
@@ -1992,6 +1976,7 @@
       }
       
       // Frame count is defined in global variables at the top
+      
       // Notify parent window of significant movement
       function notifyParentOfMovement() {
         try {
@@ -2003,7 +1988,7 @@
                 y: cockroachModel.position.y,
                 z: cockroachModel.position.z
               }
-                        }, '*');
+            }, '*');
           }
         } catch (e) {
           // Ignore cross-origin errors
@@ -2012,6 +1997,7 @@
       
       // Jump state is tracked in global variables
       // initialized at the top of the script
+      
       // Update camera to follow cockroach with improved tracking
       function updateCamera() {
         if (!camera || !cockroachModel) return;
@@ -2112,21 +2098,6 @@
           
           if (message.type === 'set-character') {
             // Parent is telling us which character to use
-            log(`Parent set character: ${message.character}`, 'info');
-            return;
-          }
-          
-          if (message.type === 'set-audio-context') {
-            // Parent is telling us which audio context to use (menu or game)
-            const isGameContext = message.context === 'game';
-            const forceStopMenuMusic = message.forceStopMenuMusic === true;
-            log(`Parent set audio context: ${message.context.toUpperCase()} (force stop: ${forceStopMenuMusic})`, 'info');
-            
-            // EMERGENCY MUSIC SHUTDOWN - Stop ALL audio playing in the document
-            const allAudioElements = document.querySelectorAll('audio');
-            log(`Stopping all ${allAudioElements.length} audio elements before context change`, 'warning');
-            
-            allAudioElements.forEach(audio => {
               if (!audio.paused) {
                 log(`Forcefully stopping audio: ${audio.id || 'unnamed'}`, 'info');
                 try {
@@ -2164,6 +2135,16 @@
                   setTimeout(() => {
                     log('Forcing game music to play after context change', 'info');
                     window.AudioManager.playMusicInGameContext();
+                    
+                    // Make additional attempts if first playback failed
+                    setTimeout(() => {
+                      if (window.AudioManager.gameMusic && window.AudioManager.gameMusic.paused && !window.AudioManager.isMuted) {
+                        log('First auto-play attempt failed, trying again...', 'warning');
+                        window.AudioManager.gameMusic.play().catch(e => log('Auto-play still blocked: ' + e.message, 'error'));
+                      } else {
+                        log('Music playback successful or muted', 'info');
+                      }
+                    }, 1000);
                     
                     // Update the now playing indicator
                     const nowPlaying = document.getElementById('now-playing');

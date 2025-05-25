@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Navigation Test</title>
+    <style>
+        .screen { display: none; padding: 20px; border: 2px solid #9333EA; margin: 10px; }
+        .screen.active { display: block; background: #1a1a1a; color: white; }
+        button { padding: 10px 20px; margin: 5px; background: #9333EA; color: white; border: none; cursor: pointer; }
+        button:hover { background: #7c3aed; }
+    </style>
+</head>
+<body>
+    <h1>Screen Navigation Test</h1>
+    
+    <div id="test-controls">
+        <button onclick="testShowScreen('start')">Show Start Screen</button>
+        <button onclick="testShowScreen('modeSelection')">Show Mode Selection</button>
+        <button onclick="testShowScreen('characterSelection')">Show Character Selection</button>
+        <button onclick="checkScreenElements()">Check Screen Elements</button>
+    </div>
+    
+    <div id="loading-screen" class="screen active">
+        <h2>Loading Screen</h2>
+        <p>This is the loading screen</p>
+    </div>
+    
+    <div id="start-screen" class="screen">
+        <h2>Start Screen</h2>
+        <button id="play-button">PLAY</button>
+        <button id="settings-button">SETTINGS</button>
+    </div>
+    
+    <div id="mode-selection-screen" class="screen">
+        <h2>Mode Selection</h2>
+        <div class="mode-card" data-mode="free-world">FREE WORLD</div>
+        <div class="mode-card" data-mode="cockroach-runner">COCKROACH RUNNER</div>
+        <button id="back-from-mode">BACK</button>
+    </div>
+    
+    <div id="character-selection-screen" class="screen">
+        <h2>Character Selection</h2>
+        <div class="character-card" data-character="default-roach">DEFAULT ROACH</div>
+        <div class="character-card" data-character="stealth-roach">STEALTH ROACH</div>
+        <button id="back-from-character">BACK</button>
+    </div>
+    
+    <script>
+        // Simplified UIManager for testing
+        const TestUIManager = {
+            screens: {
+                loading: document.getElementById('loading-screen'),
+                start: document.getElementById('start-screen'),
+                modeSelection: document.getElementById('mode-selection-screen'),
+                characterSelection: document.getElementById('character-selection-screen')
+            },
+            
+            showScreen(screenName) {
+                console.log(`Attempting to show screen: ${screenName}`);
+                console.log('Available screens:', Object.keys(this.screens));
+                console.log('Target screen element:', this.screens[screenName]);
+                
+                // Hide all screens
+                Object.values(this.screens).forEach(screen => {
+                    if (screen) {
+                        screen.classList.remove('active');
+                    }
+                });
+                
+                // Show target screen
+                const targetScreen = this.screens[screenName];
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
+                    console.log(`Successfully showing screen: ${screenName}`);
+                } else {
+                    console.error(`Screen '${screenName}' not found in screens object`);
+                }
+            }
+        };
+        
+        function testShowScreen(screenName) {
+            TestUIManager.showScreen(screenName);
+        }
+        
+        function checkScreenElements() {
+            console.log('Checking screen elements:');
+            Object.entries(TestUIManager.screens).forEach(([key, element]) => {
+                console.log(`${key}:`, element ? 'Found' : 'NOT FOUND');
+            });
+        }
+        
+        // Test play button functionality
+        document.getElementById('play-button').addEventListener('click', () => {
+            console.log('Play button clicked!');
+            TestUIManager.showScreen('modeSelection');
+        });
+        
+        console.log('Test page loaded. Screen elements:');
+        checkScreenElements();
+    </script>
+</body>
+</html>

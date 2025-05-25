@@ -10,28 +10,28 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   color: var(--text-color, #ffffff);
 }
 
 .in-game-settings .settings-container {
   background-color: rgba(10, 10, 15, 0.9);
-  border: 2px solid #00FF66;
+  border: 2px solid var(--orange);
   border-radius: 8px;
   width: 85%;
   max-width: 600px;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), 0 0 40px rgba(0, 255, 102, 0.1);
+  box-shadow: 0 0 20px rgba(255, 144, 0, 0.3), 0 0 40px rgba(255, 144, 0, 0.1);
   animation: glow 2s infinite alternate;
 }
 
 .in-game-settings .settings-title {
-  font-family: 'Orbitron', sans-serif;
-  color: #00FF66;
+  font-family: var(--font-heading);
+  color: var(--orange);
   text-align: center;
   font-size: 1.8rem;
   margin: 0 0 20px 0;
-  text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+  text-shadow: 0 0 10px rgba(255, 144, 0, 0.5);
 }
 
 .in-game-settings .settings-section {
@@ -39,10 +39,10 @@
 }
 
 .in-game-settings h3 {
-  font-family: 'Orbitron', sans-serif;
-  color: #FF8000;
+  font-family: var(--font-heading);
+  color: var(--orange);
   margin: 0 0 15px 0;
-  text-shadow: 0 0 5px rgba(255, 128, 0, 0.5);
+  text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
 }
 
 .in-game-settings .setting-item {
@@ -70,10 +70,10 @@
 
 .in-game-settings .custom-dropdown-trigger {
   background-color: rgba(30, 30, 45, 0.9);
-  color: #00FF66;
+  color: var(--orange);
   padding: 8px 12px;
   border-radius: 4px;
-  border: 1px solid #00FF66;
+  border: 1px solid var(--orange);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -89,7 +89,7 @@
 
 .in-game-settings .custom-dropdown-trigger:hover {
   background-color: rgba(40, 40, 60, 0.9);
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
 }
 
 .in-game-settings .custom-options-list {
@@ -100,14 +100,14 @@
   max-height: 250px;
   overflow-y: auto;
   background-color: rgba(30, 30, 45, 0.95);
-  border: 1px solid #00FF66;
+  border: 1px solid var(--orange);
   border-radius: 4px;
   margin: 5px 0 0 0;
   padding: 0;
   list-style: none;
   z-index: 1000;
   scrollbar-width: thin;
-  scrollbar-color: #00FF66 rgba(30, 30, 45, 0.95);
+  scrollbar-color: var(--orange) rgba(30, 30, 45, 0.95);
 }
 
 .in-game-settings .custom-options-list::-webkit-scrollbar {
@@ -119,7 +119,7 @@
 }
 
 .in-game-settings .custom-options-list::-webkit-scrollbar-thumb {
-  background-color: #00FF66;
+  background-color: var(--orange);
   border-radius: 10px;
 }
 
@@ -130,8 +130,8 @@
 }
 
 .in-game-settings .custom-option:hover {
-  background-color: rgba(0, 255, 102, 0.2);
-  color: #00FF66;
+  background-color: rgba(255, 144, 0, 0.2);
+  color: var(--orange);
 }
 
 .in-game-settings .playback-mode-section {
@@ -152,7 +152,7 @@
 .in-game-settings .mode-button {
   background-color: rgba(30, 30, 45, 0.9);
   color: #ffffff;
-  border: 1px solid #00FF66;
+  border: 1px solid var(--orange);
   border-radius: 4px;
   padding: 6px 12px;
   cursor: pointer;
@@ -161,15 +161,15 @@
 
 .in-game-settings .mode-button:hover {
   background-color: rgba(40, 40, 60, 0.9);
-  color: #00FF66;
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+  color: var(--orange);
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
 }
 
 .in-game-settings .mode-button.active {
-  background-color: rgba(0, 255, 102, 0.2);
-  color: #00FF66;
-  border-color: #00FF66;
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+  background-color: rgba(255, 144, 0, 0.2);
+  color: var(--orange);
+  border-color: var(--orange);
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.5);
 }
 
 .in-game-settings .settings-footer {
@@ -179,29 +179,29 @@
 }
 
 .in-game-settings .cyber-button {
-  background-color: rgba(255, 128, 0, 0.2);
-  color: #FF8000;
-  font-family: 'Orbitron', sans-serif;
+  background-color: rgba(255, 144, 0, 0.2);
+  color: var(--orange);
+  font-family: var(--font-heading);
   font-weight: bold;
   padding: 10px 20px;
-  border: 2px solid #FF8000;
+  border: 2px solid var(--orange);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
-  text-shadow: 0 0 5px rgba(255, 128, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 128, 0, 0.3);
+  text-shadow: 0 0 5px rgba(255, 144, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 144, 0, 0.3);
 }
 
 .in-game-settings .cyber-button:hover {
-  background-color: rgba(255, 128, 0, 0.3);
-  box-shadow: 0 0 15px rgba(255, 128, 0, 0.5);
+  background-color: rgba(255, 144, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 144, 0, 0.5);
 }
 
 @keyframes glow {
   from {
-    box-shadow: 0 0 10px rgba(0, 255, 102, 0.3), 0 0 20px rgba(0, 255, 102, 0.1);
+    box-shadow: 0 0 10px rgba(255, 144, 0, 0.3), 0 0 20px rgba(255, 144, 0, 0.1);
   }
   to {
-    box-shadow: 0 0 20px rgba(0, 255, 102, 0.5), 0 0 40px rgba(0, 255, 102, 0.2);
+    box-shadow: 0 0 20px rgba(255, 144, 0, 0.5), 0 0 40px rgba(255, 144, 0, 0.2);
   }
 }

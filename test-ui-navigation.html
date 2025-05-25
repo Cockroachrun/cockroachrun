@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Navigation Test</title>
+    <style>
+        .screen {
+            display: none;
+            padding: 20px;
+            margin: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+        .screen.active {
+            display: block;
+            background-color: #f0f0f0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .debug {
+            margin: 10px;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>UI Navigation Test</h1>
+    
+    <div class="debug" id="debug-output">Debug output will appear here...</div>
+    
+    <div>
+        <button onclick="testShowScreen('start')">Show Start Screen</button>
+        <button onclick="testShowScreen('modeSelection')">Show Mode Selection</button>
+        <button onclick="testShowScreen('characterSelection')">Show Character Selection</button>
+    </div>
+
+    <!-- Test Screens -->
+    <div id="start-screen" class="screen active">
+        <h2>Start Screen</h2>
+        <button id="play-button">PLAY</button>
+    </div>
+
+    <div id="mode-selection-screen" class="screen">
+        <h2>Mode Selection Screen</h2>
+        <p>Mode selection content here</p>
+        <button onclick="testShowScreen('start')">Back to Start</button>
+    </div>
+
+    <div id="character-selection-screen" class="screen">
+        <h2>Character Selection Screen</h2>
+        <p>Character selection content here</p>
+        <button onclick="testShowScreen('modeSelection')">Back to Mode Selection</button>
+    </div>
+
+    <script>
+        // Simplified version of the UIManager screens object
+        const testScreens = {
+            start: document.getElementById('start-screen'),
+            modeSelection: document.getElementById('mode-selection-screen'),
+            characterSelection: document.getElementById('character-selection-screen')
+        };
+
+        function debugLog(message) {
+            const debugOutput = document.getElementById('debug-output');
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function testShowScreen(screenName) {
+            debugLog(`Attempting to show screen: ${screenName}`);
+            debugLog(`Available screens: ${Object.keys(testScreens).join(', ')}`);
+            debugLog(`Target screen element: ${testScreens[screenName]}`);
+            
+            // Hide all screens
+            Object.values(testScreens).forEach(screen => {
+                if (screen) {
+                    screen.classList.remove('active');
+                    debugLog(`Removed active class from ${screen.id}`);
+                }
+            });
+            
+            // Show target screen
+            const targetScreen = testScreens[screenName];
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+                debugLog(`Successfully showing screen: ${screenName}`);
+            } else {
+                debugLog(`ERROR: Screen '${screenName}' not found!`);
+            }
+        }
+
+        // Test the play button click
+        document.getElementById('play-button').addEventListener('click', function() {
+            debugLog('Play button clicked!');
+            testShowScreen('modeSelection');
+        });
+
+        debugLog('Test UI Navigation loaded successfully');
+        debugLog(`Screens found: ${Object.keys(testScreens).map(key => `${key}: ${!!testScreens[key]}`).join(', ')}`);
+    </script>
+</body>
+</html>

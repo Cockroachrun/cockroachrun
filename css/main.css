@@ -151,6 +151,30 @@ input:focus,
     -webkit-tap-highlight-color: rgba(0,0,0,0) !important; /* For mobile */
 }
 
+/* Typography - Ensure headings use the correct font */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+h1 {
+    font-size: var(--text-3xl);
+    color: var(--orange);
+    text-shadow: var(--orange-glow);
+}
+
+h2 {
+    font-size: var(--text-2xl);
+    color: var(--orange);
+    text-shadow: var(--orange-glow);
+}
+
+h3 {
+    font-size: var(--text-lg);
+    color: var(--orange);
+}
+
 input[type="range"]:focus::-webkit-slider-thumb {
     box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
 }

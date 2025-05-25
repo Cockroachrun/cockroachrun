@@ -46,16 +46,57 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedOptionText.textContent = this.textContent;
         optionsList.classList.remove('visible');
         trigger.setAttribute('aria-expanded', 'false');
-        
-        // Trigger change event on the select element to notify listeners
+          // Trigger change event on the select element to notify listeners
         const changeEvent = new Event('change', { bubbles: true });
         originalSelect.dispatchEvent(changeEvent);
         console.log('Change event dispatched for', originalSelect.id, 'with value', value);
         
-        // For music selection specifically
+        // Enhanced music selection handling
         if (originalSelect.id === 'music-select' && window.AudioManager) {
           console.log('Changing music track to:', value);
-          window.AudioManager.changeTrack(value);
+          const trackName = this.textContent;
+          
+          // Update the game track ID in AudioManager
+          window.AudioManager.gameTrackId = value;
+          localStorage.setItem('gameTrackId', value);
+          
+          // Force game music to change and play immediately if in game context
+          if (window.AudioManager.inGameContext) {
+            window.AudioManager.playMusicInGameContext();
+          } else {
+            // If not in game context, just change the current track
+            window.AudioManager.currentTrackId = value;
+          }
+          
+          // Update now playing indicator if it exists
+          const nowPlaying = document.getElementById('now-playing');
+          const nowPlayingText = document.getElementById('now-playing-text');
+          if (nowPlayingText) {
+            nowPlayingText.textContent = trackName;
+            if (nowPlaying) nowPlaying.style.display = 'block';
+          }
+          
+          // Double-check that the audio element has the correct source
+          if (window.AudioManager.gameMusic) {
+            const expectedSrc = `assets/sounds/music/${window.AudioManager.trackMap[value]}`;
+            const currentSrc = window.AudioManager.gameMusic.src;
+            
+            // Check if the source needs updating
+            if (!currentSrc || currentSrc.indexOf(window.AudioManager.trackMap[value]) === -1) {
+              console.log('Updating audio source to:', expectedSrc);
+              window.AudioManager.gameMusic.src = expectedSrc;
+              window.AudioManager.gameMusic.load();
+              
+              // Try to play immediately if not muted and in game context
+              if (!window.AudioManager.isMuted && window.AudioManager.inGameContext) {
+                window.AudioManager.gameMusic.play()
+                  .then(() => console.log('Game track playing after source update'))
+                  .catch(e => console.log('Failed to play after src update:', e.message));
+              }
+            }
+          }
+          
+          console.log(`Music changed to: ${trackName} (${value})`);
         }
       });
     });
