@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Music Dropdown</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .pass {
+            background-color: #1b5e20;
+            border: 1px solid #4caf50;
+        }
+        .fail {
+            background-color: #b71c1c;
+            border: 1px solid #f44336;
+        }
+        .warning {
+            background-color: #e65100;
+            border: 1px solid #ff9800;
+        }
+        #test-area {
+            border: 2px solid #FF9000;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #333;
+            color: #FF9000;
+            border: 1px solid #FF9000;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Music Dropdown Integration Test</h1>
+    <p>Testing the integrated music dropdown functionality from test-ultimate.html into the main application.</p>
+    
+    <div id="test-area">
+        <h3>Test Environment</h3>
+        <button onclick="runTests()">Run Integration Tests</button>
+        <button onclick="testInMainApp()">Test in Main App</button>
+        <button onclick="compareFiles()">Compare Implementation</button>
+    </div>
+    
+    <div id="results">
+        <h3>Test Results</h3>
+        <div id="test-output"></div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'pass') {
+            const output = document.getElementById('test-output');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `${type === 'pass' ? '✅' : type === 'fail' ? '❌' : '⚠️'} ${message}`;
+            output.appendChild(div);
+        }
+
+        function runTests() {
+            document.getElementById('test-output').innerHTML = '';
+            addResult('🚀 Starting Integration Tests...', 'warning');
+            
+            // Test 1: Check if DropdownSystem.js is loaded
+            try {
+                const script = document.querySelector('script[src*="DropdownSystem.js"]');
+                if (script) {
+                    addResult('DropdownSystem.js script tag found');
+                } else {
+                    addResult('DropdownSystem.js script tag not found', 'fail');
+                }
+            } catch (e) {
+                addResult(`Error checking DropdownSystem.js: ${e.message}`, 'fail');
+            }
+
+            // Test 2: Check for custom dropdown structure in main file
+            fetch('/index.html')
+                .then(response => response.text())
+                .then(html => {
+                    if (html.includes('class="custom-dropdown-wrapper"')) {
+                        addResult('Custom dropdown structure found in index.html');
+                    } else {
+                        addResult('Custom dropdown structure not found in index.html', 'fail');
+                    }
+
+                    if (html.includes('id="music-select"')) {
+                        addResult('Music select element found');
+                    } else {
+                        addResult('Music select element not found', 'fail');
+                    }
+
+                    if (html.includes('data-target-select="music-select"')) {
+                        addResult('Music dropdown wrapper properly configured');
+                    } else {
+                        addResult('Music dropdown wrapper not properly configured', 'fail');
+                    }
+                })
+                .catch(e => addResult(`Error loading index.html: ${e.message}`, 'fail'));
+
+            // Test 3: Check DropdownSystem.js for enhanced music functionality
+            fetch('/js/DropdownSystem.js')
+                .then(response => response.text())
+                .then(js => {
+                    if (js.includes('window.AudioManager')) {
+                        addResult('AudioManager integration found in DropdownSystem.js');
+                    } else {
+                        addResult('AudioManager integration not found', 'fail');
+                    }
+
+                    if (js.includes('gameTrackId')) {
+                        addResult('Game track ID handling found');
+                    } else {
+                        addResult('Game track ID handling not found', 'fail');
+                    }
+
+                    if (js.includes('playMusicInGameContext')) {
+                        addResult('Game context music handling found');
+                    } else {
+                        addResult('Game context music handling not found', 'fail');
+                    }
+
+                    if (js.includes('now-playing')) {
+                        addResult('Now playing indicator updates found');
+                    } else {
+                        addResult('Now playing indicator updates not found', 'warning');
+                    }
+                })
+                .catch(e => addResult(`Error loading DropdownSystem.js: ${e.message}`, 'fail'));
+
+            addResult('🏁 Integration tests completed!', 'warning');
+        }
+
+        function testInMainApp() {
+            addResult('🔗 Opening main application...', 'warning');
+            window.open('/', '_blank');
+        }
+
+        function compareFiles() {
+            addResult('📋 Comparing implementations...', 'warning');
+            
+            Promise.all([
+                fetch('/test-ultimate.html').then(r => r.text()),
+                fetch('/index.html').then(r => r.text()),
+                fetch('/js/DropdownSystem.js').then(r => r.text())
+            ]).then(([testFile, mainFile, dropdownFile]) => {
+                
+                // Check if music functionality was properly transferred
+                const testHasCustomDropdown = testFile.includes('custom-dropdown-wrapper');
+                const mainHasCustomDropdown = mainFile.includes('custom-dropdown-wrapper');
+                const dropdownHasMusicLogic = dropdownFile.includes('originalSelect.id === \'music-select\'');
+                
+                if (testHasCustomDropdown && mainHasCustomDropdown) {
+                    addResult('✅ Custom dropdown structure successfully transferred');
+                } else {
+                    addResult('❌ Custom dropdown structure transfer incomplete', 'fail');
+                }
+
+                if (dropdownHasMusicLogic) {
+                    addResult('✅ Music-specific logic found in DropdownSystem.js');
+                } else {
+                    addResult('❌ Music-specific logic missing from DropdownSystem.js', 'fail');
+                }
+
+                // Check for enhanced features
+                const hasAudioManagerIntegration = dropdownFile.includes('window.AudioManager.gameTrackId');
+                const hasGameContext = dropdownFile.includes('inGameContext');
+                const hasLocalStorage = dropdownFile.includes('localStorage.setItem');
+
+                if (hasAudioManagerIntegration && hasGameContext && hasLocalStorage) {
+                    addResult('✅ All enhanced music features successfully integrated');
+                } else {
+                    addResult(`⚠️ Some enhanced features may be missing: AudioManager=${hasAudioManagerIntegration}, GameContext=${hasGameContext}, LocalStorage=${hasLocalStorage}`, 'warning');
+                }
+
+                addResult('📊 Comparison completed!', 'warning');
+                
+            }).catch(e => addResult(`Error during comparison: ${e.message}`, 'fail'));
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Music Dropdown Test</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+            color: #FF9000;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #FF9000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 144, 0, 0.1);
+            border: 1px solid #FF9000;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .success { color: #00FF41; }
+        .error { color: #FF073A; }
+        .warning { color: #FFB000; }
+        .info { color: #00D4FF; }
+        
+        button {
+            background: linear-gradient(45deg, #FF9000, #FFB000);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 144, 0, 0.3);
+        }
+        
+        .big-button {
+            font-size: 18px;
+            padding: 16px 32px;
+            margin: 15px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .console-output {
+            background: #000;
+            border: 1px solid #FF9000;
+            border-radius: 6px;
+            padding: 15px;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9000, #00FF41);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <h1>🎵 MUSIC DROPDOWN INTEGRATION TEST</h1>
+            <p class="info">Final validation of the music dropdown integration from test-ultimate.html → index.html</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 Integration Test Suite</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div style="text-align: center;">
+                <button class="big-button" onclick="runCompleteTest()">🔬 RUN COMPLETE TEST</button>
+                <button class="big-button" onclick="openMainApp()">🌐 OPEN MAIN APP</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Test Results</h3>
+            <div class="status-grid" id="status-grid">
+                <!-- Status cards will be populated here -->
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📋 Console Output</h3>
+            <div class="console-output" id="console-output"></div>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>✅ Final Integration Checklist</h3>
+            <div id="checklist">
+                <div>⏳ Waiting for test completion...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        const statusGrid = document.getElementById('status-grid');
+        const checklist = document.getElementById('checklist');
+        const progressBar = document.getElementById('progress');
+        
+        let testProgress = 0;
+        const totalTests = 8;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            consoleOutput.textContent += logEntry;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateProgress() {
+            testProgress++;
+            const percentage = (testProgress / totalTests) * 100;
+            progressBar.style.width = percentage + '%';
+        }
+        
+        function addStatusCard(title, status, message) {
+            const card = document.createElement('div');
+            card.className = 'status-card';
+            card.innerHTML = `
+                <h4>${title}</h4>
+                <div class="${status}">${status === 'success' ? '✅' : status === 'error' ? '❌' : '⚠️'}</div>
+                <p>${message}</p>
+            `;
+            statusGrid.appendChild(card);
+        }
+        
+        function updateChecklist(items) {
+            checklist.innerHTML = items.map(item => 
+                `<div class="${item.status}">${item.status === 'success' ? '✅' : item.status === 'error' ? '❌' : '⚠️'} ${item.text}</div>`
+            ).join('');
+        }
+        
+        async function runCompleteTest() {
+            log('🚀 STARTING COMPLETE INTEGRATION TEST SUITE');
+            statusGrid.innerHTML = '';
+            testProgress = 0;
+            progressBar.style.width = '0%';
+            
+            const checklistItems = [];
+            
+            try {
+                // Test 1: Check main HTML structure
+                log('📋 Test 1/8: Checking main HTML structure...');
+                const indexResponse = await fetch('/index.html');
+                const indexContent = await indexResponse.text();
+                
+                if (indexContent.includes('class="custom-dropdown-wrapper"') && 
+                    indexContent.includes('data-target-select="music-select"')) {
+                    addStatusCard('HTML Structure', 'success', 'Custom dropdown structure found');
+                    checklistItems.push({status: 'success', text: 'Custom dropdown HTML structure integrated'});
+                } else {
+                    addStatusCard('HTML Structure', 'error', 'Custom dropdown structure missing');
+                    checklistItems.push({status: 'error', text: 'Custom dropdown HTML structure missing'});
+                }
+                updateProgress();
+                
+                // Test 2: Check DropdownSystem.js integration
+                log('🔧 Test 2/8: Validating DropdownSystem.js...');
+                const dropdownResponse = await fetch('/js/DropdownSystem.js');
+                const dropdownContent = await dropdownResponse.text();
+                
+                const hasEnhancedMusic = dropdownContent.includes('originalSelect.id === \'music-select\'') &&
+                                       dropdownContent.includes('window.AudioManager') &&
+                                       dropdownContent.includes('gameTrackId');
+                
+                if (hasEnhancedMusic) {
+                    addStatusCard('JavaScript Logic', 'success', 'Enhanced music functionality integrated');
+                    checklistItems.push({status: 'success', text: 'Enhanced music selection logic implemented'});
+                } else {
+                    addStatusCard('JavaScript Logic', 'error', 'Enhanced music functionality missing');
+                    checklistItems.push({status: 'error', text: 'Enhanced music selection logic missing'});
+                }
+                updateProgress();
+                
+                // Test 3: Check CSS styles
+                log('🎨 Test 3/8: Checking CSS styles...');
+                const cssResponse = await fetch('/css/components/forms.css');
+                const cssContent = await cssResponse.text();
+                
+                if (cssContent.includes('.custom-dropdown-wrapper') && 
+                    cssContent.includes('.custom-options-list')) {
+                    addStatusCard('CSS Styles', 'success', 'Custom dropdown styles present');
+                    checklistItems.push({status: 'success', text: 'Custom dropdown CSS styles integrated'});
+                } else {
+                    addStatusCard('CSS Styles', 'warning', 'Some styles may be missing');
+                    checklistItems.push({status: 'warning', text: 'CSS styles partially integrated'});
+                }
+                updateProgress();
+                
+                // Test 4: Check mobile responsiveness
+                log('📱 Test 4/8: Checking mobile responsiveness...');
+                if (cssContent.includes('@media') && cssContent.includes('custom-dropdown')) {
+                    addStatusCard('Mobile Support', 'success', 'Mobile responsive styles found');
+                    checklistItems.push({status: 'success', text: 'Mobile responsive design implemented'});
+                } else {
+                    addStatusCard('Mobile Support', 'warning', 'Mobile styles may be incomplete');
+                    checklistItems.push({status: 'warning', text: 'Mobile responsiveness needs verification'});
+                }
+                updateProgress();
+                
+                // Test 5: Check AudioManager integration
+                log('🔊 Test 5/8: Validating AudioManager integration...');
+                const audioFeatures = [
+                    'gameTrackId',
+                    'playMusicInGameContext',
+                    'localStorage.setItem',
+                    'now-playing'
+                ];
+                
+                const integratedFeatures = audioFeatures.filter(feature => 
+                    dropdownContent.includes(feature)
+                ).length;
+                
+                if (integratedFeatures >= 3) {
+                    addStatusCard('Audio Integration', 'success', `${integratedFeatures}/${audioFeatures.length} features integrated`);
+                    checklistItems.push({status: 'success', text: 'AudioManager integration complete'});
+                } else {
+                    addStatusCard('Audio Integration', 'warning', `Only ${integratedFeatures}/${audioFeatures.length} features integrated`);
+                    checklistItems.push({status: 'warning', text: 'AudioManager integration incomplete'});
+                }
+                updateProgress();
+                
+                // Test 6: Check for script inclusion
+                log('📜 Test 6/8: Verifying script inclusion...');
+                if (indexContent.includes('src="js/DropdownSystem.js"')) {
+                    addStatusCard('Script Loading', 'success', 'DropdownSystem.js properly included');
+                    checklistItems.push({status: 'success', text: 'DropdownSystem.js properly loaded'});
+                } else {
+                    addStatusCard('Script Loading', 'error', 'DropdownSystem.js not found in HTML');
+                    checklistItems.push({status: 'error', text: 'DropdownSystem.js not properly included'});
+                }
+                updateProgress();
+                
+                // Test 7: Check music track options
+                log('🎵 Test 7/8: Validating music track options...');
+                const musicOptions = [
+                    'checkpoint-chaser',
+                    'cockroach-run',
+                    'neon-roach-runnin'
+                ];
+                
+                const foundOptions = musicOptions.filter(option => 
+                    indexContent.includes(`data-value="${option}"`)
+                ).length;
+                
+                if (foundOptions === musicOptions.length) {
+                    addStatusCard('Music Tracks', 'success', 'All test tracks found');
+                    checklistItems.push({status: 'success', text: 'Music track options properly configured'});
+                } else {
+                    addStatusCard('Music Tracks', 'warning', `${foundOptions}/${musicOptions.length} tracks found`);
+                    checklistItems.push({status: 'warning', text: 'Some music tracks may be missing'});
+                }
+                updateProgress();
+                
+                // Test 8: Overall integration assessment
+                log('🏁 Test 8/8: Overall integration assessment...');
+                const successCount = checklistItems.filter(item => item.status === 'success').length;
+                const totalChecks = checklistItems.length;
+                const successRate = (successCount / totalChecks) * 100;
+                
+                if (successRate >= 90) {
+                    addStatusCard('Overall Status', 'success', `${successRate.toFixed(0)}% - Excellent integration!`);
+                    checklistItems.push({status: 'success', text: 'INTEGRATION COMPLETE - Ready for production!'});
+                    log('🎉 INTEGRATION TEST PASSED! Music dropdown successfully integrated.');
+                } else if (successRate >= 70) {
+                    addStatusCard('Overall Status', 'warning', `${successRate.toFixed(0)}% - Good integration with minor issues`);
+                    checklistItems.push({status: 'warning', text: 'Integration mostly complete - minor fixes needed'});
+                    log('⚠️ INTEGRATION MOSTLY SUCCESSFUL - Minor issues detected.');
+                } else {
+                    addStatusCard('Overall Status', 'error', `${successRate.toFixed(0)}% - Integration incomplete`);
+                    checklistItems.push({status: 'error', text: 'Integration incomplete - major fixes required'});
+                    log('❌ INTEGRATION ISSUES DETECTED - Major fixes required.');
+                }
+                updateProgress();
+                
+                updateChecklist(checklistItems);
+                log('✅ COMPLETE TEST SUITE FINISHED');
+                
+            } catch (error) {
+                log(`❌ TEST ERROR: ${error.message}`);
+                addStatusCard('Test Error', 'error', error.message);
+                checklistItems.push({status: 'error', text: `Test error: ${error.message}`});
+                updateChecklist(checklistItems);
+            }
+        }
+        
+        function openMainApp() {
+            log('🌐 Opening main application...');
+            window.open('/', '_blank');
+        }
+        
+        function clearConsole() {
+            consoleOutput.textContent = '';
+        }
+        
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            log('🎯 Music Dropdown Integration Test Suite Ready');
+            setTimeout(runCompleteTest, 1000);
+        });
+    </script>
+</body>
+</html>
